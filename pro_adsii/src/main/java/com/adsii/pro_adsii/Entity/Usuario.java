@@ -30,7 +30,7 @@ public class Usuario {
     private Integer idStatusUsuario;
 
     @Column(name = "Password")
-    private byte[] password;
+    private String password;
 
     @Column(name = "IdGenero")
     private Integer idGenero;

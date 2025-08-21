@@ -3,8 +3,6 @@ package com.adsii.pro_adsii.Service;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.Arrays;
-
 import org.springframework.stereotype.Service;
 
 import com.adsii.pro_adsii.DTO.LoginResponse;
@@ -27,9 +25,9 @@ public class UsuarioService {
             return new LoginResponse(false, "Usuario no existe");
         }
 
-        byte[] hashedPassword = sha256(password);
+        String hashedPassword = generarMD5(password);
 
-        if (!Arrays.equals(usuario.getPassword(), hashedPassword)) {
+        if (!usuario.getPassword().equalsIgnoreCase(hashedPassword)) {
             return new LoginResponse(false, "Contraseña incorrecta");
         }
 
@@ -40,12 +38,18 @@ public class UsuarioService {
         return new LoginResponse(true, "Bienvenido " + usuario.getNombre());
     }
 
-    private byte[] sha256(String input) {
+    private String generarMD5(String input) {
         try {
-            MessageDigest md = MessageDigest.getInstance("SHA-256");
-            return md.digest(input.getBytes(StandardCharsets.UTF_8));
+            MessageDigest md = MessageDigest.getInstance("MD5");
+            byte[] digest = md.digest(input.getBytes(StandardCharsets.UTF_8));
+
+            StringBuilder sb = new StringBuilder();
+            for (byte b : digest) {
+                sb.append(String.format("%02x", b));
+            }
+            return sb.toString();
         } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException("Error generando hash", e);
+            throw new RuntimeException("Error generando hash MD5", e);
         }
     }
 }
