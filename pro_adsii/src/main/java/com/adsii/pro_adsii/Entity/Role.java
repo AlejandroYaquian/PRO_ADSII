@@ -39,8 +39,9 @@ public class Role {
 	@Column(name="UsuarioModificacion")
 	private Date usuarioModificacion;
 
-	@OneToMany(mappedBy = "IdRole", cascade = CascadeType.ALL,fetch = FetchType.LAZY)
+	@OneToMany(mappedBy = "id.idRole", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	private List<RoleOpcion> roleOpciones;
+
 
 	public Integer getIdRole() {
 		return idRole;

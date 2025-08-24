@@ -41,6 +41,8 @@ public class RoleOpcion {
     @Column(name="UsuarioModificacion")
     private String usuarioModificacion;
 
+    
+
     public RoleOpcionId getId() {
         return id;
     }
@@ -120,5 +122,5 @@ public class RoleOpcion {
     public void setUsuarioModificacion(String usuarioModificacion) {
         this.usuarioModificacion = usuarioModificacion;
     }
-    
+
 }
