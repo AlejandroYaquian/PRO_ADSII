@@ -9,6 +9,8 @@ import com.adsii.pro_adsii.DTO.LoginRequest;
 import com.adsii.pro_adsii.DTO.LoginResponse;
 import com.adsii.pro_adsii.Service.UsuarioService;
 
+import jakarta.servlet.http.HttpServletRequest;
+
 @RestController
 @RequestMapping("/auth")
 public class UsuarioController {
@@ -19,7 +21,7 @@ public class UsuarioController {
     }
 
     @PostMapping("/login")
-    public LoginResponse login(@RequestBody LoginRequest request) {
-        return authService.login(request.getIdUsuario(), request.getPassword());
+    public LoginResponse login(@RequestBody LoginRequest request, HttpServletRequest httpRequest) {
+        return authService.login(request.getIdUsuario(), request.getPassword(), httpRequest);
     }
 }
