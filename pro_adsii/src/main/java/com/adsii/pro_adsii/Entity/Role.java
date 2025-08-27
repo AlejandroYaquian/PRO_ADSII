@@ -37,11 +37,13 @@ public class Role {
 	private Date fechaModificacion;
 
 	@Column(name="UsuarioModificacion")
-	private Date usuarioModificacion;
+	private String usuarioModificacion;
 
 	@OneToMany(mappedBy = "id.idRole", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	private List<RoleOpcion> roleOpciones;
 
+	@OneToMany(mappedBy = "idRole", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	private List<Usuario> usuarios;
 
 	public Integer getIdRole() {
 		return idRole;
@@ -83,11 +85,11 @@ public class Role {
 		this.fechaModificacion = fechaModificacion;
 	}
 
-	public Date getUsuarioModificacion() {
+	public String getUsuarioModificacion() {
 		return usuarioModificacion;
 	}
 
-	public void setUsuarioModificacion(Date usuarioModificacion) {
+	public void setUsuarioModificacion(String usuarioModificacion) {
 		this.usuarioModificacion = usuarioModificacion;
 	}
 
