@@ -10,12 +10,11 @@ import java.util.Optional;
 
 @Service
 public class GeneroService {
-
     @Autowired
     private GeneroRepository generoRepository;
 
     public List<Genero> listarTodos() {
-        return generoRepository.findAll(); // Esto ejecuta SELECT * FROM Genero
+        return generoRepository.findAll();
     }
 
     public Optional<Genero> obtenerPorId(Long id) {

@@ -14,18 +14,14 @@
         @Column(name = "nombre", nullable = false, length = 50)
         private String nombre;
 
-        @Column(name = "descripcion", length = 255)
-        private String descripcion;
-
         // Constructor vacío
         public Genero() {
         }
 
         // Constructor completo
-        public Genero(Long idGenero, String nombre, String descripcion) {
+        public Genero(Long idGenero, String nombre) {
             this.idGenero = idGenero;
             this.nombre = nombre;
-            this.descripcion = descripcion;
         }
 
         // Getters y Setters
@@ -45,12 +41,5 @@
             this.nombre = nombre;
         }
 
-        public String getDescripcion() {
-            return descripcion;
-        }
-
-        public void setDescripcion(String descripcion) {
-            this.descripcion = descripcion;
-        }
     }
 
