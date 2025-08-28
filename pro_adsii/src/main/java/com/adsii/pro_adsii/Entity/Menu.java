@@ -1,4 +1,4 @@
-package com.adsii.pro_adsii.entity;
+package com.adsii.pro_adsii.Entity;
 
 import java.util.Date;
 
