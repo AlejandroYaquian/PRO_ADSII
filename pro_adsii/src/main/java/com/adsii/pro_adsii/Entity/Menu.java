@@ -1,7 +1,6 @@
 package com.adsii.pro_adsii.Entity;
 
 import java.util.Date;
-
 import jakarta.persistence.Basic;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -11,97 +10,98 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name="MENU")
+@Table(name="Menu")
 
 public class Menu {
 	@Id
-	@Column(name = "IdMenu")
+	@Column(name = "idmenu")
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Basic(optional=false)
-	private int IdMenu;
+	private int idmenu;
 	
-	@Column(name = "IdModulo")
-	private int IdModulo;
+	@Column(name = "idmodulo")
+	private int idmodulo;
 	
-	@Column(name = "Nombre")
-	private String Nombre;
+	@Column(name = "nombre")
+	private String nombre;
 	
-	@Column(name = "OrdenMenu")
-	private int OrdenMenu;
+	@Column(name = "ordenmenu")
+	private int ordenmenu;
 	
-	@Column(name = "FechaCreacion")
-	private Date FechaCreacion;
+	@Column(name = "fechacreacion")
+	private Date fechacreacion;
 	
-	@Column(name = "UsuarioCreacion")
-	private String UsuarioCreacion;
+	@Column(name = "usuariocreacion")
+	private String usuariocreacion;
 	
-	@Column(name = "FechaModificacion")
-	private Date FechaModificacion;
+	@Column(name = "fechamodificacion")
+	private Date fechamodificacion;
 	
-	@Column(name = "UsuarioModificacion")
-	private String UsuarioModificacion;
+	@Column(name = "usuariomodificacion")
+	private String usuariomodificacion;
 
-	public int getIdMenu() {
-		return IdMenu;
+	public int getIdmenu() {
+		return idmenu;
 	}
 
-	public void setIdMenu(int idMenu) {
-		IdMenu = idMenu;
+	public void setIdmenu(int idmenu) {
+		this.idmenu = idmenu;
 	}
 
-	public int getIdModulo() {
-		return IdModulo;
+	public int getIdmodulo() {
+		return idmodulo;
 	}
 
-	public void setIdModulo(int idModulo) {
-		IdModulo = idModulo;
+	public void setIdmodulo(int idmodulo) {
+		this.idmodulo = idmodulo;
 	}
 
 	public String getNombre() {
-		return Nombre;
+		return nombre;
 	}
 
 	public void setNombre(String nombre) {
-		Nombre = nombre;
+		this.nombre = nombre;
 	}
 
-	public int getOrdenMenu() {
-		return OrdenMenu;
+	public int getOrdenmenu() {
+		return ordenmenu;
 	}
 
-	public void setOrdenMenu(int ordenMenu) {
-		OrdenMenu = ordenMenu;
+	public void setOrdenmenu(int ordenmenu) {
+		this.ordenmenu = ordenmenu;
 	}
 
-	public Date getFechaCreacion() {
-		return FechaCreacion;
+	public Date getFechacreacion() {
+		return fechacreacion;
 	}
 
-	public void setFechaCreacion(Date fechaCreacion) {
-		FechaCreacion = fechaCreacion;
+	public void setFechacreacion(Date fechacreacion) {
+		this.fechacreacion = fechacreacion;
 	}
 
-	public String getUsuarioCreacion() {
-		return UsuarioCreacion;
+	public String getUsuariocreacion() {
+		return usuariocreacion;
 	}
 
-	public void setUsuarioCreacion(String usuarioCreacion) {
-		UsuarioCreacion = usuarioCreacion;
+	public void setUsuariocreacion(String usuariocreacion) {
+		this.usuariocreacion = usuariocreacion;
 	}
 
-	public Date getFechaModificacion() {
-		return FechaModificacion;
+	public Date getFechamodificacion() {
+		return fechamodificacion;
 	}
 
-	public void setFechaModificacion(Date fechaModificacion) {
-		FechaModificacion = fechaModificacion;
+	public void setFechamodificacion(Date fechamodificacion) {
+		this.fechamodificacion = fechamodificacion;
 	}
 
-	public String getUsuarioModificacion() {
-		return UsuarioModificacion;
+	public String getUsuariomodificacion() {
+		return usuariomodificacion;
 	}
 
-	public void setUsuarioModificacion(String usuarioModificacion) {
-		UsuarioModificacion = usuarioModificacion;
+	public void setUsuariomodificacion(String usuariomodificacion) {
+		this.usuariomodificacion = usuariomodificacion;
 	}
+	
 }
