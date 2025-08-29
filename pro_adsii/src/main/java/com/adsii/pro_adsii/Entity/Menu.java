@@ -1,107 +1,42 @@
-package com.adsii.pro_adsii.entity;
+package com.adsii.pro_adsii.Entity;
 
-import java.util.Date;
-import jakarta.persistence.Basic;
+import java.time.LocalDateTime;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import lombok.Data;
 
 @Entity
-@Table(name="Menu")
-
+@Table(name = "Menu")
+@Data
 public class Menu {
-	@Id
-	@Column(name = "idmenu")
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Basic(optional=false)
-	private int idmenu;
-	
-	@Column(name = "idmodulo")
-	private int idmodulo;
-	
-	@Column(name = "nombre")
-	private String nombre;
-	
-	@Column(name = "ordenmenu")
-	private int ordenmenu;
-	
-	@Column(name = "fechacreacion")
-	private Date fechacreacion;
-	
-	@Column(name = "usuariocreacion")
-	private String usuariocreacion;
-	
-	@Column(name = "fechamodificacion")
-	private Date fechamodificacion;
-	
-	@Column(name = "usuariomodificacion")
-	private String usuariomodificacion;
 
-	public int getIdmenu() {
-		return idmenu;
-	}
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "IdMenu")
+    private Integer idMenu;
 
-	public void setIdmenu(int idmenu) {
-		this.idmenu = idmenu;
-	}
+    @Column(name = "IdModulo", nullable = false)
+    private Integer idModulo;
 
-	public int getIdmodulo() {
-		return idmodulo;
-	}
+    @Column(name = "Nombre", length = 255, nullable = false)
+    private String nombre;
 
-	public void setIdmodulo(int idmodulo) {
-		this.idmodulo = idmodulo;
-	}
+    @Column(name = "OrdenMenu")
+    private Integer ordenMenu;
 
-	public String getNombre() {
-		return nombre;
-	}
+    @Column(name = "FechaCreacion", updatable = false)
+    private LocalDateTime fechaCreacion;
 
-	public void setNombre(String nombre) {
-		this.nombre = nombre;
-	}
+    @Column(name = "UsuarioCreacion", length = 100, updatable = false)
+    private String usuarioCreacion;
 
-	public int getOrdenmenu() {
-		return ordenmenu;
-	}
+    @Column(name = "FechaModificacion")
+    private LocalDateTime fechaModificacion;
 
-	public void setOrdenmenu(int ordenmenu) {
-		this.ordenmenu = ordenmenu;
-	}
-
-	public Date getFechacreacion() {
-		return fechacreacion;
-	}
-
-	public void setFechacreacion(Date fechacreacion) {
-		this.fechacreacion = fechacreacion;
-	}
-
-	public String getUsuariocreacion() {
-		return usuariocreacion;
-	}
-
-	public void setUsuariocreacion(String usuariocreacion) {
-		this.usuariocreacion = usuariocreacion;
-	}
-
-	public Date getFechamodificacion() {
-		return fechamodificacion;
-	}
-
-	public void setFechamodificacion(Date fechamodificacion) {
-		this.fechamodificacion = fechamodificacion;
-	}
-
-	public String getUsuariomodificacion() {
-		return usuariomodificacion;
-	}
-
-	public void setUsuariomodificacion(String usuariomodificacion) {
-		this.usuariomodificacion = usuariomodificacion;
-	}
-	
+    @Column(name = "UsuarioModificacion", length = 100)
+    private String usuarioModificacion;
 }
