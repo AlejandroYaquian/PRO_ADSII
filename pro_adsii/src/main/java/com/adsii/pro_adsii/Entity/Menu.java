@@ -1,4 +1,4 @@
-package com.adsii.pro_adsii.Entity;
+package com.adsii.pro_adsii.entity;
 
 import java.util.Date;
 import jakarta.persistence.Basic;
