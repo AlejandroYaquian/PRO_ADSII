@@ -8,6 +8,7 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 
+<!-- ESTRUCTURA DEL DOM INICIO***************************************************************************************************************** -->
 <body>
   <!-- Navbar -->
   <nav class="navbar navbar-expand-lg navbar-dark bg-primary w-100 mb-4">
@@ -16,23 +17,36 @@
     </div>
   </nav>
 
+
   <div class="container">
     <h2 class="mb-4">Selecciona un rol</h2>
-    
-    <form id="form-opciones">
-      <!-- Aquí se insertan los radios dinámicamente -->
+    <!-- Aquí vamos a mostrar la tabla con los roles--------------------------------------------------------------->
+    <form id="form-opciones"><!-- Formulario de opciones -->
+      <!-- Aquí vamos a mostrar la tabla con los roles -->
+      <table class="table table-striped">
+        <thead>
+          <tr>
+            <th scope="col">#</th>
+            <th scope="col">Nombre del Rol</th>
+            <th scope="col">Seleccionar</th>
+          </tr>
+        </thead>
+        <tbody id="roles-table-body">
+          <!-- Los roles se insertarán dinámicamente aquí -->
+        </tbody>
+      </table>
+      <!-- Aquí vamos a mostrar e inicializar los botones--------------------------------------------------------------->
       <div class="mt-3 d-flex gap-2" id="botones-container">
-        <button type="submit" class="btn btn-primary" id="btn-modificar">Modificar Rol</button>
         <button type="submit" class="btn btn-primary" id="btn-agregar">Agregar Rol</button>
       </div>
     </form>
 
-    <!-- Label para mostrar el rol seleccionado -->
+    <!-- Aquí vamos a mostrar e inicializar el Label para mostrar el rol seleccionado ------------------------------------->
     <div class="mt-4" id="rol-seleccionado" style="display: none;">
       <label class="form-label fw-bold">Rol seleccionado: <span id="nombre-rol"></span></label>
     </div>
 
-    <!-- Formulario para agregar nuevo rol -->
+    <!--quí vamos a mostrar e inicializar formulario para agregar nuevo rol ---------------------------------------------->
     <div class="mt-4" id="form-agregar-rol" style="display: none;">
       <h4>Agregar nuevo rol</h4>
       <form id="form-nuevo-rol">
@@ -40,78 +54,142 @@
           <label for="nombreNuevoRol" class="form-label">Nombre del nuevo rol</label>
           <input type="text" class="form-control" id="nombreNuevoRol" required>
         </div>
-        <button type="submit" class="btn btn-success">Guardar Rol</button>
+      <div style="display: flex; gap: 10px;">
+        <button class="btn btn-secondary" id="btn-atras-add" style="display: none;">Volver</button>
+        <button id="btn-guardar" class="btn btn-primary" style="display: block;">Guardar</button>
+      </div>
+       
       </form>
     </div>
-  </div>
 
-  <script>
+    <!--Aquí vamos a mostrar e inicializar Botón para volver atrás ----------------------------------------------------------->
+    <div style="display: flex; gap: 10px;">
+      <button class="btn btn-secondary" id="btn-atras" style="display: none;">Volver</button>
+      <button type="submit" class="btn btn-primary" style="display: none;" id="btn-modificar">Modificar Rol</button>
+    </div>
+
+  </div>
+<!--ESTRUCTURA DEL DOM FIN**********************************************************************************************************************-->
+
+<script>
     document.addEventListener('DOMContentLoaded', function () {
-      // Cargar roles dinámicamente desde el backend
+      const tableBody = document.getElementById('roles-table-body');
+      const tableHeader = document.querySelector('table thead');
+      const btnVolver = document.getElementById('btn-atras');
+      const btnVolverAdd = document.getElementById('btn-atras-add');
+      const formOpciones = document.getElementById('form-opciones');
+      const rolSeleccionadoDiv = document.getElementById('rol-seleccionado');
+      const formAgregarRolDiv = document.getElementById('form-agregar-rol');
+      const btnModificar = document.getElementById('btn-modificar');
+      const btnAgregar = document.getElementById('btn-agregar');
+     
+      
+//CARGA DE ROLES**************************************************************************************************************************
       fetch('http://localhost:8080/role/getRoles')
         .then(response => response.json())
         .then(roles => {
-          const form = document.getElementById('form-opciones');
-
           roles.forEach(rol => {
-            const div = document.createElement('div');
-            div.className = 'form-check mb-2 role-radio';
+            const tr = document.createElement('tr');
 
-            const input = document.createElement('input');
-            input.className = 'form-check-input';
-            input.type = 'radio';
-            input.name = 'opcionSeleccionada';
-            input.id = 'rol' + rol.idRole;
-            input.value = rol.idRole;
-            input.setAttribute('data-nombre', rol.nombre);
+            const tdId = document.createElement('td');
+            tdId.textContent = rol.idRole;
 
-            const label = document.createElement('label');
-            label.className = 'form-check-label';
-            label.htmlFor = input.id;
-            label.textContent = rol.nombre;
+            const tdName = document.createElement('td');
+            tdName.textContent = rol.nombre;
 
-            div.appendChild(input);
-            div.appendChild(label);
+            const tdSelect = document.createElement('td');
+            const selectBtn = document.createElement('button');
+            selectBtn.className = 'btn btn-info';
+            selectBtn.textContent = 'Seleccionar';
+            selectBtn.setAttribute('data-id', rol.idRole);
+            selectBtn.setAttribute('data-nombre', rol.nombre);
+            tdSelect.appendChild(selectBtn);
 
-            form.insertBefore(div, document.getElementById('botones-container'));
+            tr.appendChild(tdId);
+            tr.appendChild(tdName);
+            tr.appendChild(tdSelect);
+
+            tableBody.appendChild(tr);
+          });
+//ROL SELECCIONADO PARA MODIFICAR**************************************************************
+          const selectButtons = document.querySelectorAll('button[data-id]');
+          selectButtons.forEach(button => {
+            button.addEventListener('click', function () {
+              const rolId = this.getAttribute('data-id');
+              const rolNombre = this.getAttribute('data-nombre');
+
+              document.querySelectorAll('button[data-id]').forEach(btn => btn.classList.remove('btn-success'));
+              this.classList.add('btn-success');
+
+              document.getElementById('nombre-rol').textContent = rolNombre;
+              rolSeleccionadoDiv.style.display = 'block';
+
+              // Ocultar la tabla de roles y su encabezado
+              tableBody.style.display = 'none';
+              tableHeader.style.display = 'none';
+              btnModificar.style.display = 'block';
+              btnAgregar.style.display = 'none';
+              btnVolver.style.display = 'block'; 
+              btnVolver.addEventListener('click', volverAInicio);// Mostrar el botón "Volver"
+            });
           });
         })
         .catch(error => {
           console.error('Error al cargar los roles:', error);
         });
 
-      // MANEJAR ENVÍO DEL FORMULARIO PRINCIPAL (PARA MODIFICAR)
-      document.getElementById('form-opciones').addEventListener('submit', function (e) {
+//FUNCION CLIC EN VOLVER****************************************************************************
+      function volverAInicio() {
+        // Mostrar de nuevo la tabla, el encabezado y los botones
+        tableBody.style.display = 'table-row-group';
+        tableHeader.style.display = 'table-header-group';
+        btnModificar.style.display = 'none';
+        btnAgregar.style.display = 'block';
+
+        // Ocultar la vista de rol seleccionado y el botón "Volver"
+        rolSeleccionadoDiv.style.display = 'none';
+        formAgregarRolDiv.style.display = 'none';
+        btnVolver.style.display = 'none';
+
+        // Mostrar los botones de selección de nuevo
+        const selectButtons = document.querySelectorAll('button[data-id]');
+        selectButtons.forEach(button => {
+          button.style.display = 'inline-block'; // Mostrar los botones de "Seleccionar"
+        });
+      }
+
+//MANEJAR ERRORER DE  ENVÍO DEL FORMULARIO PRINCIPAL (PARA MODIFICAR)***************************************************************************
+      formOpciones.addEventListener('submit', function (e) {
         e.preventDefault();
 
-        const selected = document.querySelector('input[name="opcionSeleccionada"]:checked');
+        const selected = document.querySelector('button.btn-success');
         if (!selected) {
           alert('Por favor, selecciona un rol antes de continuar.');
           return;
         }
 
-        document.querySelectorAll('.role-radio').forEach(el => el.style.display = 'none');
-        document.getElementById('btn-modificar').style.display = 'none';
-        document.getElementById('btn-agregar').style.display = 'none';
-
-        const nombreRol = selected.getAttribute('data-nombre');
-        document.getElementById('nombre-rol').textContent = nombreRol;
-        document.getElementById('rol-seleccionado').style.display = 'block';
+        // Mostrar opciones para modificar el rol
+        document.querySelectorAll('button[data-id]').forEach(el => el.style.display = 'none');
+        //btnModificar.style.display = 'none';
+        btnAgregar.style.display = 'none';
+        rolSeleccionadoDiv.style.display = 'block';
       });
 
-      // MANEJAR CLIC EN BOTÓN AGREGAR ROL
-      document.getElementById('btn-agregar').addEventListener('click', function (e) {
+//AGREGAR ROL**********************************************************************************************
+      btnAgregar.addEventListener('click', function (e) {
         e.preventDefault();
 
-        document.querySelectorAll('.role-radio').forEach(el => el.style.display = 'none');
-        document.getElementById('btn-agregar').style.display = 'none';
-        document.getElementById('btn-modificar').style.display = 'none';
-        document.getElementById('rol-seleccionado').style.display = 'none';
-
-        document.getElementById('form-agregar-rol').style.display = 'block';
+        document.querySelectorAll('button[data-id]').forEach(el => el.style.display = 'none');
+        formAgregarRolDiv.style.display = 'block';
+        tableBody.style.display = 'none';
+        btnAgregar.style.display = 'none';
+        rolSeleccionadoDiv.style.display = 'none';
+        tableHeader.style.display = 'none';
+        btnVolverAdd.style.display = 'block';
+        btnVolverAdd.addEventListener('click', volverAInicio);
+       
       });
 
-      // ✅ MANEJAR ENVÍO DEL NUEVO ROL (ACTUALIZADO)
       document.getElementById('form-nuevo-rol').addEventListener('submit', function (e) {
         e.preventDefault();
 
@@ -143,7 +221,7 @@
 
             // Limpiar y ocultar formulario
             document.getElementById('form-nuevo-rol').reset();
-            document.getElementById('form-agregar-rol').style.display = 'none';
+            formAgregarRolDiv.style.display = 'none';
 
             // Recargar roles (opcional)
             location.reload(); // ← recarga la página para mostrar el nuevo rol
