@@ -13,7 +13,7 @@ import lombok.Data;
 @Table(name = "USUARIO")
 @Data
 public class Usuario {
-   @Id
+    @Id
     @Column(name = "IdUsuario")
     private String idUsuario;
 

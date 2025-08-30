@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Tipo Acceso</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+<div class="container py-5">
+    <h2 class="mb-4 text-center">Gestión de Tipos de Acceso</h2>
+
+    <!-- Formulario -->
+    <div class="card mb-4">
+        <div class="card-header">Agregar / Editar Tipo de Acceso</div>
+        <div class="card-body">
+            <input type="hidden" id="tipoAccesoId">
+            <div class="row g-2">
+                <div class="col-md-6">
+                    <input type="text" id="nombre" class="form-control" placeholder="Nombre" required>
+                </div>
+                <div class="col-md-6 d-flex gap-2">
+                    <button class="btn btn-primary" onclick="guardarTipoAcceso()" id="btnGuardar">Guardar</button>
+                    <button class="btn btn-secondary" onclick="cancelarEdicion()" id="btnCancelar" style="display:none;">Cancelar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabla -->
+    <div class="card">
+        <div class="card-header">Listado de Tipos de Acceso</div>
+        <div class="card-body">
+            <table class="table table-striped table-hover">
+                <thead class="table-dark">
+                <tr>
+                    <th>ID</th>
+                    <th>Nombre</th>
+                    <th>Fecha Creación</th>
+                    <th>Usuario Creación</th>
+                    <th>Fecha Modificación</th>
+                    <th>Usuario Modificación</th>
+                    <th>Acciones</th>
+                </tr>
+                </thead>
+                <tbody id="tipoAcceso-body">
+                    <tr><td colspan="7" class="text-center">Cargando...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    async function cargarTipoAccesos() {
+        const res = await fetch("/tipoacceso/listar");
+        const data = await res.json();
+        const tbody = document.getElementById("tipoAcceso-body");
+        tbody.innerHTML = "";
+
+        if (data.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="7" class="text-center">No hay registros.</td></tr>`;
+            return;
+        }
+
+        data.forEach(t => {
+            tbody.innerHTML += `
+                <tr>
+                    <td>${t.idTipoAcceso}</td>
+                    <td>${t.nombre}</td>
+                    <td>${t.fechaCreacion ? new Date(t.fechaCreacion).toLocaleString() : ""}</td>
+                    <td>${t.usuarioCreacion ?? ""}</td>
+                    <td>${t.fechaModificacion ? new Date(t.fechaModificacion).toLocaleString() : ""}</td>
+                    <td>${t.usuarioModificacion ?? ""}</td>
+                    <td>
+                        <button class="btn btn-warning btn-sm" onclick="editarTipoAcceso(${t.idTipoAcceso})">Editar</button>
+                        <button class="btn btn-danger btn-sm" onclick="eliminarTipoAcceso(${t.idTipoAcceso})">Eliminar</button>
+                    </td>
+                </tr>
+            `;
+        });
+    }
+
+    async function guardarTipoAcceso() {
+        const id = document.getElementById("tipoAccesoId").value;
+        const nombre = document.getElementById("nombre").value;
+        if (!nombre) return alert("Ingrese nombre");
+
+        const tipoAcceso = {
+            idTipoAcceso: id || null,
+            nombre
+        };
+
+        await fetch("/tipoacceso/guardar", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify(tipoAcceso)
+        });
+
+        cancelarEdicion();
+        cargarTipoAccesos();
+    }
+
+    async function editarTipoAcceso(id) {
+        const res = await fetch(`/tipoacceso/${id}`);
+        const t = await res.json();
+
+        document.getElementById("tipoAccesoId").value = t.idTipoAcceso;
+        document.getElementById("nombre").value = t.nombre;
+        document.getElementById("btnCancelar").style.display = "inline-block";
+        document.getElementById("btnGuardar").textContent = "Actualizar";
+    }
+
+    function cancelarEdicion() {
+        document.getElementById("tipoAccesoId").value = "";
+        document.getElementById("nombre").value = "";
+        document.getElementById("btnCancelar").style.display = "none";
+        document.getElementById("btnGuardar").textContent = "Guardar";
+    }
+
+    async function eliminarTipoAcceso(id) {
+        if (!confirm("¿Seguro de eliminar?")) return;
+        await fetch(`/tipoacceso/eliminar/${id}`, { method: "DELETE" });
+        cargarTipoAccesos();
+    }
+
+    // Cargar al iniciar
+    cargarTipoAccesos();
+</script>
+</
