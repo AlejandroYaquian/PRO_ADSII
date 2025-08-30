@@ -6,37 +6,62 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.adsii.pro_adsii.DTO.LoginResponse;
 import com.adsii.pro_adsii.Entity.Usuario;
+import com.adsii.pro_adsii.Repository.StatusUsuarioRepository;
 import com.adsii.pro_adsii.Repository.UsuarioRepository;
 
 @Service
 public class UsuarioService {
+ private final UsuarioRepository usuarioRepo;
+    private final StatusUsuarioRepository statusRepo;
 
-    private final UsuarioRepository usuarioRepository;
+    private static final int MAX_INTENTOS = 5;
 
-    public UsuarioService(UsuarioRepository usuarioRepository) {
-        this.usuarioRepository = usuarioRepository;
+    public UsuarioService(UsuarioRepository usuarioRepo, StatusUsuarioRepository statusRepo) {
+        this.usuarioRepo = usuarioRepo;
+        this.statusRepo = statusRepo;
     }
 
-    public LoginResponse login(String user, String password) {
-        Usuario usuario = usuarioRepository.findByIdUsuario(user);
-
+    @Transactional
+    public LoginResponse login(String idUsuarioOcorreo, String passwordPlano) {
+        
+        Usuario usuario = usuarioRepo.findByIdUsuario(idUsuarioOcorreo);
         if (usuario == null) {
-            return new LoginResponse(false, "Usuario no existe");
+            usuario = usuarioRepo.findByCorreoElectronico(idUsuarioOcorreo);
+        }
+        if (usuario == null) {
+            return new LoginResponse(false, "Credenciales inválidas");
         }
 
-        byte[] hashedPassword = sha256(password);
-
-        if (!Arrays.equals(usuario.getPassword(), hashedPassword)) {
-            return new LoginResponse(false, "Contraseña incorrecta");
+        // Verifica estatus
+        String nombreEstatus = statusRepo.findById(usuario.getIdStatusUsuario())
+                                         .map(s -> s.getNombre())
+                                         .orElse("Desconocido");
+        if (!"Activo".equalsIgnoreCase(nombreEstatus)) {
+            return new LoginResponse(false, "Usuario " + nombreEstatus + ". Acceso denegado.");
         }
 
-        if (usuario.getIdStatusUsuario() != 1) {
-            return new LoginResponse(false, "Usuario no activo");
+        
+        byte[] hashEntrada = sha256(passwordPlano);
+        if (!Arrays.equals(hashEntrada, usuario.getPassword())) {
+
+            usuarioRepo.incrementarIntento(usuario.getIdUsuario());
+
+            Usuario u = usuarioRepo.findByIdUsuario(usuario.getIdUsuario());
+            if (u.getIntentosDeAcceso() + 1 >= MAX_INTENTOS) {
+                Integer idBloqueado = statusRepo.findByNombre("Bloqueado").getIdStatusUsuario();
+                usuarioRepo.cambiarEstatus(usuario.getIdUsuario(), idBloqueado);
+                return new LoginResponse(false, "Cuenta bloqueada por intentos fallidos.");
+            }
+
+            return new LoginResponse(false, "Credenciales inválidas");
         }
 
+        
+        usuarioRepo.limpiarIntentosYMarcarSesion(usuario.getIdUsuario());
         return new LoginResponse(true, "Bienvenido " + usuario.getNombre());
     }
 
@@ -48,4 +73,5 @@ public class UsuarioService {
             throw new RuntimeException("Error generando hash", e);
         }
     }
+   
 }

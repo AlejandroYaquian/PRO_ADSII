@@ -6,6 +6,7 @@ import java.time.LocalDateTime;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import lombok.Data;
 
@@ -14,13 +15,13 @@ import lombok.Data;
 @Data
 public class Usuario {
    @Id
-    @Column(name = "IdUsuario")
+    @Column(name = "IdUsuario", length = 100, nullable = false)
     private String idUsuario;
 
-    @Column(name = "Nombre")
+    @Column(name = "Nombre", nullable = false)
     private String nombre;
 
-    @Column(name = "Apellido")
+    @Column(name = "Apellido", nullable = false)
     private String apellido;
 
     @Column(name = "FechaNacimiento")
@@ -29,7 +30,7 @@ public class Usuario {
     @Column(name = "IdStatusUsuario")
     private Integer idStatusUsuario;
 
-    @Column(name = "Password")
+    @Column(name = "Password", length = 255, nullable = false)
     private byte[] password;
 
     @Column(name = "IdGenero")
@@ -47,7 +48,7 @@ public class Usuario {
     @Column(name = "UltimaFechaCambioPassword")
     private LocalDateTime ultimaFechaCambioPassword;
 
-    @Column(name = "CorreoElectronico")
+    @Column(name = "CorreoElectronico", nullable = false, unique = true)
     private String correoElectronico;
 
     @Column(name = "RequiereCambiarPassword")
@@ -82,4 +83,12 @@ public class Usuario {
 
     @Column(name = "UsuarioModificacion")
     private String usuarioModificacion;
+
+    @PrePersist
+    public void PrePersist(){
+        if(intentosDeAcceso == null) intentosDeAcceso = 5;
+        if (sesionActual==null )sesionActual=false;
+            
+    
+    }
 }
