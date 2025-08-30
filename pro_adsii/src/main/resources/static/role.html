@@ -19,14 +19,17 @@
 
 
   <div class="container">
-    <h2 class="mb-4">Selecciona un rol</h2>
+    <h2 class="mb-4" id='labelRol'>Selecciona un rol</h2>
     <!-- Aquí vamos a mostrar la tabla con los roles--------------------------------------------------------------->
-    <form id="form-opciones"><!-- Formulario de opciones -->
-      <!-- Aquí vamos a mostrar la tabla con los roles -->
-      <table class="table table-striped">
-        <thead>
+    <form id="form-opciones" class="mt-4">
+  <!-- Título arriba de la tabla -->
+   <h5 class="mb-3" id="labelListRole">Listado de Roles</h5>
+
+    <div class="table-responsive shadow-sm rounded w-100">
+      <table  id='rolesTable' class="table table-bordered table-hover table-striped align-middle w-100">
+        <thead id="thead-roles" class="table-primary">
           <tr>
-            <th scope="col">#</th>
+            <th scope="col">No.</th>
             <th scope="col">Nombre del Rol</th>
             <th scope="col">Seleccionar</th>
           </tr>
@@ -35,11 +38,16 @@
           <!-- Los roles se insertarán dinámicamente aquí -->
         </tbody>
       </table>
-      <!-- Aquí vamos a mostrar e inicializar los botones--------------------------------------------------------------->
-      <div class="mt-3 d-flex gap-2" id="botones-container">
-        <button type="submit" class="btn btn-primary" id="btn-agregar">Agregar Rol</button>
-      </div>
-    </form>
+    </div>
+    
+    <!-- Botón de agregar -->
+    <div class="mt-3 d-flex justify-content-start gap-2" id="botones-container">
+      <button type="submit" class="btn btn-success" id="btn-agregar">
+        <i class="bi bi-plus-circle me-1"></i>Agregar Rol
+      </button>
+    </div>
+  </form>
+
 
     <!-- Aquí vamos a mostrar e inicializar el Label para mostrar el rol seleccionado ------------------------------------->
     <div class="mt-4" id="rol-seleccionado" style="display: none;">
@@ -62,6 +70,25 @@
       </form>
     </div>
 
+  <div class="table-responsive mt-4">
+  <table id='opcionesTable'class="table table-bordered table-hover table-striped align-middle shadow-sm rounded">
+    <thead id="thead-options" class="table-primary" style="display: none;">
+      <tr>
+        <th scope="col">No.</th>
+        <th scope="col">Nombre de la opción</th>
+        <th scope="col">Alta</th>
+        <th scope="col">Baja</th>
+        <th scope="col">Imprimir</th>
+        <th scope="col">Exportar</th>
+      </tr>
+    </thead>
+    <tbody id="options-table-body" style="display: none;">
+      <!-- Las filas se insertarán dinámicamente -->
+    </tbody>
+  </table>
+</div>
+
+
     <!--Aquí vamos a mostrar e inicializar Botón para volver atrás ----------------------------------------------------------->
     <div style="display: flex; gap: 10px;">
       <button class="btn btn-secondary" id="btn-atras" style="display: none;">Volver</button>
@@ -73,8 +100,9 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {
+      const roleTable = document.getElementById("rolesTable");
       const tableBody = document.getElementById('roles-table-body');
-      const tableHeader = document.querySelector('table thead');
+      const tableHeader = document.getElementById('thead-roles');
       const btnVolver = document.getElementById('btn-atras');
       const btnVolverAdd = document.getElementById('btn-atras-add');
       const formOpciones = document.getElementById('form-opciones');
@@ -82,6 +110,12 @@
       const formAgregarRolDiv = document.getElementById('form-agregar-rol');
       const btnModificar = document.getElementById('btn-modificar');
       const btnAgregar = document.getElementById('btn-agregar');
+      const tableOptions = document.getElementById('options-table-body');
+      const headTableOptions = document.getElementById('thead-options');
+      const labelR = document.getElementById("labelRol");
+      const labelLR = document.getElementById("labelListRole");
+      const opcionesTable= document.getElementById("opcionesTable")
+      
      
       
 //CARGA DE ROLES**************************************************************************************************************************
@@ -108,9 +142,10 @@
             tr.appendChild(tdId);
             tr.appendChild(tdName);
             tr.appendChild(tdSelect);
-
             tableBody.appendChild(tr);
+
           });
+
 //ROL SELECCIONADO PARA MODIFICAR**************************************************************
           const selectButtons = document.querySelectorAll('button[data-id]');
           selectButtons.forEach(button => {
@@ -127,10 +162,16 @@
               // Ocultar la tabla de roles y su encabezado
               tableBody.style.display = 'none';
               tableHeader.style.display = 'none';
+              headTableOptions.style.display = 'block';
+              tableOptions.style.display = 'block';
               btnModificar.style.display = 'block';
               btnAgregar.style.display = 'none';
               btnVolver.style.display = 'block'; 
+              labelR.style.display = 'none';
+              labelLR.style.display = 'none';
+              roleTable.style.display = 'none';
               btnVolver.addEventListener('click', volverAInicio);// Mostrar el botón "Volver"
+              
             });
           });
         })
@@ -145,6 +186,12 @@
         tableHeader.style.display = 'table-header-group';
         btnModificar.style.display = 'none';
         btnAgregar.style.display = 'block';
+        headTableOptions.style.display = 'none';
+        tableOptions.style.display = 'none';
+        labelR.style.display = 'block';
+        labelLR.style.display = 'block';
+        roleTable.style.display = 'block';
+        opcionesTable.style.display = 'none';
 
         // Ocultar la vista de rol seleccionado y el botón "Volver"
         rolSeleccionadoDiv.style.display = 'none';
@@ -186,8 +233,10 @@
         rolSeleccionadoDiv.style.display = 'none';
         tableHeader.style.display = 'none';
         btnVolverAdd.style.display = 'block';
+        labelR.style.display = 'none';
+        labelLR.style.display = 'none';
+         roleTable.style.display = 'none';
         btnVolverAdd.addEventListener('click', volverAInicio);
-       
       });
 
       document.getElementById('form-nuevo-rol').addEventListener('submit', function (e) {
