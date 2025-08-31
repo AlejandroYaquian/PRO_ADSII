@@ -1,30 +1,29 @@
 package com.adsii.pro_adsii.Controller;
 
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.adsii.pro_adsii.Repository.RoleOpcionRepository;
+import com.adsii.pro_adsii.DTO.OpcionDTO;
+import com.adsii.pro_adsii.Service.RoleOpcionService;
 
 @RestController
 @RequestMapping(path="/RoleOpcion")
 public class RoleOpcionController {
 
+   
     @Autowired
-    RoleOpcionRepository roleOpcionRepository;
-
-    /* 
+    RoleOpcionService roleOpcionService;
+    
     @GetMapping("/opcionesRol/{idRole}")
-    public ResponseEntity<List<Opcion>> obtenerOpcionesPorRol(@PathVariable Integer idRole) {
-        List<Opcion> opciones = roleOpcionRepository.findOpcionesByIdRole(idRole);
-        return opciones.isEmpty()
-            ? ResponseEntity.noContent().build()
-            : ResponseEntity.ok(opciones);
-    }*/
+    public List<OpcionDTO> obtenerOpcionesPorRol(@PathVariable Integer idRole) {
+        
+        return roleOpcionService.obtenerOpcionesPorRol(idRole);
+        
+    }
 
 
 

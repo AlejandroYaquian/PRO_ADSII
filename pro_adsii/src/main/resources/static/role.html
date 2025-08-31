@@ -70,16 +70,16 @@
       </form>
     </div>
 
-  <div class="table-responsive mt-4">
-  <table id='opcionesTable'class="table table-bordered table-hover table-striped align-middle shadow-sm rounded">
+  <div class="table-responsive shadow-sm rounded w-100">
+  <table id='opcionesTable' class="table table-bordered table-hover table-striped align-middle w-100">
     <thead id="thead-options" class="table-primary" style="display: none;">
       <tr>
-        <th scope="col">No.</th>
         <th scope="col">Nombre de la opción</th>
-        <th scope="col">Alta</th>
-        <th scope="col">Baja</th>
-        <th scope="col">Imprimir</th>
-        <th scope="col">Exportar</th>
+        <th scope="col" class="text-center" style="width: 80px;">Alta</th>
+        <th scope="col" class="text-center" style="width: 80px;">Baja</th>
+        <th scope="col" class="text-center" style="width: 100px;">Imprimir</th>
+        <th scope="col" class="text-center" style="width: 100px;">Exportar</th>
+        <th scope="col" class="text-center" style="width: 120px;">Modificar</th>
       </tr>
     </thead>
     <tbody id="options-table-body" style="display: none;">
@@ -92,7 +92,7 @@
     <!--Aquí vamos a mostrar e inicializar Botón para volver atrás ----------------------------------------------------------->
     <div style="display: flex; gap: 10px;">
       <button class="btn btn-secondary" id="btn-atras" style="display: none;">Volver</button>
-      <button type="submit" class="btn btn-primary" style="display: none;" id="btn-modificar">Modificar Rol</button>
+       <!--<button type="submit" class="btn btn-primary" style="display: none;" id="btn-modificar">Modificar Rol</button>-->
     </div>
 
   </div>
@@ -108,13 +108,13 @@
       const formOpciones = document.getElementById('form-opciones');
       const rolSeleccionadoDiv = document.getElementById('rol-seleccionado');
       const formAgregarRolDiv = document.getElementById('form-agregar-rol');
-      const btnModificar = document.getElementById('btn-modificar');
+      //const btnModificar = document.getElementById('btn-modificar');
       const btnAgregar = document.getElementById('btn-agregar');
       const tableOptions = document.getElementById('options-table-body');
       const headTableOptions = document.getElementById('thead-options');
       const labelR = document.getElementById("labelRol");
       const labelLR = document.getElementById("labelListRole");
-      const opcionesTable= document.getElementById("opcionesTable")
+      const opcionesTable= document.getElementById("opcionesTable");
       
      
       
@@ -146,12 +146,22 @@
 
           });
 
+
+
+          
+
 //ROL SELECCIONADO PARA MODIFICAR**************************************************************
           const selectButtons = document.querySelectorAll('button[data-id]');
           selectButtons.forEach(button => {
             button.addEventListener('click', function () {
+
               const rolId = this.getAttribute('data-id');
               const rolNombre = this.getAttribute('data-nombre');
+              tableOptions.innerHTML = ''
+              //thead.classList.remove('d-none');
+              //tableOptions.classList.remove('d-none');
+              getOptions(rolId);
+             
 
               document.querySelectorAll('button[data-id]').forEach(btn => btn.classList.remove('btn-success'));
               this.classList.add('btn-success');
@@ -160,16 +170,19 @@
               rolSeleccionadoDiv.style.display = 'block';
 
               // Ocultar la tabla de roles y su encabezado
-              tableBody.style.display = 'none';
-              tableHeader.style.display = 'none';
+              opcionesTable.style.display = 'block';
+              tableBody.style.display = 'table-row-group';
+              tableHeader.style.display = 'table-header-group';
               headTableOptions.style.display = 'block';
               tableOptions.style.display = 'block';
-              btnModificar.style.display = 'block';
+              //btnModificar.style.display = 'block';
               btnAgregar.style.display = 'none';
               btnVolver.style.display = 'block'; 
               labelR.style.display = 'none';
               labelLR.style.display = 'none';
               roleTable.style.display = 'none';
+              
+              
               btnVolver.addEventListener('click', volverAInicio);// Mostrar el botón "Volver"
               
             });
@@ -179,12 +192,73 @@
           console.error('Error al cargar los roles:', error);
         });
 
+
 //FUNCION CLIC EN VOLVER****************************************************************************
+
+ function getOptions(idRol){
+
+
+      
+        
+        fetch(`http://localhost:8080/RoleOpcion/opcionesRol/${idRol}`)
+        .then(response => response.json())
+        .then(opciones => {
+
+          
+          opciones.forEach(opcion => {
+            const tr = document.createElement('tr');
+
+            const tdName = document.createElement('td');
+            tdName.textContent = opcion.nombre;
+            tdName.style.width = '175px';
+
+            const tdAlta = document.createElement('td');
+            tdAlta.textContent = opcion.alta ? "✅" : "❌";
+            tdAlta.classList.add('text-center');
+            tdAlta.style.width = '80px';
+
+            const tdBaja = document.createElement('td');
+            tdBaja.textContent = opcion.baja ? "✅" : "❌";
+            tdBaja.classList.add('text-center');
+            tdBaja.style.width = '80px';
+
+            const tdImprimir = document.createElement('td');
+            tdImprimir.textContent = opcion.baja ? "✅" : "❌";
+            tdImprimir.classList.add('text-center');
+            tdImprimir.style.width = '100px';
+
+            const tdExportar = document.createElement('td');
+            tdExportar.textContent = opcion.baja ? "✅" : "❌";
+            tdExportar.classList.add('text-center');
+            tdExportar.style.width = '98px';
+
+            const tdSelect = document.createElement('td');
+            const selectBtn = document.createElement('button');
+
+            selectBtn.className = 'btn btn-info';
+            selectBtn.textContent = 'Seleccionar';
+            selectBtn.setAttribute('data-id', opcion.idOpcion);
+            selectBtn.setAttribute('data-nombre', opcion.nombre);
+            tdSelect.classList.add('text-center');
+            tdSelect.appendChild(selectBtn);
+            
+            tr.appendChild(tdName);
+            tr.appendChild(tdAlta);
+            tr.appendChild(tdBaja);
+            tr.appendChild(tdImprimir);
+            tr.appendChild(tdExportar);
+            tr.appendChild(tdSelect);
+            tableOptions.appendChild(tr);
+
+          });
+          })
+  }
+
       function volverAInicio() {
         // Mostrar de nuevo la tabla, el encabezado y los botones
         tableBody.style.display = 'table-row-group';
         tableHeader.style.display = 'table-header-group';
-        btnModificar.style.display = 'none';
+        //btnModificar.style.display = 'none';
         btnAgregar.style.display = 'block';
         headTableOptions.style.display = 'none';
         tableOptions.style.display = 'none';
@@ -204,6 +278,9 @@
           button.style.display = 'inline-block'; // Mostrar los botones de "Seleccionar"
         });
       }
+
+
+     
 
 //MANEJAR ERRORER DE  ENVÍO DEL FORMULARIO PRINCIPAL (PARA MODIFICAR)***************************************************************************
       formOpciones.addEventListener('submit', function (e) {
@@ -235,7 +312,8 @@
         btnVolverAdd.style.display = 'block';
         labelR.style.display = 'none';
         labelLR.style.display = 'none';
-         roleTable.style.display = 'none';
+        roleTable.style.display = 'none';
+        opcionesTable.style.display = 'none';
         btnVolverAdd.addEventListener('click', volverAInicio);
       });
 
