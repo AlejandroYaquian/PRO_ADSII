@@ -1,4 +1,4 @@
-package com.adsii.pro_adsii.service;
+package com.adsii.pro_adsii.Service;
 
 import java.util.List;
 
@@ -12,8 +12,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.adsii.pro_adsii.entity.Menu;
-import com.adsii.pro_adsii.repository.MenuRepository;
+import com.adsii.pro_adsii.Entity.Menu;
+import com.adsii.pro_adsii.Repository.MenuRepository;
 
 
 @RestController
