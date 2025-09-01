@@ -1,6 +1,7 @@
 package com.adsii.pro_adsii.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -39,4 +40,14 @@ public class OpcionService {
 	public void eliminar(@PathVariable int idopcion) {
 		ur.deleteById(idopcion);
 	}
+
+
+	@GetMapping(path="/buscarOpcion/{idopcion}")
+	public Opcion buscarOpcion(@PathVariable int idopcion) {	
+	
+		Optional<Opcion> opcion = ur.findById(idopcion);	
+		return opcion.isPresent() ? opcion.get() : null;
+	}
+
+
 }
