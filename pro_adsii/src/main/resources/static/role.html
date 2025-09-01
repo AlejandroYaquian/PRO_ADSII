@@ -76,7 +76,6 @@
       <tr>
         <th scope="col">Nombre de la opción</th>
         <th scope="col" class="text-center" style="width: 80px;">Alta</th>
-        <th scope="col" class="text-center" style="width: 80px;">Baja</th>
         <th scope="col" class="text-center" style="width: 100px;">Imprimir</th>
         <th scope="col" class="text-center" style="width: 100px;">Exportar</th>
         <th scope="col" class="text-center" style="width: 120px;">Modificar</th>
@@ -195,64 +194,133 @@
 
 //FUNCION CLIC EN VOLVER****************************************************************************
 
- function getOptions(idRol){
+function getOptions(idRol) {
+  fetch(`http://localhost:8080/RoleOpcion/opcionesRol/${idRol}`)
+    .then(response => response.json())
+    .then(opciones => {
+      opciones.forEach(opcion => {
+        const tr = document.createElement('tr');
 
+        // Nombre
+        const tdName = document.createElement('td');
+        tdName.textContent = opcion.nombre;
+        tdName.style.width = '175px';
 
-      
-        
-        fetch(`http://localhost:8080/RoleOpcion/opcionesRol/${idRol}`)
-        .then(response => response.json())
-        .then(opciones => {
+        // Alta
+        const tdAlta = document.createElement('td');
+        const chkAlta = document.createElement('input');
+        chkAlta.type = 'checkbox';
+        chkAlta.checked = opcion.alta;
+        chkAlta.disabled = true;
+        tdAlta.classList.add('text-center');
+        tdAlta.style.width = '80px';
+        tdAlta.appendChild(chkAlta);
 
-          
-          opciones.forEach(opcion => {
-            const tr = document.createElement('tr');
+        // Imprimir
+        const tdImprimir = document.createElement('td');
+        const chkImprimir = document.createElement('input');
+        chkImprimir.type = 'checkbox';
+        chkImprimir.checked = opcion.baja;
+        chkImprimir.disabled = true;
+        tdImprimir.classList.add('text-center');
+        tdImprimir.style.width = '100px';
+        tdImprimir.appendChild(chkImprimir);
 
-            const tdName = document.createElement('td');
-            tdName.textContent = opcion.nombre;
-            tdName.style.width = '175px';
+        // Exportar
+        const tdExportar = document.createElement('td');
+        const chkExportar = document.createElement('input');
+        chkExportar.type = 'checkbox';
+        chkExportar.checked = opcion.baja;
+        chkExportar.disabled = true;
+        tdExportar.classList.add('text-center');
+        tdExportar.style.width = '98px';
+        tdExportar.appendChild(chkExportar);
 
-            const tdAlta = document.createElement('td');
-            tdAlta.textContent = opcion.alta ? "✅" : "❌";
-            tdAlta.classList.add('text-center');
-            tdAlta.style.width = '80px';
+        // Botón Seleccionar
+        const tdSelect = document.createElement('td');
+        const selectBtn = document.createElement('button');
+        selectBtn.className = 'btn btn-info';
+        selectBtn.textContent = 'Seleccionar';
+        selectBtn.setAttribute('data-id', opcion.idOpcion);
+        selectBtn.setAttribute('data-nombre', opcion.nombre);
+        tdSelect.classList.add('text-center');
+        tdSelect.appendChild(selectBtn);
 
-            const tdBaja = document.createElement('td');
-            tdBaja.textContent = opcion.baja ? "✅" : "❌";
-            tdBaja.classList.add('text-center');
-            tdBaja.style.width = '80px';
+        // Agregar al row
+        tr.appendChild(tdName);
+        tr.appendChild(tdAlta);
+        tr.appendChild(tdImprimir);
+        tr.appendChild(tdExportar);
+        tr.appendChild(tdSelect);
 
-            const tdImprimir = document.createElement('td');
-            tdImprimir.textContent = opcion.baja ? "✅" : "❌";
-            tdImprimir.classList.add('text-center');
-            tdImprimir.style.width = '100px';
+        tableOptions.appendChild(tr);
 
-            const tdExportar = document.createElement('td');
-            tdExportar.textContent = opcion.baja ? "✅" : "❌";
-            tdExportar.classList.add('text-center');
-            tdExportar.style.width = '98px';
+        // Evento para activar checkboxes y cambiar el botón a "Guardar"
+        selectBtn.addEventListener('click', function seleccionarHandler() {
+          // Activar checkboxes
+          chkAlta.disabled = false;
+          chkImprimir.disabled = false;
+          chkExportar.disabled = false;
 
-            const tdSelect = document.createElement('td');
-            const selectBtn = document.createElement('button');
-
-            selectBtn.className = 'btn btn-info';
-            selectBtn.textContent = 'Seleccionar';
-            selectBtn.setAttribute('data-id', opcion.idOpcion);
-            selectBtn.setAttribute('data-nombre', opcion.nombre);
-            tdSelect.classList.add('text-center');
-            tdSelect.appendChild(selectBtn);
-            
-            tr.appendChild(tdName);
-            tr.appendChild(tdAlta);
-            tr.appendChild(tdBaja);
-            tr.appendChild(tdImprimir);
-            tr.appendChild(tdExportar);
-            tr.appendChild(tdSelect);
-            tableOptions.appendChild(tr);
-
+          // Deshabilitar todos los demás botones "Seleccionar"
+          const allSelectButtons = document.querySelectorAll('button[data-id]');
+          allSelectButtons.forEach(btn => {
+            btn.disabled = true;
+            btn.classList.remove('btn-info');
+            btn.classList.add('btn-secondary');
           });
-          })
-  }
+
+          // Habilitar solo este botón y cambiar su texto
+          selectBtn.disabled = false;
+          selectBtn.textContent = 'Guardar';
+          selectBtn.classList.remove('btn-secondary');
+          selectBtn.classList.add('btn-success');
+
+          // Remover este handler para evitar múltiples bindings
+          selectBtn.removeEventListener('click', seleccionarHandler);
+
+          // Agregar nuevo handler para guardar
+          selectBtn.addEventListener('click', function guardarHandler() {
+            // Aquí puedes recolectar los datos
+            const datos = {
+              idOpcion: selectBtn.getAttribute('data-id'),
+              nombre: selectBtn.getAttribute('data-nombre'),
+              alta: chkAlta.checked,
+              imprimir: chkImprimir.checked,
+              exportar: chkExportar.checked
+            };
+
+            console.log('Guardando datos:', datos);
+
+            // Desactivar checkboxes nuevamente
+            chkAlta.disabled = true;
+            chkImprimir.disabled = true;
+            chkExportar.disabled = true;
+
+            // Restaurar texto y estilo del botón
+            selectBtn.textContent = 'Seleccionar';
+            selectBtn.classList.remove('btn-success');
+            selectBtn.classList.add('btn-info');
+
+            // Habilitar todos los botones "Seleccionar"
+            allSelectButtons.forEach(btn => {
+              btn.disabled = false;
+              btn.classList.remove('btn-secondary');
+              btn.classList.add('btn-info');
+            });
+
+            // Remover el handler de guardar y volver a agregar el de seleccionar
+            selectBtn.removeEventListener('click', guardarHandler);
+            selectBtn.addEventListener('click', seleccionarHandler);
+          });
+        });
+      });
+    })
+    .catch(error => {
+      console.error('Error al cargar opciones:', error);
+    });
+}
+
 
       function volverAInicio() {
         // Mostrar de nuevo la tabla, el encabezado y los botones
@@ -277,7 +345,7 @@
         selectButtons.forEach(button => {
           button.style.display = 'inline-block'; // Mostrar los botones de "Seleccionar"
         });
-      }
+  }
 
 
      
@@ -359,6 +427,9 @@
           });
       });
     });
+
+    
+
   </script>
 </body>
 </html>
