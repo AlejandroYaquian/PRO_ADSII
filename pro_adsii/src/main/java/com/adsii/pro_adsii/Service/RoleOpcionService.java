@@ -1,17 +1,17 @@
 package com.adsii.pro_adsii.Service;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.PutMapping;
-
 import com.adsii.pro_adsii.DTO.OpcionDTO;
 import com.adsii.pro_adsii.Entity.Opcion;
 import com.adsii.pro_adsii.Entity.RoleOpcion;
-import com.adsii.pro_adsii.Entity.RoleOpcionId;
 import com.adsii.pro_adsii.Repository.RoleOpcionRepository;
 
 
@@ -26,6 +26,7 @@ public class RoleOpcionService {
 
     @Autowired
     RoleService roleR;
+
 
 
     public List<OpcionDTO> obtenerOpcionesPorRol(int idRole) {
@@ -51,17 +52,48 @@ public class RoleOpcionService {
         return ops;
     }
 
-    public RoleOpcion actualizarRoleOpcion(int id, OpcionDTO opcionDTOActualizado) {
+    public RoleOpcion actualizarRoleOpcion(OpcionDTO opcionDTOActualizado) {
         Optional<RoleOpcion> roleOpcion = Optional.ofNullable(roleOpcionRepository.findByIdIdRoleAndIdIdOpcion(opcionDTOActualizado.getIdRole(), opcionDTOActualizado.getIdOpcion()));
-		if (roleOpcion.isPresent()) {
+		Date fecha = new Date(); // fecha actual
+        if (roleOpcion.isPresent()) {
 			RoleOpcion rop = roleOpcion.get();
-			rop.setAlta(opcionDTOActualizado.getAlta() ? true :false);
-            rop.setImprimir(opcionDTOActualizado.getImprimir() ? true :false);
-            rop.setExportar(opcionDTOActualizado.getExportar() ? true :false);
+			rop.setAlta(opcionDTOActualizado.getAlta() ? true : false);
+            rop.setImprimir(opcionDTOActualizado.getImprimir() ? true : false);
+            rop.setExportar(opcionDTOActualizado.getExportar() ? true : false);
+            rop.setFechaModificacion(fecha);
+            rop.setUsuarioModificacion("admin01");
 			return roleOpcionRepository.save(rop);			
 		}else {
 			return null;
 		}
     }
+
+
+   public List<Opcion> obtenerOpcionesDiponibles(int idRole) {
+        // Lista de opciones ya asignadas al rol
+        List<OpcionDTO> ops = obtenerOpcionesPorRol(idRole);
+
+        // Lista de todas las opciones disponibles en el sistema
+        List<Opcion> opciones = opcion.buscar();
+
+        // Lista para almacenar las opciones que NO están en ops
+        List<Opcion> opcionesDisponibles = new ArrayList<>();
+
+        // Convertir lista de OpcionDTO a conjunto de IDs para facilitar búsqueda
+        Set<Integer> idsAsignados = ops.stream()
+                                    .map(OpcionDTO::getIdOpcion)
+                                    .collect(Collectors.toSet());
+
+        // Recorrer todas las opciones y quedarnos solo con las que no están asignadas
+        for (Opcion opcion : opciones) {
+            if (!idsAsignados.contains(opcion.getIdOpcion())) {
+                opcionesDisponibles.add(opcion);
+            }
+        }
+
+        return opcionesDisponibles;
+        
+    }
+
 
 }
