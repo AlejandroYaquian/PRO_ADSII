@@ -91,6 +91,7 @@
     <!--Aquí vamos a mostrar e inicializar Botón para volver atrás ----------------------------------------------------------->
     <div style="display: flex; gap: 10px;">
       <button class="btn btn-secondary" id="btn-atras" style="display: none;">Volver</button>
+      <button class="btn btn-warning" id="btn-imprimir" style="display: none;" onclick="imprimirOpcionesMarcadas()">Imprimir</button>
        <!--<button type="submit" class="btn btn-primary" style="display: none;" id="btn-modificar">Modificar Rol</button>-->
     </div>
 
@@ -98,11 +99,13 @@
 <!--ESTRUCTURA DEL DOM FIN**********************************************************************************************************************-->
 
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
+       let nombreRolSeleccionado = ''; 
+      document.addEventListener('DOMContentLoaded', function () {
       const roleTable = document.getElementById("rolesTable");
       const tableBody = document.getElementById('roles-table-body');
       const tableHeader = document.getElementById('thead-roles');
       const btnVolver = document.getElementById('btn-atras');
+      const btnImprimir = document.getElementById('btn-imprimir');
       const btnVolverAdd = document.getElementById('btn-atras-add');
       const formOpciones = document.getElementById('form-opciones');
       const rolSeleccionadoDiv = document.getElementById('rol-seleccionado');
@@ -114,6 +117,8 @@
       const labelR = document.getElementById("labelRol");
       const labelLR = document.getElementById("labelListRole");
       const opcionesTable= document.getElementById("opcionesTable");
+     
+
       
      
       
@@ -156,9 +161,8 @@
 
               const rolId = this.getAttribute('data-id');
               const rolNombre = this.getAttribute('data-nombre');
+              nombreRolSeleccionado = rolNombre;
               tableOptions.innerHTML = ''
-              //thead.classList.remove('d-none');
-              //tableOptions.classList.remove('d-none');
               getOptions(rolId);
              
 
@@ -176,7 +180,8 @@
               tableOptions.style.display = 'block';
               //btnModificar.style.display = 'block';
               btnAgregar.style.display = 'none';
-              btnVolver.style.display = 'block'; 
+              btnVolver.style.display = 'block';
+              btnImprimir.style.display = 'block'; 
               labelR.style.display = 'none';
               labelLR.style.display = 'none';
               roleTable.style.display = 'none';
@@ -192,7 +197,7 @@
         });
 
 
-//FUNCION CLIC EN VOLVER****************************************************************************
+//FUNCION PARA MOSTRAR LAS OPCIONES****************************************************************************
 
 function getOptions(idRol) {
   fetch(`http://localhost:8080/RoleOpcion/opcionesRol/${idRol}`)
@@ -220,7 +225,7 @@ function getOptions(idRol) {
         const tdImprimir = document.createElement('td');
         const chkImprimir = document.createElement('input');
         chkImprimir.type = 'checkbox';
-        chkImprimir.checked = opcion.baja;
+        chkImprimir.checked = opcion.imprimir;
         chkImprimir.disabled = true;
         tdImprimir.classList.add('text-center');
         tdImprimir.style.width = '100px';
@@ -230,7 +235,7 @@ function getOptions(idRol) {
         const tdExportar = document.createElement('td');
         const chkExportar = document.createElement('input');
         chkExportar.type = 'checkbox';
-        chkExportar.checked = opcion.baja;
+        chkExportar.checked = opcion.exportar;
         chkExportar.disabled = true;
         tdExportar.classList.add('text-center');
         tdExportar.style.width = '98px';
@@ -243,6 +248,7 @@ function getOptions(idRol) {
         selectBtn.textContent = 'Seleccionar';
         selectBtn.setAttribute('data-id', opcion.idOpcion);
         selectBtn.setAttribute('data-nombre', opcion.nombre);
+        selectBtn.setAttribute('data-role', idRol);
         tdSelect.classList.add('text-center');
         tdSelect.appendChild(selectBtn);
 
@@ -281,14 +287,34 @@ function getOptions(idRol) {
 
           // Agregar nuevo handler para guardar
           selectBtn.addEventListener('click', function guardarHandler() {
-            // Aquí puedes recolectar los datos
+            // recolectar los datos
             const datos = {
               idOpcion: selectBtn.getAttribute('data-id'),
+              idRole: selectBtn.getAttribute('data-role'),
               nombre: selectBtn.getAttribute('data-nombre'),
               alta: chkAlta.checked,
               imprimir: chkImprimir.checked,
               exportar: chkExportar.checked
             };
+
+            fetch('http://localhost:8080/RoleOpcion/editarRoleOpcion', {
+              method: 'PUT',
+              headers:{
+                'Content-Type' : 'application/json'
+              },
+              body: JSON.stringify(datos)
+            })
+            .then(response => {
+              if(!response.ok){
+                throw new Error('Error al editar opcion')
+              }
+              return response.json();
+            }).then(data =>{
+              console.log('Opciones de Role Actualizada')
+            })
+            .catch( error =>{
+              console.error('Error en la peticion')
+            })
 
             console.log('Guardando datos:', datos);
 
@@ -321,7 +347,7 @@ function getOptions(idRol) {
     });
 }
 
-
+//FUNCION CLIC EN VOLVER****************************************************************************
       function volverAInicio() {
         // Mostrar de nuevo la tabla, el encabezado y los botones
         tableBody.style.display = 'table-row-group';
@@ -339,6 +365,7 @@ function getOptions(idRol) {
         rolSeleccionadoDiv.style.display = 'none';
         formAgregarRolDiv.style.display = 'none';
         btnVolver.style.display = 'none';
+        btnImprimir.style.display = 'none';
 
         // Mostrar los botones de selección de nuevo
         const selectButtons = document.querySelectorAll('button[data-id]');
@@ -428,6 +455,48 @@ function getOptions(idRol) {
       });
     });
 
+
+  function imprimirOpcionesMarcadas() {
+    const filas = document.querySelectorAll('#options-table-body tr');
+    const opcionesMarcadas = [];
+
+    filas.forEach(fila => {
+      const nombre = fila.querySelector('td:nth-child(1)').textContent.trim();
+      const chkImprimir = fila.querySelector('td:nth-child(3) input[type="checkbox"]');
+      
+      if (chkImprimir && chkImprimir.checked) {
+        opcionesMarcadas.push(nombre);
+      }
+    });
+
+    // Generar HTML para imprimir
+    const ventanaImpresion = window.open('', '', 'width=800,height=600');
+    ventanaImpresion.document.write(`
+    <html>
+      <head>
+        <title>Opciones de Rol</title>
+        <style>
+          body { font-family: Arial, sans-serif; padding: 20px; }
+          h2 { color: #333; }
+          ul { font-size: 16px; }
+        </style>
+      </head>
+      <body>
+        <h2>Opciones del rol: ${nombreRolSeleccionado}</h2>
+        <ul>
+          ${opcionesMarcadas.map(nombre => `<li>${nombre}</li>`).join('')}
+        </ul>
+        <script>
+          window.onload = function() {
+            window.print();
+            window.onafterprint = function() { window.close(); }
+          }
+        <\/script>
+      </body>
+    </html>
+  `);
+  ventanaImpresion.document.close();
+}
     
 
   </script>
