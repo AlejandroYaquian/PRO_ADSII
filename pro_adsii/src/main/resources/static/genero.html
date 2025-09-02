@@ -1,72 +1,123 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html>
 <head>
     <meta charset="UTF-8">
-    <title>Gestión de Géneros</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>CRUD Género</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
 </head>
-<body class="bg-light">
-<div class="container py-5">
-    <h2 class="mb-4 text-center">Gestión de Géneros</h2>
+<body class="container mt-4">
 
-     <!-- Botón Nuevo Genero -->
-    <div class="mb-3 text-end">
-        <a th:href="@{/modulo/listar}" class="btn btn-success">Nuevo Genero</a>
+<h2 class="mb-4">Gestión de Géneros</h2>
+
+<!-- Formulario Crear/Editar -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 id="form-title">Nuevo Género</h5>
     </div>
-
-    <!-- Formulario Crear/Editar -->
-    <div class="card mb-4">
-        <div class="card-header">
-            <h5 th:text="${genero.idGenero == null ? 'Nuevo Género' : 'Editar Género'}"></h5>
-        </div>
-        <div class="card-body">
-            <form th:action="@{/genero/guardar}" th:object="${genero}" method="post">
-                <input type="hidden" th:field="*{idGenero}" />
-                <div class="mb-3">
-                    <label class="form-label">Nombre</label>
-                    <input type="text" th:field="*{nombre}" class="form-control" required />
-                </div>
-                <div class="d-flex justify-content-between">
-                    <button type="submit" class="btn btn-primary">Guardar</button>
-                    <a th:href="@{/genero/listar}" class="btn btn-secondary">Cancelar</a>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Tabla de Géneros -->
-    <div class="card">
-        <div class="card-header">
-            <h5>Lista de Géneros</h5>
-        </div>
-        <div class="card-body">
-            <table class="table table-bordered table-hover">
-                <thead class="table-light">
-                    <tr>
-                        <th>ID</th>
-                        <th>Nombre</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr th:each="g : ${generos}">
-                        <td th:text="${g.idGenero}"></td>
-                        <td th:text="${g.nombre}"></td>
-                        <td>
-                            <a th:href="@{/genero/editar/{id}(id=${g.idGenero})}" class="btn btn-sm btn-warning">Editar</a>
-                            <a th:href="@{/genero/eliminar/{id}(id=${g.idGenero})}" class="btn btn-sm btn-danger"
-                               onclick="return confirm('¿Está seguro de eliminar este género?');">Eliminar</a>
-                        </td>
-                    </tr>
-                    <tr th:if="${#lists.isEmpty(generos)}">
-                        <td colspan="3" class="text-center">No hay géneros registrados.</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
+    <div class="card-body">
+        <form id="genero-form">
+            <input type="hidden" id="idGenero">
+            <div class="mb-3">
+                <label for="nombre" class="form-label">Nombre</label>
+                <input type="text" id="nombre" class="form-control" required>
+            </div>
+            <div class="mb-3">
+                <label for="usuarioCreacion" class="form-label">Usuario Creación</label>
+                <input type="text" id="usuarioCreacion" class="form-control" required>
+            </div>
+            <button type="submit" class="btn btn-success">Guardar</button>
+            <button type="button" id="cancelar" class="btn btn-secondary">Cancelar</button>
+        </form>
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<!-- Tabla de Géneros -->
+<table class="table table-bordered table-striped">
+    <thead class="table-dark">
+        <tr>
+            <th>ID</th>
+            <th>Nombre</th>
+            <th>Fecha Creación</th>
+            <th>Usuario Creación</th>
+            <th>Fecha Modificación</th>
+            <th>Usuario Modificación</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody id="generos-table"></tbody>
+</table>
+
+<script>
+const apiBase = '/genero';
+
+async function listarGeneros() {
+    const res = await fetch(`${apiBase}/listar`);
+    const generos = await res.json();
+    const tbody = document.getElementById('generos-table');
+    tbody.innerHTML = '';
+    generos.forEach(g => {
+        tbody.innerHTML += `
+            <tr>
+                <td>${g.idGenero}</td>
+                <td>${g.nombre}</td>
+                <td>${g.fechaCreacion || ''}</td>
+                <td>${g.usuarioCreacion || ''}</td>
+                <td>${g.fechaModificacion || ''}</td>
+                <td>${g.usuarioModificacion || ''}</td>
+                <td>
+                    <button class="btn btn-warning btn-sm" onclick="editarGenero(${g.idGenero})">Editar</button>
+                    <button class="btn btn-danger btn-sm" onclick="eliminarGenero(${g.idGenero})">Eliminar</button>
+                </td>
+            </tr>
+        `;
+    });
+}
+
+document.getElementById('genero-form').addEventListener('submit', async e => {
+    e.preventDefault();
+    const idGenero = document.getElementById('idGenero').value;
+    const nombre = document.getElementById('nombre').value;
+    const usuarioCreacion = document.getElementById('usuarioCreacion').value;
+
+    await fetch(`${apiBase}/guardar`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            idGenero: idGenero || null,
+            nombre,
+            usuarioCreacion
+        })
+    });
+
+    document.getElementById('genero-form').reset();
+    document.getElementById('form-title').innerText = 'Nuevo Género';
+    listarGeneros();
+});
+
+async function editarGenero(id) {
+    const res = await fetch(`${apiBase}/${id}`);
+    const g = await res.json();
+    document.getElementById('idGenero').value = g.idGenero;
+    document.getElementById('nombre').value = g.nombre;
+    document.getElementById('usuarioCreacion').value = g.usuarioCreacion || '';
+    document.getElementById('form-title').innerText = 'Editar Género';
+}
+
+async function eliminarGenero(id) {
+    if(confirm('¿Seguro que deseas eliminar este género?')) {
+        await fetch(`${apiBase}/eliminar/${id}`, { method: 'DELETE' });
+        listarGeneros();
+    }
+}
+
+document.getElementById('cancelar').addEventListener('click', () => {
+    document.getElementById('genero-form').reset();
+    document.getElementById('idGenero').value = '';
+    document.getElementById('form-title').innerText = 'Nuevo Género';
+});
+
+listarGeneros();
+</script>
+
 </body>
 </html>
