@@ -1,52 +1,72 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Gestión de Roles</title>
   <!-- Bootstrap CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
-
-<!-- ESTRUCTURA DEL DOM INICIO***************************************************************************************************************** -->
+<style>
+    #btnCerrarSesion {
+        background-color: transparent;
+        border: 1px solid #fff;
+        color: #fff;
+    }
+    #btnCerrarSesion:hover {
+        background-color: rgba(255, 255, 255, 0.2);
+    }
+</style>
 <body>
-  <!-- Navbar -->
-  <nav class="navbar navbar-expand-lg navbar-dark bg-primary w-100 mb-4">
-    <div class="container-fluid">
-      <a class="navbar-brand" href="#">Gestión de Roles y Permisos</a>
-    </div>
-  </nav>
-
-
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="index.html">Inicio</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMenu">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarMenu">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item"><a class="nav-link" href="genero.html">Género</a></li>
+                    <li class="nav-item"><a class="nav-link" href="modulo.html">Módulo</a></li>
+                    <li class="nav-item"><a class="nav-link" href="role.html">Rol</a></li>
+                    <li class="nav-item"><a class="nav-link" href="bitacora.html">Bitácora</a></li>
+                    <li class="nav-item"><a class="nav-link" href="tipoacceso.html">Tipo Acceso</a></li>
+                </ul>
+                <span class="navbar-text me-3" id="navUsuario"></span>
+                <button class="btn ms-2" id="btnCerrarSesion">Cerrar Sesión</button>
+            </div>
+        </div>
+    </nav>
   <div class="container">
-    <h2 class="mb-4" id='labelRol'>Selecciona un rol</h2>
+    <h2 class="mb-4" id='labelRol'>Gestión de Roles y Permisos</h2>
     <!-- Aquí vamos a mostrar la tabla con los roles--------------------------------------------------------------->
     <form id="form-opciones" class="mt-4">
-  <!-- Título arriba de la tabla -->
-   <h5 class="mb-3" id="labelListRole">Listado de Roles</h5>
+      <!-- Título arriba de la tabla -->
+      <h5 class="mb-3" id="labelListRole">Listado de Roles</h5>
 
-    <div class="table-responsive shadow-sm rounded w-100">
-      <table  id='rolesTable' class="table table-bordered table-hover table-striped align-middle w-100">
-        <thead id="thead-roles" class="table-primary">
-          <tr>
-            <th scope="col">No.</th>
-            <th scope="col">Nombre del Rol</th>
-            <th scope="col">Seleccionar</th>
-          </tr>
-        </thead>
-        <tbody id="roles-table-body">
-          <!-- Los roles se insertarán dinámicamente aquí -->
-        </tbody>
-      </table>
-    </div>
-    
-    <!-- Botón de agregar -->
-    <div class="mt-3 d-flex justify-content-start gap-2" id="botones-container">
-      <button type="submit" class="btn btn-success" id="btn-agregar">
-        <i class="bi bi-plus-circle me-1"></i>Agregar Rol
-      </button>
-    </div>
-  </form>
+      <div class="table-responsive shadow-sm rounded w-100">
+        <table id='rolesTable' class="table table-bordered table-hover table-striped align-middle w-100">
+          <thead id="thead-roles" class="table-primary">
+            <tr>
+              <th scope="col">No.</th>
+              <th scope="col">Nombre del Rol</th>
+              <th scope="col">Seleccionar</th>
+            </tr>
+          </thead>
+          <tbody id="roles-table-body">
+            <!-- Los roles se insertarán dinámicamente aquí -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Botón de agregar -->
+      <div class="mt-3 d-flex justify-content-start gap-2" id="botones-container">
+        <button type="submit" class="btn btn-success" id="btn-agregar">
+          <i class="bi bi-plus-circle me-1"></i>Agregar Rol
+        </button>
+      </div>
+    </form>
 
 
     <!-- Aquí vamos a mostrar e inicializar el Label para mostrar el rol seleccionado ------------------------------------->
@@ -62,45 +82,59 @@
           <label for="nombreNuevoRol" class="form-label">Nombre del nuevo rol</label>
           <input type="text" class="form-control" id="nombreNuevoRol" required>
         </div>
-      <div style="display: flex; gap: 10px;">
-        <button class="btn btn-secondary" id="btn-atras-add" style="display: none;">Volver</button>
-        <button id="btn-guardar" class="btn btn-primary" style="display: block;">Guardar</button>
-      </div>
-       
+        <div style="display: flex; gap: 10px;">
+          <button class="btn btn-secondary" id="btn-atras-add" style="display: none;">Volver</button>
+          <button id="btn-guardar" class="btn btn-primary" style="display: block;">Guardar</button>
+        </div>
+
       </form>
     </div>
 
-  <div class="table-responsive shadow-sm rounded w-100">
-  <table id='opcionesTable' class="table table-bordered table-hover table-striped align-middle w-100">
-    <thead id="thead-options" class="table-primary" style="display: none;">
-      <tr>
-        <th scope="col">Nombre de la opción</th>
-        <th scope="col" class="text-center" style="width: 80px;">Alta</th>
-        <th scope="col" class="text-center" style="width: 100px;">Imprimir</th>
-        <th scope="col" class="text-center" style="width: 100px;">Exportar</th>
-        <th scope="col" class="text-center" style="width: 120px;">Modificar</th>
-      </tr>
-    </thead>
-    <tbody id="options-table-body" style="display: none;">
-      <!-- Las filas se insertarán dinámicamente -->
-    </tbody>
-  </table>
-</div>
+    <div class="table-responsive shadow-sm rounded w-100">
+      <table id='opcionesTable' class="table table-bordered table-hover table-striped align-middle w-100">
+        <thead id="thead-options" class="table-primary" style="display: none;">
+          <tr>
+            <th scope="col">Nombre de la opción</th>
+            <th scope="col" class="text-center" style="width: 80px;">Alta</th>
+            <th scope="col" class="text-center" style="width: 100px;">Imprimir</th>
+            <th scope="col" class="text-center" style="width: 100px;">Exportar</th>
+            <th scope="col" class="text-center" style="width: 120px;">Modificar</th>
+          </tr>
+        </thead>
+        <tbody id="options-table-body" style="display: none;">
+          <!-- Las filas se insertarán dinámicamente -->
+        </tbody>
+      </table>
+    </div>
 
 
     <!--Aquí vamos a mostrar e inicializar Botón para volver atrás ----------------------------------------------------------->
     <div style="display: flex; gap: 10px;">
       <button class="btn btn-secondary" id="btn-atras" style="display: none;">Volver</button>
-      <button class="btn btn-warning" id="btn-imprimir" style="display: none;" onclick="imprimirOpcionesMarcadas()">Imprimir</button>
-       <!--<button type="submit" class="btn btn-primary" style="display: none;" id="btn-modificar">Modificar Rol</button>-->
+      <button class="btn btn-warning" id="btn-imprimir" style="display: none;"
+        onclick="imprimirOpcionesMarcadas()">Imprimir</button>
+      <!--<button type="submit" class="btn btn-primary" style="display: none;" id="btn-modificar">Modificar Rol</button>-->
     </div>
 
   </div>
-<!--ESTRUCTURA DEL DOM FIN**********************************************************************************************************************-->
+  <!--ESTRUCTURA DEL DOM FIN**********************************************************************************************************************-->
 
-<script>
-       let nombreRolSeleccionado = ''; 
-      document.addEventListener('DOMContentLoaded', function () {
+  <script>
+    const usuario = sessionStorage.getItem('usuarioActual');
+
+    if (!usuario) {
+      window.location.href = 'login.html';
+    } else {
+      document.getElementById('navUsuario').textContent = usuario;
+    }
+
+    document.getElementById('btnCerrarSesion').addEventListener('click', () => {
+      sessionStorage.removeItem('usuarioActual');
+      window.location.href = 'login.html';
+    });
+
+    let nombreRolSeleccionado = '';
+    document.addEventListener('DOMContentLoaded', function () {
       const roleTable = document.getElementById("rolesTable");
       const tableBody = document.getElementById('roles-table-body');
       const tableHeader = document.getElementById('thead-roles');
@@ -116,13 +150,13 @@
       const headTableOptions = document.getElementById('thead-options');
       const labelR = document.getElementById("labelRol");
       const labelLR = document.getElementById("labelListRole");
-      const opcionesTable= document.getElementById("opcionesTable");
-     
+      const opcionesTable = document.getElementById("opcionesTable");
 
-      
-     
-      
-//CARGA DE ROLES**************************************************************************************************************************
+
+
+
+
+      //CARGA DE ROLES**************************************************************************************************************************
       fetch('http://localhost:8080/role/getRoles')
         .then(response => response.json())
         .then(roles => {
@@ -152,9 +186,9 @@
 
 
 
-          
 
-//ROL SELECCIONADO PARA MODIFICAR**************************************************************
+
+          //ROL SELECCIONADO PARA MODIFICAR**************************************************************
           const selectButtons = document.querySelectorAll('button[data-id]');
           selectButtons.forEach(button => {
             button.addEventListener('click', function () {
@@ -164,7 +198,7 @@
               nombreRolSeleccionado = rolNombre;
               tableOptions.innerHTML = ''
               getOptions(rolId);
-             
+
 
               document.querySelectorAll('button[data-id]').forEach(btn => btn.classList.remove('btn-success'));
               this.classList.add('btn-success');
@@ -181,14 +215,14 @@
               //btnModificar.style.display = 'block';
               btnAgregar.style.display = 'none';
               btnVolver.style.display = 'block';
-              btnImprimir.style.display = 'block'; 
+              btnImprimir.style.display = 'block';
               labelR.style.display = 'none';
               labelLR.style.display = 'none';
               roleTable.style.display = 'none';
-              
-              
+
+
               btnVolver.addEventListener('click', volverAInicio);// Mostrar el botón "Volver"
-              
+
             });
           });
         })
@@ -197,157 +231,157 @@
         });
 
 
-//FUNCION PARA MOSTRAR LAS OPCIONES****************************************************************************
+      //FUNCION PARA MOSTRAR LAS OPCIONES****************************************************************************
 
-function getOptions(idRol) {
-  fetch(`http://localhost:8080/RoleOpcion/opcionesRol/${idRol}`)
-    .then(response => response.json())
-    .then(opciones => {
-      opciones.forEach(opcion => {
-        const tr = document.createElement('tr');
+      function getOptions(idRol) {
+        fetch(`http://localhost:8080/RoleOpcion/opcionesRol/${idRol}`)
+          .then(response => response.json())
+          .then(opciones => {
+            opciones.forEach(opcion => {
+              const tr = document.createElement('tr');
 
-        // Nombre
-        const tdName = document.createElement('td');
-        tdName.textContent = opcion.nombre;
-        tdName.style.width = '175px';
+              // Nombre
+              const tdName = document.createElement('td');
+              tdName.textContent = opcion.nombre;
+              tdName.style.width = '175px';
 
-        // Alta
-        const tdAlta = document.createElement('td');
-        const chkAlta = document.createElement('input');
-        chkAlta.type = 'checkbox';
-        chkAlta.checked = opcion.alta;
-        chkAlta.disabled = true;
-        tdAlta.classList.add('text-center');
-        tdAlta.style.width = '80px';
-        tdAlta.appendChild(chkAlta);
+              // Alta
+              const tdAlta = document.createElement('td');
+              const chkAlta = document.createElement('input');
+              chkAlta.type = 'checkbox';
+              chkAlta.checked = opcion.alta;
+              chkAlta.disabled = true;
+              tdAlta.classList.add('text-center');
+              tdAlta.style.width = '80px';
+              tdAlta.appendChild(chkAlta);
 
-        // Imprimir
-        const tdImprimir = document.createElement('td');
-        const chkImprimir = document.createElement('input');
-        chkImprimir.type = 'checkbox';
-        chkImprimir.checked = opcion.imprimir;
-        chkImprimir.disabled = true;
-        tdImprimir.classList.add('text-center');
-        tdImprimir.style.width = '100px';
-        tdImprimir.appendChild(chkImprimir);
+              // Imprimir
+              const tdImprimir = document.createElement('td');
+              const chkImprimir = document.createElement('input');
+              chkImprimir.type = 'checkbox';
+              chkImprimir.checked = opcion.imprimir;
+              chkImprimir.disabled = true;
+              tdImprimir.classList.add('text-center');
+              tdImprimir.style.width = '100px';
+              tdImprimir.appendChild(chkImprimir);
 
-        // Exportar
-        const tdExportar = document.createElement('td');
-        const chkExportar = document.createElement('input');
-        chkExportar.type = 'checkbox';
-        chkExportar.checked = opcion.exportar;
-        chkExportar.disabled = true;
-        tdExportar.classList.add('text-center');
-        tdExportar.style.width = '98px';
-        tdExportar.appendChild(chkExportar);
+              // Exportar
+              const tdExportar = document.createElement('td');
+              const chkExportar = document.createElement('input');
+              chkExportar.type = 'checkbox';
+              chkExportar.checked = opcion.exportar;
+              chkExportar.disabled = true;
+              tdExportar.classList.add('text-center');
+              tdExportar.style.width = '98px';
+              tdExportar.appendChild(chkExportar);
 
-        // Botón Seleccionar
-        const tdSelect = document.createElement('td');
-        const selectBtn = document.createElement('button');
-        selectBtn.className = 'btn btn-info';
-        selectBtn.textContent = 'Seleccionar';
-        selectBtn.setAttribute('data-id', opcion.idOpcion);
-        selectBtn.setAttribute('data-nombre', opcion.nombre);
-        selectBtn.setAttribute('data-role', idRol);
-        tdSelect.classList.add('text-center');
-        tdSelect.appendChild(selectBtn);
+              // Botón Seleccionar
+              const tdSelect = document.createElement('td');
+              const selectBtn = document.createElement('button');
+              selectBtn.className = 'btn btn-info';
+              selectBtn.textContent = 'Seleccionar';
+              selectBtn.setAttribute('data-id', opcion.idOpcion);
+              selectBtn.setAttribute('data-nombre', opcion.nombre);
+              selectBtn.setAttribute('data-role', idRol);
+              tdSelect.classList.add('text-center');
+              tdSelect.appendChild(selectBtn);
 
-        // Agregar al row
-        tr.appendChild(tdName);
-        tr.appendChild(tdAlta);
-        tr.appendChild(tdImprimir);
-        tr.appendChild(tdExportar);
-        tr.appendChild(tdSelect);
+              // Agregar al row
+              tr.appendChild(tdName);
+              tr.appendChild(tdAlta);
+              tr.appendChild(tdImprimir);
+              tr.appendChild(tdExportar);
+              tr.appendChild(tdSelect);
 
-        tableOptions.appendChild(tr);
+              tableOptions.appendChild(tr);
 
-        // Evento para activar checkboxes y cambiar el botón a "Guardar"
-        selectBtn.addEventListener('click', function seleccionarHandler() {
-          // Activar checkboxes
-          chkAlta.disabled = false;
-          chkImprimir.disabled = false;
-          chkExportar.disabled = false;
+              // Evento para activar checkboxes y cambiar el botón a "Guardar"
+              selectBtn.addEventListener('click', function seleccionarHandler() {
+                // Activar checkboxes
+                chkAlta.disabled = false;
+                chkImprimir.disabled = false;
+                chkExportar.disabled = false;
 
-          // Deshabilitar todos los demás botones "Seleccionar"
-          const allSelectButtons = document.querySelectorAll('button[data-id]');
-          allSelectButtons.forEach(btn => {
-            btn.disabled = true;
-            btn.classList.remove('btn-info');
-            btn.classList.add('btn-secondary');
-          });
+                // Deshabilitar todos los demás botones "Seleccionar"
+                const allSelectButtons = document.querySelectorAll('button[data-id]');
+                allSelectButtons.forEach(btn => {
+                  btn.disabled = true;
+                  btn.classList.remove('btn-info');
+                  btn.classList.add('btn-secondary');
+                });
 
-          // Habilitar solo este botón y cambiar su texto
-          selectBtn.disabled = false;
-          selectBtn.textContent = 'Guardar';
-          selectBtn.classList.remove('btn-secondary');
-          selectBtn.classList.add('btn-success');
+                // Habilitar solo este botón y cambiar su texto
+                selectBtn.disabled = false;
+                selectBtn.textContent = 'Guardar';
+                selectBtn.classList.remove('btn-secondary');
+                selectBtn.classList.add('btn-success');
 
-          // Remover este handler para evitar múltiples bindings
-          selectBtn.removeEventListener('click', seleccionarHandler);
+                // Remover este handler para evitar múltiples bindings
+                selectBtn.removeEventListener('click', seleccionarHandler);
 
-          // Agregar nuevo handler para guardar
-          selectBtn.addEventListener('click', function guardarHandler() {
-            // recolectar los datos
-            const datos = {
-              idOpcion: selectBtn.getAttribute('data-id'),
-              idRole: selectBtn.getAttribute('data-role'),
-              nombre: selectBtn.getAttribute('data-nombre'),
-              alta: chkAlta.checked,
-              imprimir: chkImprimir.checked,
-              exportar: chkExportar.checked
-            };
+                // Agregar nuevo handler para guardar
+                selectBtn.addEventListener('click', function guardarHandler() {
+                  // recolectar los datos
+                  const datos = {
+                    idOpcion: selectBtn.getAttribute('data-id'),
+                    idRole: selectBtn.getAttribute('data-role'),
+                    nombre: selectBtn.getAttribute('data-nombre'),
+                    alta: chkAlta.checked,
+                    imprimir: chkImprimir.checked,
+                    exportar: chkExportar.checked
+                  };
 
-            fetch('http://localhost:8080/RoleOpcion/editarRoleOpcion', {
-              method: 'PUT',
-              headers:{
-                'Content-Type' : 'application/json'
-              },
-              body: JSON.stringify(datos)
-            })
-            .then(response => {
-              if(!response.ok){
-                throw new Error('Error al editar opcion')
-              }
-              return response.json();
-            }).then(data =>{
-              console.log('Opciones de Role Actualizada')
-            })
-            .catch( error =>{
-              console.error('Error en la peticion')
-            })
+                  fetch('http://localhost:8080/RoleOpcion/editarRoleOpcion', {
+                    method: 'PUT',
+                    headers: {
+                      'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(datos)
+                  })
+                    .then(response => {
+                      if (!response.ok) {
+                        throw new Error('Error al editar opcion')
+                      }
+                      return response.json();
+                    }).then(data => {
+                      console.log('Opciones de Role Actualizada')
+                    })
+                    .catch(error => {
+                      console.error('Error en la peticion')
+                    })
 
-            console.log('Guardando datos:', datos);
+                  console.log('Guardando datos:', datos);
 
-            // Desactivar checkboxes nuevamente
-            chkAlta.disabled = true;
-            chkImprimir.disabled = true;
-            chkExportar.disabled = true;
+                  // Desactivar checkboxes nuevamente
+                  chkAlta.disabled = true;
+                  chkImprimir.disabled = true;
+                  chkExportar.disabled = true;
 
-            // Restaurar texto y estilo del botón
-            selectBtn.textContent = 'Seleccionar';
-            selectBtn.classList.remove('btn-success');
-            selectBtn.classList.add('btn-info');
+                  // Restaurar texto y estilo del botón
+                  selectBtn.textContent = 'Seleccionar';
+                  selectBtn.classList.remove('btn-success');
+                  selectBtn.classList.add('btn-info');
 
-            // Habilitar todos los botones "Seleccionar"
-            allSelectButtons.forEach(btn => {
-              btn.disabled = false;
-              btn.classList.remove('btn-secondary');
-              btn.classList.add('btn-info');
+                  // Habilitar todos los botones "Seleccionar"
+                  allSelectButtons.forEach(btn => {
+                    btn.disabled = false;
+                    btn.classList.remove('btn-secondary');
+                    btn.classList.add('btn-info');
+                  });
+
+                  // Remover el handler de guardar y volver a agregar el de seleccionar
+                  selectBtn.removeEventListener('click', guardarHandler);
+                  selectBtn.addEventListener('click', seleccionarHandler);
+                });
+              });
             });
-
-            // Remover el handler de guardar y volver a agregar el de seleccionar
-            selectBtn.removeEventListener('click', guardarHandler);
-            selectBtn.addEventListener('click', seleccionarHandler);
+          })
+          .catch(error => {
+            console.error('Error al cargar opciones:', error);
           });
-        });
-      });
-    })
-    .catch(error => {
-      console.error('Error al cargar opciones:', error);
-    });
-}
+      }
 
-//FUNCION CLIC EN VOLVER****************************************************************************
+      //FUNCION CLIC EN VOLVER****************************************************************************
       function volverAInicio() {
         // Mostrar de nuevo la tabla, el encabezado y los botones
         tableBody.style.display = 'table-row-group';
@@ -372,12 +406,12 @@ function getOptions(idRol) {
         selectButtons.forEach(button => {
           button.style.display = 'inline-block'; // Mostrar los botones de "Seleccionar"
         });
-  }
+      }
 
 
-     
 
-//MANEJAR ERRORER DE  ENVÍO DEL FORMULARIO PRINCIPAL (PARA MODIFICAR)***************************************************************************
+
+      //MANEJAR ERRORER DE  ENVÍO DEL FORMULARIO PRINCIPAL (PARA MODIFICAR)***************************************************************************
       formOpciones.addEventListener('submit', function (e) {
         e.preventDefault();
 
@@ -394,7 +428,7 @@ function getOptions(idRol) {
         rolSeleccionadoDiv.style.display = 'block';
       });
 
-//AGREGAR ROL**********************************************************************************************
+      //AGREGAR ROL**********************************************************************************************
       btnAgregar.addEventListener('click', function (e) {
         e.preventDefault();
 
@@ -456,22 +490,22 @@ function getOptions(idRol) {
     });
 
 
-  function imprimirOpcionesMarcadas() {
-    const filas = document.querySelectorAll('#options-table-body tr');
-    const opcionesMarcadas = [];
+    function imprimirOpcionesMarcadas() {
+      const filas = document.querySelectorAll('#options-table-body tr');
+      const opcionesMarcadas = [];
 
-    filas.forEach(fila => {
-      const nombre = fila.querySelector('td:nth-child(1)').textContent.trim();
-      const chkImprimir = fila.querySelector('td:nth-child(3) input[type="checkbox"]');
-      
-      if (chkImprimir && chkImprimir.checked) {
-        opcionesMarcadas.push(nombre);
-      }
-    });
+      filas.forEach(fila => {
+        const nombre = fila.querySelector('td:nth-child(1)').textContent.trim();
+        const chkImprimir = fila.querySelector('td:nth-child(3) input[type="checkbox"]');
 
-    // Generar HTML para imprimir
-    const ventanaImpresion = window.open('', '', 'width=800,height=600');
-    ventanaImpresion.document.write(`
+        if (chkImprimir && chkImprimir.checked) {
+          opcionesMarcadas.push(nombre);
+        }
+      });
+
+      // Generar HTML para imprimir
+      const ventanaImpresion = window.open('', '', 'width=800,height=600');
+      ventanaImpresion.document.write(`
     <html>
       <head>
         <title>Opciones de Rol</title>
@@ -495,10 +529,11 @@ function getOptions(idRol) {
       </body>
     </html>
   `);
-  ventanaImpresion.document.close();
-}
-    
+      ventanaImpresion.document.close();
+    }
+
 
   </script>
 </body>
+
 </html>

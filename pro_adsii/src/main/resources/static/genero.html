@@ -1,62 +1,107 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <meta charset="UTF-8">
     <title>CRUD Género</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
 </head>
-<body class="container mt-4">
-
-<h2 class="mb-4">Gestión de Géneros</h2>
-
-<!-- Formulario Crear/Editar -->
-<div class="card mb-4">
-    <div class="card-header">
-        <h5 id="form-title">Nuevo Género</h5>
-    </div>
-    <div class="card-body">
-        <form id="genero-form">
-            <input type="hidden" id="idGenero">
-            <div class="mb-3">
-                <label for="nombre" class="form-label">Nombre</label>
-                <input type="text" id="nombre" class="form-control" required>
+<style>
+    #btnCerrarSesion {
+        background-color: transparent;
+        border: 1px solid #fff;
+        color: #fff;
+    }
+    #btnCerrarSesion:hover {
+        background-color: rgba(255, 255, 255, 0.2);
+    }
+</style>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="index.html">Inicio</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMenu">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarMenu">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item"><a class="nav-link" href="genero.html">Género</a></li>
+                    <li class="nav-item"><a class="nav-link" href="modulo.html">Módulo</a></li>
+                    <li class="nav-item"><a class="nav-link" href="role.html">Rol</a></li>
+                    <li class="nav-item"><a class="nav-link" href="bitacora.html">Bitácora</a></li>
+                    <li class="nav-item"><a class="nav-link" href="tipoacceso.html">Tipo Acceso</a></li>
+                </ul>
+                <span class="navbar-text me-3" id="navUsuario"></span>
+                <button class="btn ms-2" id="btnCerrarSesion">Cerrar Sesión</button>
             </div>
-            <div class="mb-3">
-                <label for="usuarioCreacion" class="form-label">Usuario Creación</label>
-                <input type="text" id="usuarioCreacion" class="form-control" required>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <h2 class="mb-4">Gestión de Géneros</h2>
+
+        <!-- Formulario Crear/Editar -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 id="form-title">Nuevo Género</h5>
             </div>
-            <button type="submit" class="btn btn-success">Guardar</button>
-            <button type="button" id="cancelar" class="btn btn-secondary">Cancelar</button>
-        </form>
+            <div class="card-body">
+                <form id="genero-form">
+                    <input type="hidden" id="idGenero">
+                    <div class="mb-3">
+                        <label for="nombre" class="form-label">Nombre</label>
+                        <input type="text" id="nombre" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="usuarioCreacion" class="form-label">Usuario Creación</label>
+                        <input type="text" id="usuarioCreacion" class="form-control" required>
+                    </div>
+                    <button type="submit" class="btn btn-success">Guardar</button>
+                    <button type="button" id="cancelar" class="btn btn-secondary">Cancelar</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Tabla de Géneros -->
+        <table class="table table-bordered table-striped">
+            <thead class="table-dark">
+                <tr>
+                    <th>ID</th>
+                    <th>Nombre</th>
+                    <th>Fecha Creación</th>
+                    <th>Usuario Creación</th>
+                    <th>Fecha Modificación</th>
+                    <th>Usuario Modificación</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody id="generos-table"></tbody>
+        </table>
     </div>
-</div>
 
-<!-- Tabla de Géneros -->
-<table class="table table-bordered table-striped">
-    <thead class="table-dark">
-        <tr>
-            <th>ID</th>
-            <th>Nombre</th>
-            <th>Fecha Creación</th>
-            <th>Usuario Creación</th>
-            <th>Fecha Modificación</th>
-            <th>Usuario Modificación</th>
-            <th>Acciones</th>
-        </tr>
-    </thead>
-    <tbody id="generos-table"></tbody>
-</table>
+    <script>
 
-<script>
-const apiBase = '/genero';
+        const usuario = sessionStorage.getItem('usuarioActual');
 
-async function listarGeneros() {
-    const res = await fetch(`${apiBase}/listar`);
-    const generos = await res.json();
-    const tbody = document.getElementById('generos-table');
-    tbody.innerHTML = '';
-    generos.forEach(g => {
-        tbody.innerHTML += `
+        if (!usuario) {
+            window.location.href = 'login.html';
+        } else {
+            document.getElementById('navUsuario').textContent = usuario;
+        }
+
+        document.getElementById('btnCerrarSesion').addEventListener('click', () => {
+            sessionStorage.removeItem('usuarioActual');
+            window.location.href = 'login.html';
+        });
+        const apiBase = '/genero';
+
+        async function listarGeneros() {
+            const res = await fetch(`${apiBase}/listar`);
+            const generos = await res.json();
+            const tbody = document.getElementById('generos-table');
+            tbody.innerHTML = '';
+            generos.forEach(g => {
+                tbody.innerHTML += `
             <tr>
                 <td>${g.idGenero}</td>
                 <td>${g.nombre}</td>
@@ -70,54 +115,55 @@ async function listarGeneros() {
                 </td>
             </tr>
         `;
-    });
-}
+            });
+        }
 
-document.getElementById('genero-form').addEventListener('submit', async e => {
-    e.preventDefault();
-    const idGenero = document.getElementById('idGenero').value;
-    const nombre = document.getElementById('nombre').value;
-    const usuarioCreacion = document.getElementById('usuarioCreacion').value;
+        document.getElementById('genero-form').addEventListener('submit', async e => {
+            e.preventDefault();
+            const idGenero = document.getElementById('idGenero').value;
+            const nombre = document.getElementById('nombre').value;
+            const usuarioCreacion = document.getElementById('usuarioCreacion').value;
 
-    await fetch(`${apiBase}/guardar`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            idGenero: idGenero || null,
-            nombre,
-            usuarioCreacion
-        })
-    });
+            await fetch(`${apiBase}/guardar`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    idGenero: idGenero || null,
+                    nombre,
+                    usuarioCreacion
+                })
+            });
 
-    document.getElementById('genero-form').reset();
-    document.getElementById('form-title').innerText = 'Nuevo Género';
-    listarGeneros();
-});
+            document.getElementById('genero-form').reset();
+            document.getElementById('form-title').innerText = 'Nuevo Género';
+            listarGeneros();
+        });
 
-async function editarGenero(id) {
-    const res = await fetch(`${apiBase}/${id}`);
-    const g = await res.json();
-    document.getElementById('idGenero').value = g.idGenero;
-    document.getElementById('nombre').value = g.nombre;
-    document.getElementById('usuarioCreacion').value = g.usuarioCreacion || '';
-    document.getElementById('form-title').innerText = 'Editar Género';
-}
+        async function editarGenero(id) {
+            const res = await fetch(`${apiBase}/${id}`);
+            const g = await res.json();
+            document.getElementById('idGenero').value = g.idGenero;
+            document.getElementById('nombre').value = g.nombre;
+            document.getElementById('usuarioCreacion').value = g.usuarioCreacion || '';
+            document.getElementById('form-title').innerText = 'Editar Género';
+        }
 
-async function eliminarGenero(id) {
-    if(confirm('¿Seguro que deseas eliminar este género?')) {
-        await fetch(`${apiBase}/eliminar/${id}`, { method: 'DELETE' });
+        async function eliminarGenero(id) {
+            if (confirm('¿Seguro que deseas eliminar este género?')) {
+                await fetch(`${apiBase}/eliminar/${id}`, { method: 'DELETE' });
+                listarGeneros();
+            }
+        }
+
+        document.getElementById('cancelar').addEventListener('click', () => {
+            document.getElementById('genero-form').reset();
+            document.getElementById('idGenero').value = '';
+            document.getElementById('form-title').innerText = 'Nuevo Género';
+        });
+
         listarGeneros();
-    }
-}
-
-document.getElementById('cancelar').addEventListener('click', () => {
-    document.getElementById('genero-form').reset();
-    document.getElementById('idGenero').value = '';
-    document.getElementById('form-title').innerText = 'Nuevo Género';
-});
-
-listarGeneros();
-</script>
+    </script>
 
 </body>
+
 </html>
