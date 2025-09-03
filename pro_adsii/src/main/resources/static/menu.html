@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Menu</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous"> 
+</head>
+<body class="bg-light">
+<div class="container py-5">
+    <h2 class="mb-4 text-center">Gestión de Menu</h2>
+
+    <!-- Formulario para agregar / editar -->
+    <div class="card mb-4">
+        <div class="card-header">Agregar / Editar Menu</div>
+        <div class="card-body">
+            <input type="hidden" id="menuId">
+            <div class="row g-2">
+                <div class="col-md-4">
+                    <input type="text" id="nombreMenu" class="form-control" placeholder="Nombre" required>
+                </div>
+                <div class="col-md-2">
+                    <input type="number" id="ordenMenu" class="form-control" placeholder="Orden" required>
+                </div>
+                <div class="col-md-3">
+                    <input type="text" id="usuarioCreacion" class="form-control" placeholder="Usuario Creación" required>
+                </div>
+                <div class="col-md-3 d-flex gap-2">
+                    <button class="btn btn-primary" onclick="guardarMenu()" id="btnGuardar">Guardar</button>
+                    <button class="btn btn-secondary" onclick="cancelarEdicion()" id="btnCancelar">Cancelar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+<!-- Tabla de módulos -->
+    <div class="card">
+        <div class="card-header">Listado de Menu</div>
+        <div class="card-body">
+            <table class="table table-bordered table-hover">
+                <thead class="table-dark">
+                <tr>
+                    <th>Id Menu</th>
+                    <th>Id Modulo</th>
+                    <th>Nombre</th>
+                    <th>Orden</th>
+                    <th>Fecha Creación</th>
+                    <th>Usuario Creación</th>
+                    <th>Fecha Modificación</th>
+                    <th>Usuario Modificación</th>
+                    <th>Acciones</th>
+                </tr>
+                </thead>
+                <tbody id="menu-body">
+                    <tr><td colspan="9" class="text-center">Cargando...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    async function cargarMenu() {
+        const res = await fetch("/menu/listar");
+        const data = await res.json();
+
+        const tbody = document.getElementById("menu-body");
+        tbody.innerHTML = "";
+
+        if (data.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="8" class="text-center">No hay módulos registrados.</td></tr>`;
+            return;
+        }
+
+        data.forEach(m => {
+            const row = `
+                <tr>
+                    <td>${m.idMenu}</td>
+                    <td>${m.idModulo}</td>
+                    <td>${m.nombre ?? ""}</td>
+                    <td>${m.ordenMenu ?? ""}</td>
+                    <td>${m.fechaCreacion ? new Date(m.fechaCreacion).toLocaleString() : ""}</td>
+                    <td>${m.usuarioCreacion ?? ""}</td>
+                    <td>${m.fechaModificacion ? new Date(m.fechaModificacion).toLocaleString() : ""}</td>
+                    <td>${m.usuarioModificacion ?? ""}</td>
+                    <td>
+                        <button class="btn btn-warning btn-sm" onclick="editarMenu(${m.idMenu})">Editar</button>
+                        <button class="btn btn-danger btn-sm" onclick="eliminarMenu(${m.idMenu})">Eliminar</button>
+                    </td>
+                </tr>
+            `;
+            tbody.innerHTML += row;
+        });
+    }
+
+    async function guardarMenu() {
+        const id = document.getElementById("menuId").value;
+        const nombre = document.getElementById("nombreMenu").value;
+        const ordenMenu = parseInt(document.getElementById("ordenMenu").value);
+        const usuarioCreacion = document.getElementById("usuarioCreacion").value;
+
+        if (!nombre || !ordenMenu || !usuarioCreacion) {
+            return alert("Complete todos los campos requeridos");
+        }
+
+        const menu = {
+            idMenu: id || undefined,
+            nombre,
+            ordenMenu,
+            usuarioCreacion
+        };
+
+        const metodo = id ? "POST" : "POST";
+        await fetch("/menu/guardar", {
+            method: metodo,
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(menu)
+        });
+
+        cancelarEdicion();
+        cargarMenu();
+    }
+
+    async function editarMenu(id) {
+        const res = await fetch(`/menu/${id}`);
+        const m = await res.json();
+
+        document.getElementById("menuID").value = m.idMenu;
+        document.getElementById("nombreModulo").value = m.nombre;
+        document.getElementById("ordenMenu").value = m.ordenMenu;
+        document.getElementById("usuarioCreacion").value = m.usuarioCreacion;
+
+        document.getElementById("btnCancelar").style.display = "inline-block";
+        document.getElementById("btnGuardar").textContent = "Actualizar";
+    }
+
+    function cancelarEdicion() {
+        document.getElementById("moduloId").value = "";
+        document.getElementById("nombreModulo").value = "";
+        document.getElementById("ordenMenu").value = "";
+        document.getElementById("usuarioCreacion").value = "";
+        document.getElementById("btnCancelar").style.display = "none";
+        document.getElementById("btnGuardar").textContent = "Guardar";
+    }
+
+    async function eliminarMenu(id) {
+        if (!confirm("¿Seguro de eliminar este menu?")) return;
+
+        await fetch(`/menu/eliminar/${id}`, { method: "DELETE" });
+        cargarMenu();
+    }
+
+    cargarMenu();
+</script>
+</body>
+</html>
