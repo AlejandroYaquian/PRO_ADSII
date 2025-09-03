@@ -3,21 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestión de Menu</title>
+    <title>Gestión de Opcion</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous"> 
 </head>
 <body class="bg-light">
 <div class="container py-5">
-    <h2 class="mb-4 text-center">Gestión de Menu</h2>
+    <h2 class="mb-4 text-center">Gestión de Opcion</h2>
 
     <!-- Formulario para agregar / editar -->
     <div class="card mb-4">
-        <div class="card-header">Agregar / Editar Menu</div>
+        <div class="card-header">Agregar / Editar Opcion</div>
         <div class="card-body">
-            <input type="hidden" id="menuId">
+            <input type="hidden" id="opcionId">
             <div class="row g-2">
                 <div class="col-md-4">
-                    <input type="text" id="nombreMenu" class="form-control" placeholder="Nombre" required>
+                    <input type="text" id="nombreOpcion" class="form-control" placeholder="Nombre" required>
                 </div>
                 <div class="col-md-2">
                     <input type="number" id="ordenMenu" class="form-control" placeholder="Orden" required>
@@ -36,15 +36,16 @@
 
 <!-- Tabla de módulos -->
     <div class="card">
-        <div class="card-header">Listado de Menu</div>
+        <div class="card-header">Listado de Opciones</div>
         <div class="card-body">
             <table class="table table-bordered table-hover">
                 <thead class="table-dark">
                 <tr>
+                    <th>Id Opcion</th>
                     <th>Id Menu</th>
-                    <th>Id Modulo</th>
                     <th>Nombre</th>
                     <th>Orden</th>
+                    <th>Pagina</th>
                     <th>Fecha Creación</th>
                     <th>Usuario Creación</th>
                     <th>Fecha Modificación</th>
@@ -52,8 +53,8 @@
                     <th>Acciones</th>
                 </tr>
                 </thead>
-                <tbody id="menu-body">
-                    <tr><td colspan="9" class="text-center">Cargando...</td></tr>
+                <tbody id="opcion-body">
+                    <tr><td colspan="10" class="text-center">Cargando...</td></tr>
                 </tbody>
             </table>
         </div>
@@ -61,32 +62,33 @@
 </div>
 
 <script>
-    async function cargarMenu() {
-        const res = await fetch("/menu/listar");
+    async function cargarOpcion() {
+        const res = await fetch("/opcion/listar");
         const data = await res.json();
 
-        const tbody = document.getElementById("menu-body");
+        const tbody = document.getElementById("opcion-body");
         tbody.innerHTML = "";
 
         if (data.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="8" class="text-center">No hay módulos registrados.</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="8" class="text-center">No hay opciones registradas.</td></tr>`;
             return;
         }
 
         data.forEach(m => {
             const row = `
                 <tr>
+                    <td>${m.idOpcion}</td>
                     <td>${m.idMenu}</td>
-                    <td>${m.idModulo}</td>
                     <td>${m.nombre ?? ""}</td>
                     <td>${m.ordenMenu ?? ""}</td>
+                    <td>${m.pagina ?? ""}</td>
                     <td>${m.fechaCreacion ? new Date(m.fechaCreacion).toLocaleString() : ""}</td>
                     <td>${m.usuarioCreacion ?? ""}</td>
                     <td>${m.fechaModificacion ? new Date(m.fechaModificacion).toLocaleString() : ""}</td>
                     <td>${m.usuarioModificacion ?? ""}</td>
                     <td>
-                        <button class="btn btn-warning btn-sm" onclick="editarMenu(${m.idMenu})">Editar</button>
-                        <button class="btn btn-danger btn-sm" onclick="eliminarMenu(${m.idMenu})">Eliminar</button>
+                        <button class="btn btn-warning btn-sm" onclick="editarMenu(${m.idOpcion})">Editar</button>
+                        <button class="btn btn-danger btn-sm" onclick="eliminarMenu(${m.idOpcion})">Eliminar</button>
                     </td>
                 </tr>
             `;
@@ -94,40 +96,40 @@
         });
     }
 
-    async function guardarMenu() {
-        const id = document.getElementById("menuId").value;
-        const nombre = document.getElementById("nombreMenu").value;
-        const ordenMenu = parseInt(document.getElementById("ordenMenu").value);
+    async function guardarOpcion() {
+        const id = document.getElementById("opcionId").value;
+        const nombre = document.getElementById("nombreOpcion").value;
+        const ordenOpcion = parseInt(document.getElementById("ordenOpcion").value);
         const usuarioCreacion = document.getElementById("usuarioCreacion").value;
 
-        if (!nombre || !ordenMenu || !usuarioCreacion) {
+        if (!nombre || !ordenOpcion || !usuarioCreacion) {
             return alert("Complete todos los campos requeridos");
         }
 
-        const menu = {
-            idMenu: id || undefined,
+        const opcion = {
+            idOpcion: id || undefined,
             nombre,
-            ordenMenu,
+            ordenOpcion,
             usuarioCreacion
         };
 
         const metodo = id ? "POST" : "POST";
-        await fetch("/menu/guardar", {
+        await fetch("/opcion/guardar", {
             method: metodo,
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(menu)
         });
 
         cancelarEdicion();
-        cargarMenu();
+        cargarOpcion();
     }
 
-    async function editarMenu(id) {
-        const res = await fetch(`/menu/${id}`);
+    async function editarOpcion(id) {
+        const res = await fetch(`/opcion/${id}`);
         const m = await res.json();
 
-        document.getElementById("menuId").value = m.idMenu;
-        document.getElementById("nombreModulo").value = m.nombre;
+        document.getElementById("opcionId").value = m.idOpcion;
+        document.getElementById("nombreOpcion").value = m.nombre;
         document.getElementById("ordenMenu").value = m.ordenMenu;
         document.getElementById("usuarioCreacion").value = m.usuarioCreacion;
 
@@ -136,22 +138,22 @@
     }
 
     function cancelarEdicion() {
-        document.getElementById("moduloId").value = "";
-        document.getElementById("nombreModulo").value = "";
+        document.getElementById("opcionId").value = "";
+        document.getElementById("nombreOpcion").value = "";
         document.getElementById("ordenMenu").value = "";
         document.getElementById("usuarioCreacion").value = "";
         document.getElementById("btnCancelar").style.display = "none";
         document.getElementById("btnGuardar").textContent = "Guardar";
     }
 
-    async function eliminarMenu(id) {
-        if (!confirm("¿Seguro de eliminar este menu?")) return;
+    async function eliminarOpcion(id) {
+        if (!confirm("¿Seguro de eliminar esta opcion?")) return;
 
-        await fetch(`/menu/eliminar/${id}`, { method: "DELETE" });
-        cargarMenu();
+        await fetch(`/opcion/eliminar/${id}`, { method: "DELETE" });
+        cargarOpcion();
     }
 
-    cargarMenu();
+    cargarOpcion();
 </script>
 </body>
 </html>

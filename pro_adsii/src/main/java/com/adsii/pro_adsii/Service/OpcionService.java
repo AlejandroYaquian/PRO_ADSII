@@ -1,53 +1,47 @@
 package com.adsii.pro_adsii.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
 
 import com.adsii.pro_adsii.Entity.Opcion;
 import com.adsii.pro_adsii.Repository.OpcionRepository;
 
-@RestController
-@RequestMapping("/opcion")
 @Service
 
 public class OpcionService {
 
 	@Autowired
-	OpcionRepository ur;
-	
-	@GetMapping(path="/buscar")
-	
-	public List<Opcion> buscar(){
-		return ur.findAll();
-	}
-	
-	@PostMapping(path="/guardar")
-	public Opcion guardar(@RequestBody Opcion opcion) {
-		return ur.save(opcion);
-	}
-	
-	@DeleteMapping(path="/eliminar/{idopcion}")
-	public void eliminar(@PathVariable int idopcion) {
-		ur.deleteById(idopcion);
+	private OpcionRepository opcionRepository;
+
+	public List<Opcion> listarTodos() {
+		return opcionRepository.findAll();
 	}
 
-
-	@GetMapping(path="/buscarOpcion/{idopcion}")
-	public Opcion buscarOpcion(@PathVariable int idopcion) {	
-	
-		Optional<Opcion> opcion = ur.findById(idopcion);	
-		return opcion.isPresent() ? opcion.get() : null;
+	public Optional<Opcion> obtenerPorId(Integer id) {
+		return opcionRepository.findById(id);
 	}
 
+	public Opcion guardar(Opcion opcion, String usuarioActual) {
+		if (opcion.getIdOpcion() == null) {
+            opcion.setFechaCreacion(LocalDateTime.now());
+            opcion.setUsuarioCreacion(usuarioActual);
+        } else {
+            Opcion existente = opcionRepository.findById(opcion.getIdOpcion())
+                    .orElseThrow(() -> new RuntimeException("Opcion no encontrada"));
+            opcion.setFechaCreacion(existente.getFechaCreacion());
+            opcion.setUsuarioCreacion(existente.getUsuarioCreacion());
+            opcion.setFechaModificacion(LocalDateTime.now());
+            opcion.setUsuarioModificacion(usuarioActual);
+        }
+		return opcionRepository.save(opcion);
+	}	
+
+	public void eliminar(Integer id) {
+        opcionRepository.deleteById(id);
+    }
 
 }
