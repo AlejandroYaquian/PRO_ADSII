@@ -1,45 +1,30 @@
     package com.adsii.pro_adsii.Entity;
 
-    import jakarta.persistence.*;
+    import java.time.LocalDateTime;
 
-    @Entity
-    @Table(name = "Genero")
-    public class Genero {
+import jakarta.persistence.*;
+import lombok.Data;
 
-        @Id
-        @GeneratedValue(strategy = GenerationType.IDENTITY)
-        @Column(name = "id_genero")
-        private Long idGenero;
+@Entity
+@Table(name = "Genero")
+@Data
+public class Genero {
 
-        @Column(name = "nombre", nullable = false, length = 50)
-        private String nombre;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long idGenero;
 
-        // Constructor vacío
-        public Genero() {
-        }
+    @Column(nullable = false, length = 100)
+    private String nombre;
 
-        // Constructor completo
-        public Genero(Long idGenero, String nombre) {
-            this.idGenero = idGenero;
-            this.nombre = nombre;
-        }
+    @Column(nullable = false)
+    private LocalDateTime fechaCreacion;
 
-        // Getters y Setters
-        public Long getIdGenero() {
-            return idGenero;
-        }
+    @Column(nullable = false, length = 50)
+    private String usuarioCreacion;
 
-        public void setIdGenero(Long idGenero) {
-            this.idGenero = idGenero;
-        }
+    private LocalDateTime fechaModificacion;
 
-        public String getNombre() {
-            return nombre;
-        }
-
-        public void setNombre(String nombre) {
-            this.nombre = nombre;
-        }
-
-    }
-
+    @Column(length = 50)
+    private String usuarioModificacion;
+}

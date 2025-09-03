@@ -1,63 +1,109 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <title>Bitácora de Acceso</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
-<body class="bg-light">
-<div class="container py-5">
-    <h2 class="mb-4 text-center">Bitácora de Acceso</h2>
 
-    <div class="card">
-        <div class="card-header">
-            <h5>Registros</h5>
+<style>
+    #btnCerrarSesion {
+        background-color: transparent;
+        border: 1px solid #fff;
+        color: #fff;
+    }
+    #btnCerrarSesion:hover {
+        background-color: rgba(255, 255, 255, 0.2);
+    }
+</style>
+
+<body class="bg-light">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="index.html">Inicio</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMenu">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarMenu">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item"><a class="nav-link" href="genero.html">Género</a></li>
+                    <li class="nav-item"><a class="nav-link" href="modulo.html">Módulo</a></li>
+                    <li class="nav-item"><a class="nav-link" href="role.html">Rol</a></li>
+                    <li class="nav-item"><a class="nav-link" href="bitacora.html">Bitácora</a></li>
+                    <li class="nav-item"><a class="nav-link" href="tipoacceso.html">Tipo Acceso</a></li>
+                </ul>
+                <span class="navbar-text me-3" id="navUsuario"></span>
+                <button class="btn ms-2" id="btnCerrarSesion">Cerrar Sesión</button>
+            </div>
         </div>
-        <div class="card-body">
-            <table class="table table-striped table-hover">
-                <thead class="table-dark">
-                <tr>
-                    <th>ID</th>
-                    <th>Usuario</th>
-                    <th>Tipo Acceso</th>
-                    <th>Acción</th>
-                    <th>Fecha</th>
-                    <th>IP</th>
-                    <th>Navegador</th>
-                    <th>Sistema Operativo</th>
-                    <th>Dispositivo</th>
-                    <th>Sesión</th>
-                </tr>
-                </thead>
-                <tbody id="bitacora-body">
-                <tr><td colspan="10" class="text-center">Cargando...</td></tr>
-                </tbody>
-            </table>
+    </nav>
+    <div class="container py-5">
+        <h2 class="mb-4 text-center">Bitácora de Acceso</h2>
+
+        <div class="card">
+            <div class="card-header">
+                <h5>Registros</h5>
+            </div>
+            <div class="card-body">
+                <table class="table table-striped table-hover">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>ID</th>
+                            <th>Usuario</th>
+                            <th>Tipo Acceso</th>
+                            <th>Acción</th>
+                            <th>Fecha</th>
+                            <th>IP</th>
+                            <th>Navegador</th>
+                            <th>Sistema Operativo</th>
+                            <th>Dispositivo</th>
+                            <th>Sesión</th>
+                        </tr>
+                    </thead>
+                    <tbody id="bitacora-body">
+                        <tr>
+                            <td colspan="10" class="text-center">Cargando...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
-</div>
 
-<script>
-    async function cargarBitacora() {
-        const response = await fetch("/bitacora/listar");
-        const data = await response.json();
+    <script>
+        const usuario = sessionStorage.getItem('usuarioActual');
 
-        const tbody = document.getElementById("bitacora-body");
-        tbody.innerHTML = "";
-
-        if (data.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="10" class="text-center">No hay registros en la bitácora.</td></tr>`;
-            return;
+        if (!usuario) {
+            window.location.href = 'login.html';
+        } else {
+            document.getElementById('navUsuario').textContent = usuario;
         }
 
-        data.forEach(b => {
-            let tipoAcceso = "Otro";
-            if (b.idTipoAcceso === 1) tipoAcceso = '<span class="badge bg-success">Acceso Concedido</span>';
-            else if (b.idTipoAcceso === 2) tipoAcceso = '<span class="badge bg-danger">Bloqueado</span>';
-            else if (b.idTipoAcceso === 3) tipoAcceso = '<span class="badge bg-warning">Usuario Inactivo</span>';
-            else if (b.idTipoAcceso === 4) tipoAcceso = '<span class="badge bg-secondary">No Existe</span>';
+        document.getElementById('btnCerrarSesion').addEventListener('click', () => {
+            sessionStorage.removeItem('usuarioActual');
+            window.location.href = 'login.html';
+        });
+        async function cargarBitacora() {
+            const response = await fetch("/bitacora/listar");
+            const data = await response.json();
 
-            const row = `
+            const tbody = document.getElementById("bitacora-body");
+            tbody.innerHTML = "";
+
+            if (data.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="10" class="text-center">No hay registros en la bitácora.</td></tr>`;
+                return;
+            }
+
+            data.forEach(b => {
+                let tipoAcceso = "Otro";
+                if (b.idTipoAcceso === 1) tipoAcceso = '<span class="badge bg-success">Acceso Concedido</span>';
+                else if (b.idTipoAcceso === 2) tipoAcceso = '<span class="badge bg-danger">Bloqueado</span>';
+                else if (b.idTipoAcceso === 3) tipoAcceso = '<span class="badge bg-warning">Usuario Inactivo</span>';
+                else if (b.idTipoAcceso === 4) tipoAcceso = '<span class="badge bg-secondary">No Existe</span>';
+
+                const row = `
                 <tr>
                     <td>${b.idBitacoraAcceso}</td>
                     <td>${b.idUsuario}</td>
@@ -71,11 +117,12 @@
                     <td>${b.sesion ?? "—"}</td>
                 </tr>
             `;
-            tbody.innerHTML += row;
-        });
-    }
+                tbody.innerHTML += row;
+            });
+        }
 
-    cargarBitacora();
-</script>
+        cargarBitacora();
+    </script>
 </body>
+
 </html>

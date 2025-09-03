@@ -23,32 +23,30 @@ public class UsuarioService {
     }
 
     public LoginResponse login(String user, String password, HttpServletRequest request) {
-        Usuario usuario = usuarioRepository.findByIdUsuario(user);
+    Usuario usuario = usuarioRepository.findByIdUsuario(user);
 
-        if (usuario == null) {
-            // Tipo acceso 4: Usuario no existe
-            bitacoraService.registrarAcceso(user, 4, request, "Usuario no existe");
-            return new LoginResponse(false, "Usuario no existe");
-        }
-
-        String hashedPassword = generarMD5(password);
-
-        if (!usuario.getPassword().equalsIgnoreCase(hashedPassword)) {
-            // Tipo acceso 2: Bloqueado por contraseña incorrecta
-            bitacoraService.registrarAcceso(user, 2, request, "Contraseña incorrecta");
-            return new LoginResponse(false, "Contraseña incorrecta");
-        }
-
-        if (usuario.getIdStatusUsuario() != 1) {
-            // Tipo acceso 3: Usuario inactivo
-            bitacoraService.registrarAcceso(user, 3, request, "Usuario inactivo");
-            return new LoginResponse(false, "Usuario no activo");
-        }
-
-        // Tipo acceso 1: Login exitoso
-        bitacoraService.registrarAcceso(user, 1, request, "Login exitoso");
-        return new LoginResponse(true, "Bienvenido " + usuario.getNombre());
+    if (usuario == null) {
+        bitacoraService.registrarAcceso(user, 4, request, "Usuario no existe");
+        return new LoginResponse(false, "Usuario no existe", null);
     }
+
+    String hashedPassword = generarMD5(password);
+
+    if (!usuario.getPassword().equalsIgnoreCase(hashedPassword)) {
+        bitacoraService.registrarAcceso(user, 2, request, "Contraseña incorrecta");
+        return new LoginResponse(false, "Contraseña incorrecta", null);
+    }
+
+    if (usuario.getIdStatusUsuario() != 1) {
+        bitacoraService.registrarAcceso(user, 3, request, "Usuario inactivo");
+        return new LoginResponse(false, "Usuario no activo", null);
+    }
+
+    // Login exitoso, mandamos idUsuario para front
+    bitacoraService.registrarAcceso(user, 1, request, "Login exitoso");
+    return new LoginResponse(true, "Bienvenido " + usuario.getNombre(), usuario.getIdUsuario());
+}
+
 
     private String generarMD5(String input) {
         try {

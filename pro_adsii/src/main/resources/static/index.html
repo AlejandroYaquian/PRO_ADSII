@@ -3,21 +3,71 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bienvenido</title>
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>Pantalla Principal</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        #btnCerrarSesion {
+            background-color: transparent;
+            border: 1px solid #fff;
+            color: #fff;
+        }
+        #btnCerrarSesion:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+        .welcome-text {
+            text-align: center;
+            margin-top: 50px;
+        }
+    </style>
 </head>
-<body class="bg-light">
-
-    <div class="container vh-100 d-flex justify-content-center align-items-center">
-        <div class="card shadow-lg p-4" style="width: 24rem;">
-            <div class="card-body text-center">
-                <h1 class="card-title mb-4">Bienvenido</h1>
-                <h3 class="text-primary mb-3" id="nombreUsuario">Usuario</h3>
-                <p class="card-text">Has iniciado sesión correctamente en el sistema.</p>
-                <a href="logout.html" class="btn btn-danger mt-3" id="logoutBtn">Cerrar sesión</a>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="index.html">Inicio</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMenu">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarMenu">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item"><a class="nav-link" href="genero.html">Género</a></li>
+                    <li class="nav-item"><a class="nav-link" href="modulo.html">Módulo</a></li>
+                    <li class="nav-item"><a class="nav-link" href="role.html">Rol</a></li>
+                    <li class="nav-item"><a class="nav-link" href="bitacora.html">Bitácora</a></li>
+                    <li class="nav-item"><a class="nav-link" href="tipoacceso.html">Tipo Acceso</a></li>
+                </ul>
+                <span class="navbar-text me-3" id="navUsuario"></span>
+                <button class="btn ms-2" id="btnCerrarSesion">Cerrar Sesión</button>
             </div>
         </div>
+    </nav>
+
+    <!-- Contenido principal -->
+    <div class="container welcome-text">
+        <h1 id="mensajeBienvenida">Bienvenido</h1>
+        <p>Use los botones del menú para navegar por el sistema.</p>
     </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Obtener usuario de la sesión
+        const usuario = sessionStorage.getItem('usuarioActual');
+
+        if (!usuario) {
+            // Redirigir al login si no hay usuario
+            window.location.href = 'login.html';
+        } else {
+            // Mostrar usuario en el navbar
+            document.getElementById('navUsuario').textContent = usuario;
+            // Mostrar mensaje de bienvenida en el centro
+            document.getElementById('mensajeBienvenida').textContent = `Bienvenido, ${usuario}`;
+        }
+
+        // Cerrar sesión
+        document.getElementById('btnCerrarSesion').addEventListener('click', () => {
+            sessionStorage.removeItem('usuarioActual');
+            window.location.href = 'login.html';
+        });
+    </script>
 </body>
 </html>
