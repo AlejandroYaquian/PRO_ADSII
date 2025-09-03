@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Opciones disponibles</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+
+  <nav class="navbar navbar-expand-lg navbar-dark bg-primary w-100">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="#">Agregar opciones a rol</a>
+    </div>
+  </nav>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 0px;
+    }
+
+    ul {
+      font-size: 16px;
+      padding-left: 20px;
+    }
+
+    li {
+      margin-bottom: 6px;
+    }
+
+    @media print {
+      #btn-imprimir {
+        display: none;
+      }
+    }
+  </style>
+
+
+
+</head>
+
+<body>
+  <div class="container">
+  <h3 id="titulo-rol" class="mb-3">Opciones disponibles</h3>
+
+  <div class="mb-3">
+    <label for="select-opciones" class="form-label">Selecciona una opción</label>
+    <select class="form-select" id="select-opciones">
+      <option selected disabled>-- Cargando opciones... --</option>
+    </select>
+  </div>
+
+ <div class="form-check mb-2">
+  <input class="form-check-input" type="checkbox" id="chk-imprimir">
+  <label class="form-check-label" for="chk-imprimir">
+    Imprimir opción
+  </label>
+</div>
+
+<div class="form-check mb-3">
+  <input class="form-check-input" type="checkbox" id="chk-exportar">
+  <label class="form-check-label" for="chk-exportar">
+    Exportar opción
+  </label>
+</div>
+
+
+  <button class="btn btn-warning" onclick="volverRole()">Volver a opciones roles</button>
+  <button class="btn btn-primary" onclick="agregarOpcion()">Agregar opcion</button>
+</div>
+
+<script>
+  // Obtener idRol desde la URL
+  const queryParams = new URLSearchParams(window.location.search);
+  const idRol = queryParams.get("idRol");
+
+  if (!idRol) {
+    alert("No se ha proporcionado el ID del rol.");
+  } else {
+    fetch(`http://localhost:8080/RoleOpcion/opcionesDisponibles/${idRol}`)
+      .then(response => response.json())
+      .then(opciones => {
+        const select = document.getElementById("select-opciones");
+        select.innerHTML = '';
+
+        if (opciones.length === 0) {
+          const option = document.createElement("option");
+          option.text = "No hay opciones disponibles";
+          option.disabled = true;
+          option.selected = true;
+          select.appendChild(option);
+        } else {
+          const placeholder = document.createElement("option");
+          placeholder.text = "-- Selecciona una opción --";
+          placeholder.disabled = true;
+          placeholder.selected = true;
+          select.appendChild(placeholder);
+
+          opciones.forEach(opcion => {
+            const opt = document.createElement("option");
+            opt.value = opcion.idOpcion;
+            opt.textContent = opcion.nombre;
+            select.appendChild(opt);
+          });
+        }
+      })
+      .catch(error => {
+        console.error("Error al obtener las opciones:", error);
+        alert("Ocurrió un error al cargar las opciones.");
+      });
+  }
+
+  function volverRole() {
+     window.location.href = `/role.html`;
+  }
+
+  function agregarOpcion() {
+    const select = document.getElementById("select-opciones");
+    const idOpcion = select.value;
+    const nombre = select.options[select.selectedIndex].text;
+    const imprimir = document.getElementById("chk-imprimir").checked;
+    const exportar = document.getElementById("chk-exportar").checked;
+
+    if (!idOpcion) {
+      alert("Selecciona una opción válida.");
+      return;
+    }
+
+    const datos = {
+      idOpcion: parseInt(idOpcion),
+      idRole: parseInt(idRol),
+      nombre: nombre,
+      alta: true,
+      baja: false,
+      imprimir: imprimir,
+      exportar: exportar
+    };
+
+    fetch("http://localhost:8080/RoleOpcion/agregar", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(datos)
+    })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error("Error al agregar opción.");
+      }
+      return response.json();
+    })
+    .then(data => {
+      alert("Opción agregada correctamente.");
+
+      // Limpiar los checkboxes
+      document.getElementById("chk-imprimir").checked = false;
+      document.getElementById("chk-exportar").checked = false;
+
+      // Eliminar la opción del select
+      select.remove(select.selectedIndex);
+
+      // Si no quedan más opciones, mostrar mensaje
+      if (select.options.length === 1) {
+        select.innerHTML = '<option selected disabled>No hay más opciones disponibles</option>';
+      }
+    })
+    .catch(error => {
+      console.error("Error al enviar los datos:", error);
+      alert("Ocurrió un error al guardar la opción.");
+    });
+  }
+</script>
+
+
+</body>
+</html>

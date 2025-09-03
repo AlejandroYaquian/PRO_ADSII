@@ -9,9 +9,13 @@ import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+
 import com.adsii.pro_adsii.DTO.OpcionDTO;
 import com.adsii.pro_adsii.Entity.Opcion;
 import com.adsii.pro_adsii.Entity.RoleOpcion;
+import com.adsii.pro_adsii.Entity.RoleOpcionId;
 import com.adsii.pro_adsii.Repository.RoleOpcionRepository;
 
 
@@ -94,6 +98,31 @@ public class RoleOpcionService {
         return opcionesDisponibles;
         
     }
+
+
+    
+	public RoleOpcion agregarRoleOpcion(OpcionDTO opcionDTO) {
+
+        Date fecha = new Date(); // fecha actual
+        RoleOpcion roleOpcion = new RoleOpcion();
+        RoleOpcionId roleOpcionId = new RoleOpcionId();
+        roleOpcionId.setIdRole(opcionDTO.getIdRole());
+        roleOpcionId.setIdOpcion(opcionDTO.getIdOpcion());
+
+        roleOpcion.setId(roleOpcionId);
+        roleOpcion.setAlta(opcionDTO.getAlta());
+        roleOpcion.setBaja(opcionDTO.getBaja());
+        roleOpcion.setCambio(true);
+        roleOpcion.setImprimir(opcionDTO.getImprimir());
+        roleOpcion.setExportar(opcionDTO.getExportar());
+        roleOpcion.setFechaCreacion(fecha);
+        roleOpcion.setUsuarioCreacion("admin01");
+        roleOpcion.setFechaModificacion(null);
+        roleOpcion.setUsuarioModificacion(null);
+
+		return roleOpcionRepository.save(roleOpcion);
+	}
+
 
 
 }

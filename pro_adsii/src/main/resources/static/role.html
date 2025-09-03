@@ -111,9 +111,11 @@
     <!--Aquí vamos a mostrar e inicializar Botón para volver atrás ----------------------------------------------------------->
     <div style="display: flex; gap: 10px;">
       <button class="btn btn-secondary" id="btn-atras" style="display: none;">Volver</button>
-      <button class="btn btn-warning" id="btn-imprimir" style="display: none;"
-        onclick="imprimirOpcionesMarcadas()">Imprimir</button>
-      <!--<button type="submit" class="btn btn-primary" style="display: none;" id="btn-modificar">Modificar Rol</button>-->
+
+      <button class="btn btn-warning" id="btn-imprimir" style="display: none;" onclick="imprimirOpcionesMarcadas()">Imprimir</button>
+      <button class="btn btn-primary" id="btn-agregar-opc" style="display: none;">Agregar Opciones</button>
+
+       <!--<button type="submit" class="btn btn-primary" style="display: none;" id="btn-modificar">Modificar Rol</button>-->
     </div>
 
   </div>
@@ -133,8 +135,10 @@
       window.location.href = 'login.html';
     });
 
-    let nombreRolSeleccionado = '';
-    document.addEventListener('DOMContentLoaded', function () {
+
+      let nombreRolSeleccionado = ''; 
+      document.addEventListener('DOMContentLoaded', function () {
+
       const roleTable = document.getElementById("rolesTable");
       const tableBody = document.getElementById('roles-table-body');
       const tableHeader = document.getElementById('thead-roles');
@@ -150,13 +154,17 @@
       const headTableOptions = document.getElementById('thead-options');
       const labelR = document.getElementById("labelRol");
       const labelLR = document.getElementById("labelListRole");
-      const opcionesTable = document.getElementById("opcionesTable");
+
+      const opcionesTable= document.getElementById("opcionesTable");
+      const btnAgregarOpc = document.getElementById('btn-agregar-opc');
+      
+   
 
 
+     
+      
+//CARGA DE ROLES**************************************************************************************************************************
 
-
-
-      //CARGA DE ROLES**************************************************************************************************************************
       fetch('http://localhost:8080/role/getRoles')
         .then(response => response.json())
         .then(roles => {
@@ -194,6 +202,8 @@
             button.addEventListener('click', function () {
 
               const rolId = this.getAttribute('data-id');
+              window.rolIdSeleccionado = rolId; // Guarda en el objeto global window
+
               const rolNombre = this.getAttribute('data-nombre');
               nombreRolSeleccionado = rolNombre;
               tableOptions.innerHTML = ''
@@ -219,11 +229,20 @@
               labelR.style.display = 'none';
               labelLR.style.display = 'none';
               roleTable.style.display = 'none';
-
-
+              btnAgregarOpc.style.display = 'block';
+              
+              
               btnVolver.addEventListener('click', volverAInicio);// Mostrar el botón "Volver"
 
-            });
+              btnAgregarOpc.addEventListener('click', function () {
+                  if (window.rolIdSeleccionado) {
+                      window.location.href = `/roleOpcion.html?idRol=${window.rolIdSeleccionado}`;
+                  } else {
+                      alert("Por favor selecciona un rol primero.");
+                  }
+                });
+              });
+
           });
         })
         .catch(error => {
@@ -400,6 +419,7 @@
         formAgregarRolDiv.style.display = 'none';
         btnVolver.style.display = 'none';
         btnImprimir.style.display = 'none';
+        btnAgregarOpc.style.display = 'none';
 
         // Mostrar los botones de selección de nuevo
         const selectButtons = document.querySelectorAll('button[data-id]');
