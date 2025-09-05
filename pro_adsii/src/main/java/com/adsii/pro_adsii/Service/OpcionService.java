@@ -44,4 +44,10 @@ public class OpcionService {
         opcionRepository.deleteById(id);
     }
 
+
+	public Opcion buscarOpcion(int idopcion) {	
+		Optional<Opcion> opcion = opcionRepository.findById(idopcion);	
+		return opcion.isPresent() ? opcion.get() : null;
+	}
+
 }

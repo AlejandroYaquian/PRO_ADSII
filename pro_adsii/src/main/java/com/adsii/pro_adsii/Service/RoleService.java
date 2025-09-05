@@ -7,7 +7,7 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-
+import com.adsii.pro_adsii.DTO.RoleDTO;
 import com.adsii.pro_adsii.Entity.Role;
 import com.adsii.pro_adsii.Repository.RoleRepository;
 
@@ -17,11 +17,17 @@ public class RoleService {
     @Autowired
     RoleRepository roleRepository;
 
-    public Role guardarRole(Role roleAdd){
+
+    public Role guardarRole(RoleDTO rolNuevo){
+        
+        Role rol = new Role();
         Date fecha = new Date(); // fecha actual
-        roleAdd.setFechaCreacion(fecha);
-        roleAdd.setUsuarioCreacion("admin01"); // o tomarlo de sesión si tienes auth
-        return roleRepository.save(roleAdd);
+        rol.setNombre(rolNuevo.getNombre());
+        rol.setFechaCreacion(fecha);
+        rol.setUsuarioCreacion("admin01"); // o tomarlo de sesión si tienes auth
+        rol.setUsuarioModificacion(null);
+        rol.setFechaModificacion(null);
+        return roleRepository.save(rol);
     }
 
 
@@ -34,5 +40,28 @@ public class RoleService {
         Optional<Role> role = roleRepository.findById(idrole);	
 		return role.isPresent() ? role.get() : null;
 	}
+
+    public void editarRole(RoleDTO roleDTO){
+        Optional<Role> roMod= roleRepository.findById(roleDTO.getIdRole());
+        Date fecha = new Date();
+       
+            Role rol = roMod.get();
+            rol.setNombre(roleDTO.getNombre());
+            rol.setFechaModificacion(fecha);
+            rol.setUsuarioModificacion("admin01");
+            roleRepository.save(rol);
+    
+    }
+
+    public void eliminarRol(Integer idRole) {
+        Role role = roleRepository.findById(idRole)
+            .orElseThrow(() -> new RuntimeException("Rol no encontrado con ID: " + idRole));
+
+        if (role.getUsuarios() != null && !role.getUsuarios().isEmpty()) {
+            throw new RuntimeException("No se puede eliminar el rol porque tiene usuarios vinculados.");
+        }
+
+        roleRepository.delete(role);
+    }
 
 }

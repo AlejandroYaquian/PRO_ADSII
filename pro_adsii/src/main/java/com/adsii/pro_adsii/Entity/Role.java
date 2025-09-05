@@ -45,6 +45,14 @@ public class Role {
 	@OneToMany(mappedBy = "idRole", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	private List<Usuario> usuarios;
 
+	public List<Usuario> getUsuarios() {
+		return usuarios;
+	}
+
+	public void setUsuarios(List<Usuario> usuarios) {
+		this.usuarios = usuarios;
+	}
+
 	public Integer getIdRole() {
 		return idRole;
 	}
