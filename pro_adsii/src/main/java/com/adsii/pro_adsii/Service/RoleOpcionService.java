@@ -9,8 +9,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+
 
 import com.adsii.pro_adsii.DTO.OpcionDTO;
 import com.adsii.pro_adsii.Entity.Opcion;
@@ -78,7 +77,7 @@ public class RoleOpcionService {
         List<OpcionDTO> ops = obtenerOpcionesPorRol(idRole);
 
         // Lista de todas las opciones disponibles en el sistema
-        List<Opcion> opciones = opcion.buscar();
+        List<Opcion> opciones = opcion.listarTodos();
 
         // Lista para almacenar las opciones que NO están en ops
         List<Opcion> opcionesDisponibles = new ArrayList<>();
@@ -101,28 +100,30 @@ public class RoleOpcionService {
 
 
     
-	public RoleOpcion agregarRoleOpcion(OpcionDTO opcionDTO) {
+	public void agregarRoleOpcion(Integer rolID) {
 
         Date fecha = new Date(); // fecha actual
-        RoleOpcion roleOpcion = new RoleOpcion();
-        RoleOpcionId roleOpcionId = new RoleOpcionId();
-        roleOpcionId.setIdRole(opcionDTO.getIdRole());
-        roleOpcionId.setIdOpcion(opcionDTO.getIdOpcion());
+        List<Opcion> opciones = opcion.listarTodos() ;
 
-        roleOpcion.setId(roleOpcionId);
-        roleOpcion.setAlta(opcionDTO.getAlta());
-        roleOpcion.setBaja(opcionDTO.getBaja());
-        roleOpcion.setCambio(true);
-        roleOpcion.setImprimir(opcionDTO.getImprimir());
-        roleOpcion.setExportar(opcionDTO.getExportar());
-        roleOpcion.setFechaCreacion(fecha);
-        roleOpcion.setUsuarioCreacion("admin01");
-        roleOpcion.setFechaModificacion(null);
-        roleOpcion.setUsuarioModificacion(null);
+        for (Opcion opcion : opciones) {
+            RoleOpcion roleOpcion = new RoleOpcion();
+            RoleOpcionId roleOpcionId = new RoleOpcionId();
+            roleOpcionId.setIdRole(rolID);
+            roleOpcionId.setIdOpcion(opcion.getIdOpcion());
 
-		return roleOpcionRepository.save(roleOpcion);
+            roleOpcion.setId(roleOpcionId);
+            roleOpcion.setAlta(false);
+            roleOpcion.setBaja(true);
+            roleOpcion.setCambio(false);
+            roleOpcion.setImprimir(false);
+            roleOpcion.setExportar(false);
+            roleOpcion.setFechaCreacion(fecha);
+            roleOpcion.setUsuarioCreacion("admin01");
+            roleOpcion.setFechaModificacion(null);
+            roleOpcion.setUsuarioModificacion(null);
+            roleOpcionRepository.save(roleOpcion);
+        }
 	}
-
 
 
 }
