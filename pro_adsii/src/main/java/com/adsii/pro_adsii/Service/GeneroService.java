@@ -11,6 +11,12 @@ import java.util.Optional;
 
 @Service
 public class GeneroService {
+<<<<<<< Updated upstream
+=======
+
+    @Autowired
+    private GeneroRepository generoRepository;
+>>>>>>> Stashed changes
 
     private final GeneroRepository generoRepository;
 
@@ -28,6 +34,7 @@ public class GeneroService {
         return generoRepository.findById(id);
     }
 
+<<<<<<< Updated upstream
     // Guardar o editar
     public Genero guardar(Genero genero) {
         if (genero.getIdGenero() == null) {
@@ -42,6 +49,19 @@ public class GeneroService {
             original.setFechaModificacion(LocalDateTime.now());
             original.setUsuarioModificacion("Admin"); // o extraído del login
             genero = original;
+=======
+    public Genero guardar(Genero genero, String usuarioActual) {
+        if (genero.getIdGenero() == null) {
+            genero.setFechaCreacion(LocalDateTime.now());
+            genero.setUsuarioCreacion(usuarioActual);
+        } else {
+            Genero existente = generoRepository.findById(genero.getIdGenero())
+                    .orElseThrow(() -> new RuntimeException("Genero no encontrado"));
+            genero.setFechaCreacion(existente.getFechaCreacion());
+            genero.setUsuarioCreacion(existente.getUsuarioCreacion());
+            genero.setFechaModificacion(LocalDateTime.now());
+            genero.setUsuarioModificacion(usuarioActual);
+>>>>>>> Stashed changes
         }
         return generoRepository.save(genero);
     }

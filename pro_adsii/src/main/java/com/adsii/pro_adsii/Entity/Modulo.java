@@ -13,19 +13,19 @@ public class Modulo {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "IdModulo")
-    private Long idModulo;
+    private Long IdModulo;
 
     @Column(name = "Nombre", nullable = false, length = 100)
-    private String nombre;
+    private String Nombre;
 
     @Column(name = "OrdenMenu", nullable = false)
     private Integer ordenMenu;
 
     @Column(name = "FechaCreacion", nullable = false)
-    private LocalDateTime fechaCreacion;
+    private LocalDateTime FechaCreacion;
 
     @Column(name = "UsuarioCreacion", nullable = false, length = 50)
-    private String usuarioCreacion;
+    private String UsuarioCreacion;
 
     @Column(name = "FechaModificacion")
     private LocalDateTime fechaModificacion;
