@@ -9,8 +9,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+
 
 import com.adsii.pro_adsii.DTO.OpcionDTO;
 import com.adsii.pro_adsii.Entity.Opcion;
