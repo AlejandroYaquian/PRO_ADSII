@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Empresas</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    #btnCerrarSesion {
+      background-color: transparent;
+      border: 1px solid #fff;
+      color: #fff;
+    }
+    #btnCerrarSesion:hover {
+      background-color: rgba(255, 255, 255, 0.2);
+    }
+  </style>
+</head>
+<body class="bg-light">
+  <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="index.html">Inicio</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMenu">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarMenu">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+          <li class="nav-item"><a class="nav-link" href="genero.html">Género</a></li>
+          <li class="nav-item"><a class="nav-link" href="modulo.html">Módulo</a></li>
+          <li class="nav-item"><a class="nav-link" href="empresa.html">Empresa</a></li>
+          <li class="nav-item"><a class="nav-link" href="role.html">Rol</a></li>
+        </ul>
+        <span class="navbar-text me-3" id="navUsuario"></span>
+        <button class="btn ms-2" id="btnCerrarSesion">Cerrar Sesión</button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container mt-4">
+    <h2 class="mb-4 text-center">Gestión de Empresas</h2>
+
+    <!-- Formulario -->
+    <div class="card mb-4">
+      <div class="card-header">Agregar / Editar Empresa</div>
+      <div class="card-body">
+        <input type="hidden" id="empresaId">
+        <div class="row g-3 mb-3">
+          <div class="col-md-4">
+            <label class="form-label">Nombre</label>
+            <input type="text" id="nombre" class="form-control" required>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Dirección</label>
+            <input type="text" id="direccion" class="form-control" required>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">NIT</label>
+            <input type="text" id="nit" class="form-control" required>
+          </div>
+        </div>
+        <div class="row g-3 mb-3">
+          <div class="col-md-4">
+            <label class="form-label">Usuario Creación</label>
+            <input type="text" id="usuarioCreacion" class="form-control" required>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Largo Contraseña</label>
+            <input type="number" id="passwordLargo" class="form-control" required>
+          </div>
+          <div class="col-md-4 d-flex align-items-end gap-2">
+            <button class="btn btn-primary" onclick="guardarEmpresa()" id="btnGuardar">Guardar</button>
+            <button class="btn btn-secondary" onclick="cancelarEdicion()" id="btnCancelar" style="display:none;">Cancelar</button>
+          </div>
+        </div>
+        <div class="row g-3 mb-3">
+          <div class="col-md-3"><label class="form-label">Mayúsculas</label><input type="number" id="passwordCantidadMayusculas" class="form-control" required></div>
+          <div class="col-md-3"><label class="form-label">Minúsculas</label><input type="number" id="passwordCantidadMinusculas" class="form-control" required></div>
+          <div class="col-md-3"><label class="form-label">Especiales</label><input type="number" id="passwordCantidadCaracteresEspeciales" class="form-control" required></div>
+          <div class="col-md-3"><label class="form-label">Números</label><input type="number" id="passwordCantidadNumeros" class="form-control" required></div>
+        </div>
+        <div class="row g-3">
+          <div class="col-md-4"><label class="form-label">Caducidad (días)</label><input type="number" id="passwordCantidadCaducidadDias" class="form-control" required></div>
+          <div class="col-md-4"><label class="form-label">Intentos antes de bloquear</label><input type="number" id="passwordIntentosAntesDeBloquear" class="form-control" required></div>
+          <div class="col-md-4"><label class="form-label">Preguntas de validación</label><input type="number" id="passwordCantidadPreguntasValidar" class="form-control" required></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabla -->
+    <div class="card">
+      <div class="card-header">Listado de Empresas</div>
+      <div class="card-body table-responsive">
+        <table class="table table-striped table-hover">
+          <thead class="table-dark">
+            <tr>
+              <th>ID</th><th>Nombre</th><th>Dirección</th><th>NIT</th><th>Largo</th><th>Mayús</th><th>Minús</th><th>Esp.</th><th>Num.</th><th>Cad.</th><th>Int.</th><th>Preg.</th><th>F. Creación</th><th>U. Creación</th><th>F. Modif.</th><th>U. Modif.</th><th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="empresa-body">
+            <tr><td colspan="17" class="text-center">Cargando...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const usuario = sessionStorage.getItem('usuarioActual');
+    if (!usuario) window.location.href = 'login.html';
+    else document.getElementById('navUsuario').textContent = usuario;
+
+    document.getElementById('btnCerrarSesion').addEventListener('click', () => {
+      sessionStorage.removeItem('usuarioActual');
+      window.location.href = 'login.html';
+    });
+
+    async function cargarEmpresas() {
+      const res = await fetch("/empresa/listar");
+      const data = await res.json();
+      const tbody = document.getElementById("empresa-body");
+      tbody.innerHTML = "";
+
+      if (data.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="17" class="text-center">No hay empresas registradas.</td></tr>`;
+        return;
+      }
+
+      data.forEach(e => {
+        const row = `
+          <tr>
+            <td>${e.idEmpresa}</td>
+            <td>${e.nombre ?? ""}</td>
+            <td>${e.direccion ?? ""}</td>
+            <td>${e.nit ?? ""}</td>
+            <td>${e.passwordLargo ?? ""}</td>
+            <td>${e.passwordCantidadMayusculas ?? ""}</td>
+            <td>${e.passwordCantidadMinusculas ?? ""}</td>
+            <td>${e.passwordCantidadCaracteresEspeciales ?? ""}</td>
+            <td>${e.passwordCantidadNumeros ?? ""}</td>
+            <td>${e.passwordCantidadCaducidadDias ?? ""}</td>
+            <td>${e.passwordIntentosAntesDeBloquear ?? ""}</td>
+            <td>${e.passwordCantidadPreguntasValidar ?? ""}</td>
+            <td>${e.fechaCreacion ? new Date(e.fechaCreacion).toLocaleString() : ""}</td>
+            <td>${e.usuarioCreacion ?? ""}</td>
+            <td>${e.fechaModificacion ? new Date(e.fechaModificacion).toLocaleString() : ""}</td>
+            <td>${e.usuarioModificacion ?? ""}</td>
+            <td>
+              <button class="btn btn-warning btn-sm" onclick="editarEmpresa(${e.idEmpresa})">Editar</button>
+                            <button class="btn btn-danger btn-sm" onclick="eliminarEmpresa(${e.idEmpresa})">Eliminar</button>
+            </td>
+          </tr>
+        `;
+        tbody.innerHTML += row;
+      });
+    }
+
+    cargarEmpresas();
+
+    async function guardarEmpresa() {
+      const empresa = {
+        idEmpresa: document.getElementById("empresaId").value || null,
+        nombre: document.getElementById("nombre").value,
+        direccion: document.getElementById("direccion").value,
+        nit: document.getElementById("nit").value,
+        usuarioCreacion: document.getElementById("usuarioCreacion").value,
+        passwordLargo: parseInt(document.getElementById("passwordLargo").value),
+        passwordCantidadMayusculas: parseInt(document.getElementById("passwordCantidadMayusculas").value),
+        passwordCantidadMinusculas: parseInt(document.getElementById("passwordCantidadMinusculas").value),
+        passwordCantidadCaracteresEspeciales: parseInt(document.getElementById("passwordCantidadCaracteresEspeciales").value),
+        passwordCantidadNumeros: parseInt(document.getElementById("passwordCantidadNumeros").value),
+        passwordCantidadCaducidadDias: parseInt(document.getElementById("passwordCantidadCaducidadDias").value),
+        passwordIntentosAntesDeBloquear: parseInt(document.getElementById("passwordIntentosAntesDeBloquear").value),
+        passwordCantidadPreguntasValidar: parseInt(document.getElementById("passwordCantidadPreguntasValidar").value)
+      };
+
+      const method = empresa.idEmpresa ? "PUT" : "POST";
+      const url = empresa.idEmpresa ? `/empresa/actualizar/${empresa.idEmpresa}` : "/empresa/guardar";
+
+      const res = await fetch(url, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(empresa)
+      });
+
+      if (res.ok) {
+        alert("Empresa guardada correctamente.");
+        limpiarFormulario();
+        cargarEmpresas();
+      } else {
+        alert("Error al guardar la empresa.");
+      }
+    }
+
+    function editarEmpresa(id) {
+      fetch(`/empresa/{id}`)
+        .then(res => res.json())
+        .then(e => {
+          document.getElementById("empresaId").value = e.idEmpresa;
+          document.getElementById("nombre").value = e.nombre;
+          document.getElementById("direccion").value = e.direccion;
+          document.getElementById("nit").value = e.nit;
+          document.getElementById("usuarioCreacion").value = e.usuarioCreacion;
+          document.getElementById("passwordLargo").value = e.passwordLargo;
+          document.getElementById("passwordCantidadMayusculas").value = e.passwordCantidadMayusculas;
+          document.getElementById("passwordCantidadMinusculas").value = e.passwordCantidadMinusculas;
+          document.getElementById("passwordCantidadCaracteresEspeciales").value = e.passwordCantidadCaracteresEspeciales;
+          document.getElementById("passwordCantidadNumeros").value = e.passwordCantidadNumeros;
+          document.getElementById("passwordCantidadCaducidadDias").value = e.passwordCantidadCaducidadDias;
+          document.getElementById("passwordIntentosAntesDeBloquear").value = e.passwordIntentosAntesDeBloquear;
+          document.getElementById("passwordCantidadPreguntasValidar").value = e.passwordCantidadPreguntasValidar;
+
+          document.getElementById("btnCancelar").style.display = "inline-block";
+        });
+
+        fetch(`/empresa/{id}`)
+            .then(res => {
+                if (!res.ok) throw new Error("Error al buscar empresa");
+                return res.json();
+            })
+            .then(e => {
+                console.log("Empresa recibida:", e);
+                // asignación de campos
+            })
+            .catch(err => {
+                console.error("Error en editarEmpresa:", err);
+                alert("No se pudo cargar la empresa.");
+            });
+    }
+
+    function cancelarEdicion() {
+      limpiarFormulario();
+      document.getElementById("btnCancelar").style.display = "none";
+    }
+
+    function limpiarFormulario() {
+      document.getElementById("empresaId").value = "";
+      document.querySelectorAll("input").forEach(input => input.value = "");
+    }
+
+    async function eliminarEmpresa(id) {
+      if (!confirm("¿Estás seguro de eliminar esta empresa?")) return;
+
+      const res = await fetch(`/empresa/eliminar/${id}`, { method: "DELETE" });
+      if (res.ok) {
+        alert("Empresa eliminada.");
+        cargarEmpresas();
+      } else {
+        alert("Error al eliminar la empresa.");
+      }
+    }
+  </script>
+</body>
+</html>
+
