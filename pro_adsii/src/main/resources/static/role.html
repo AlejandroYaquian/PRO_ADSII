@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Gestión de Roles</title>
+  <title>Gestión</title>
   <!-- Bootstrap CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
@@ -38,7 +38,29 @@
             </div>
         </div>
     </nav>
-  <div class="container">
+
+
+
+<!-- PANTALLA ROLE---------------------------------------------------------->
+
+<!-- Formulario de agregar rol--->
+<div class="card w-50 mx-auto mt-4">
+  <div class="card-body text-center">
+    <h4 class="mb-4">Agregar nuevo rol</h4>
+    <form id="form-nuevo-rol">
+      <div class="mb-3">
+        <label for="nombreNuevoRol" class="form-label">Nombre del nuevo rol</label>
+        <input type="text" class="form-control form-control-sm mx-auto" style="width: 60%;" id="nombreNuevoRol" required>
+      </div>
+      <div class="d-flex justify-content-center gap-2 mt-3">
+        <button type="submit" id="btn-guardar" class="btn btn-primary" style="display: block;">Guardar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Listado de roles --->
+<div class="container">
     <h2 class="mb-4" id='labelRol'>Gestión de Roles y Permisos</h2>
     <!-- Aquí vamos a mostrar la tabla con los roles--------------------------------------------------------------->
     <form id="form-opciones" class="mt-4">
@@ -47,79 +69,24 @@
 
       <div class="table-responsive shadow-sm rounded w-100">
         <table id='rolesTable' class="table table-bordered table-hover table-striped align-middle w-100">
-          <thead id="thead-roles" class="table-primary">
+          <thead id="thead-roles" class="table-dark">
             <tr>
               <th scope="col">No.</th>
               <th scope="col">Nombre del Rol</th>
-              <th scope="col">Seleccionar</th>
+              <th scope="col" class="text-center">Editar rol</th>
+              <th scope="col" class="text-center">Editar opciones de rol</th>
             </tr>
           </thead>
           <tbody id="roles-table-body">
             <!-- Los roles se insertarán dinámicamente aquí -->
           </tbody>
         </table>
-      </div>
-
-      <!-- Botón de agregar -->
-      <div class="mt-3 d-flex justify-content-start gap-2" id="botones-container">
-        <button type="submit" class="btn btn-success" id="btn-agregar">
-          <i class="bi bi-plus-circle me-1"></i>Agregar Rol
-        </button>
-      </div>
+      </div>     
     </form>
+</div>
 
 
-    <!-- Aquí vamos a mostrar e inicializar el Label para mostrar el rol seleccionado ------------------------------------->
-    <div class="mt-4" id="rol-seleccionado" style="display: none;">
-      <label class="form-label fw-bold">Rol seleccionado: <span id="nombre-rol"></span></label>
-    </div>
-
-    <!--quí vamos a mostrar e inicializar formulario para agregar nuevo rol ---------------------------------------------->
-    <div class="mt-4" id="form-agregar-rol" style="display: none;">
-      <h4>Agregar nuevo rol</h4>
-      <form id="form-nuevo-rol">
-        <div class="mb-3">
-          <label for="nombreNuevoRol" class="form-label">Nombre del nuevo rol</label>
-          <input type="text" class="form-control" id="nombreNuevoRol" required>
-        </div>
-        <div style="display: flex; gap: 10px;">
-          <button class="btn btn-secondary" id="btn-atras-add" style="display: none;">Volver</button>
-          <button id="btn-guardar" class="btn btn-primary" style="display: block;">Guardar</button>
-        </div>
-
-      </form>
-    </div>
-
-    <div class="table-responsive shadow-sm rounded w-100">
-      <table id='opcionesTable' class="table table-bordered table-hover table-striped align-middle w-100">
-        <thead id="thead-options" class="table-primary" style="display: none;">
-          <tr>
-            <th scope="col">Nombre de la opción</th>
-            <th scope="col" class="text-center" style="width: 80px;">Alta</th>
-            <th scope="col" class="text-center" style="width: 100px;">Imprimir</th>
-            <th scope="col" class="text-center" style="width: 100px;">Exportar</th>
-            <th scope="col" class="text-center" style="width: 120px;">Modificar</th>
-          </tr>
-        </thead>
-        <tbody id="options-table-body" style="display: none;">
-          <!-- Las filas se insertarán dinámicamente -->
-        </tbody>
-      </table>
-    </div>
-
-
-    <!--Aquí vamos a mostrar e inicializar Botón para volver atrás ----------------------------------------------------------->
-    <div style="display: flex; gap: 10px;">
-      <button class="btn btn-secondary" id="btn-atras" style="display: none;">Volver</button>
-
-      <button class="btn btn-warning" id="btn-imprimir" style="display: none;" onclick="imprimirOpcionesMarcadas()">Imprimir</button>
-      <button class="btn btn-primary" id="btn-agregar-opc" style="display: none;">Agregar Opciones</button>
-
-       <!--<button type="submit" class="btn btn-primary" style="display: none;" id="btn-modificar">Modificar Rol</button>-->
-    </div>
-
-  </div>
-  <!--ESTRUCTURA DEL DOM FIN**********************************************************************************************************************-->
+<!--ESTRUCTURA DEL DOM FIN**********************************************************************************************************************-->
 
   <script>
     const usuario = sessionStorage.getItem('usuarioActual');
@@ -130,42 +97,49 @@
       document.getElementById('navUsuario').textContent = usuario;
     }
 
-    document.getElementById('btnCerrarSesion').addEventListener('click', () => {
-      sessionStorage.removeItem('usuarioActual');
-      window.location.href = 'login.html';
-    });
+
+    const tableBody = document.getElementById('roles-table-body');
+
+  //Manipulacion de formulario de agregar rol  
+  document.getElementById('form-nuevo-rol').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const nuevoRol = document.getElementById('nombreNuevoRol').value.trim();
+            if (!nuevoRol) {
+              alert('Por favor, ingresa un nombre para el nuevo rol.');
+              return;
+            }
+
+            const data = {
+              nombre: nuevoRol
+            };
+
+            fetch('http://localhost:8080/role/agregar', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify(data)
+            })
+              .then(response => {
+                if (!response.ok) {
+                  throw new Error('Error al guardar el rol');
+                }
+                return response.json();
+              })
+              .then(result => {
+                alert(`Rol "${result.nombre}" guardado correctamente.`);
+                document.getElementById('form-nuevo-rol').reset();
+                location.reload();
+              })
+              .catch(error => {
+                console.error('Error:', error);
+                alert('Ocurrió un error al guardar el rol.');
+              });
+});
 
 
-      let nombreRolSeleccionado = ''; 
-      document.addEventListener('DOMContentLoaded', function () {
-
-      const roleTable = document.getElementById("rolesTable");
-      const tableBody = document.getElementById('roles-table-body');
-      const tableHeader = document.getElementById('thead-roles');
-      const btnVolver = document.getElementById('btn-atras');
-      const btnImprimir = document.getElementById('btn-imprimir');
-      const btnVolverAdd = document.getElementById('btn-atras-add');
-      const formOpciones = document.getElementById('form-opciones');
-      const rolSeleccionadoDiv = document.getElementById('rol-seleccionado');
-      const formAgregarRolDiv = document.getElementById('form-agregar-rol');
-      //const btnModificar = document.getElementById('btn-modificar');
-      const btnAgregar = document.getElementById('btn-agregar');
-      const tableOptions = document.getElementById('options-table-body');
-      const headTableOptions = document.getElementById('thead-options');
-      const labelR = document.getElementById("labelRol");
-      const labelLR = document.getElementById("labelListRole");
-
-      const opcionesTable= document.getElementById("opcionesTable");
-      const btnAgregarOpc = document.getElementById('btn-agregar-opc');
-      
-   
-
-
-     
-      
-//CARGA DE ROLES**************************************************************************************************************************
-
-      fetch('http://localhost:8080/role/getRoles')
+//Manipular tabla que muestra roles
+fetch('http://localhost:8080/role/getRoles')
         .then(response => response.json())
         .then(roles => {
           roles.forEach(rol => {
@@ -175,384 +149,175 @@
             tdId.textContent = rol.idRole;
 
             const tdName = document.createElement('td');
-            tdName.textContent = rol.nombre;
+            const inputName = document.createElement('input');
+            inputName.type = 'text';
+            inputName.value = rol.nombre;
+            inputName.disabled = true;
+            inputName.className = 'form-control form-control-sm';
 
             const tdSelect = document.createElement('td');
+            tdSelect.className = 'align-middle text-center';
             const selectBtn = document.createElement('button');
-            selectBtn.className = 'btn btn-info';
-            selectBtn.textContent = 'Seleccionar';
+            selectBtn.className = 'btn btn btn-primary text-white btn-sm';
+            selectBtn.textContent = 'Editar opciones de rol';
+            selectBtn.setAttribute('type', 'button');
             selectBtn.setAttribute('data-id', rol.idRole);
             selectBtn.setAttribute('data-nombre', rol.nombre);
+            selectBtn.addEventListener('click', function () {
+               const id = rol.idRole;
+               const nombre = encodeURIComponent(rol.nombre); // para evitar errores con espacios/acentos
+               window.location.href = `roleOpcion.html?idRol=${id}&nombre=${nombre}`;
+            });
             tdSelect.appendChild(selectBtn);
 
+            const tdEdit = document.createElement('td');
+            tdEdit.className = 'align-middle text-center';
+
+
+            const deleteBtn = document.createElement('button');
+            deleteBtn.className = 'btn btn-danger btn-sm text-white';
+            deleteBtn.textContent = 'Eliminar rol';
+            deleteBtn.setAttribute('type', 'button');
+            deleteBtn.setAttribute('data-id', rol.idRole);
+            deleteBtn.setAttribute('data-nombre', rol.nombre);
+            deleteBtn.addEventListener('click', () => {
+                const rolId = deleteBtn.getAttribute('data-id');
+                const rolNombre = deleteBtn.getAttribute('data-nombre');
+
+                if (confirm(`¿Estás seguro de eliminar el rol "${rolNombre}"? Esta acción no se puede deshacer.`)) {
+                    fetch(`http://localhost:8080/role/eliminar/${rolId}`, {
+                        method: 'DELETE',
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            return response.text().then(text => { throw new Error(text); });
+                        }
+                        return response.text();
+                    })
+                    .then(message => {
+                        alert(message);
+                        // Recarga la página o actualiza la tabla para reflejar los cambios
+                        location.reload();
+                    })
+                    .catch(error => {
+                        alert('Error al eliminar el rol: ' + error.message);
+                    });
+                }
+            });
+
+            
+            const editBtn = document.createElement('button');
+            editBtn.className = 'btn btn-warning btn-sm text-black me-2';
+            editBtn.textContent = 'Acciones Rol';
+            editBtn.setAttribute('type', 'button');
+            editBtn.setAttribute('data-id', rol.idRole);
+            editBtn.setAttribute('data-nombre', rol.nombre);
+            editBtn.addEventListener('click', function () {
+                // 1. Deshabilitar todos los botones de la tabla
+               deleteBtn.style.display = 'none';
+
+                const allButtons = document.querySelectorAll('button');
+                allButtons.forEach(btn => btn.disabled = true);
+
+                // 2. Habilitar el input de nombre de esta fila
+                inputName.disabled = false;
+                inputName.focus();
+
+                // 3. Crear botones Guardar y Cancelar
+                const saveBtn = document.createElement('button');
+                saveBtn.className = 'btn btn-success btn-sm ms-2';
+                saveBtn.textContent = 'Guardar';
+                saveBtn.type = 'button';
+
+                const cancelBtn = document.createElement('button');
+                cancelBtn.className = 'btn btn-secondary btn-sm ms-2';
+                cancelBtn.textContent = 'Cancelar';
+
+                // Añadir botones al tdEdit
+                tdEdit.appendChild(saveBtn);
+                tdEdit.appendChild(cancelBtn);
+
+                // 4. Ocultar botón Editar (para evitar confusión)
+                editBtn.style.display = 'none';
+
+                // 5. Funcionalidad botones Guardar y Cancelar
+                saveBtn.addEventListener('click',() =>{
+                    deleteBtn.style.display = '';
+
+                    event.preventDefault();   
+                    const data = {
+                      idRole: editBtn.getAttribute('data-id'),
+                      nombre: inputName.value
+                    };
+                   fetch('http://localhost:8080/role/editar', {
+                      method: 'PUT',
+                      headers: {
+                          'Content-Type': 'application/json'
+                      },
+                      body: JSON.stringify(data)
+                  })
+                  .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Error al guardar el rol');
+                        }
+
+                        // Leer como texto para depurar
+                        return response.text().then(text => {
+                            console.log("🔎 Respuesta cruda:", text);
+                            try {
+                                const json = JSON.parse(text);
+                                console.log(" JSON parseado:", json);
+                                return json;
+                            } catch (err) {
+                                console.error(" Error al parsear JSON:", err);
+                                throw new Error("Respuesta no es JSON válido");
+                            }
+                        });
+                    })
+                    .then(result => {
+                        alert(`Rol "${result.nombre}" guardado correctamente.`);
+                        location.reload();
+                    })
+                    .catch(error => {
+                        //console.error('Error:', error);
+                        alert('Ocurrió un error al guardar el rol: ' + error.message);
+                    });
+                });
+                cancelBtn.addEventListener('click', () => {
+                  deleteBtn.style.display = '';
+
+                  inputName.value = rol.nombre; // restaurar valor original
+                  inputName.disabled = true;
+                  
+
+                  // Volver a habilitar todos los botones
+                  allButtons.forEach(btn => btn.disabled = false);
+
+                  // Quitar botones Guardar y Cancelar
+                  saveBtn.remove();
+                  cancelBtn.remove();
+
+                  // Mostrar botón Editar
+                  editBtn.style.display = '';
+                            
+                });
+            });
+
+
+            tdEdit.appendChild(editBtn);
+            tdEdit.appendChild(deleteBtn);
+           
+
             tr.appendChild(tdId);
-            tr.appendChild(tdName);
+            tr.appendChild(inputName);
+            tr.appendChild(tdEdit);
             tr.appendChild(tdSelect);
             tableBody.appendChild(tr);
 
-          });
-
-
-
-
-
-          //ROL SELECCIONADO PARA MODIFICAR**************************************************************
-          const selectButtons = document.querySelectorAll('button[data-id]');
-          selectButtons.forEach(button => {
-            button.addEventListener('click', function () {
-
-              const rolId = this.getAttribute('data-id');
-              window.rolIdSeleccionado = rolId; // Guarda en el objeto global window
-
-              const rolNombre = this.getAttribute('data-nombre');
-              nombreRolSeleccionado = rolNombre;
-              tableOptions.innerHTML = ''
-              getOptions(rolId);
-
-
-              document.querySelectorAll('button[data-id]').forEach(btn => btn.classList.remove('btn-success'));
-              this.classList.add('btn-success');
-
-              document.getElementById('nombre-rol').textContent = rolNombre;
-              rolSeleccionadoDiv.style.display = 'block';
-
-              // Ocultar la tabla de roles y su encabezado
-              opcionesTable.style.display = 'block';
-              tableBody.style.display = 'table-row-group';
-              tableHeader.style.display = 'table-header-group';
-              headTableOptions.style.display = 'block';
-              tableOptions.style.display = 'block';
-              //btnModificar.style.display = 'block';
-              btnAgregar.style.display = 'none';
-              btnVolver.style.display = 'block';
-              btnImprimir.style.display = 'block';
-              labelR.style.display = 'none';
-              labelLR.style.display = 'none';
-              roleTable.style.display = 'none';
-              btnAgregarOpc.style.display = 'block';
-              
-              
-              btnVolver.addEventListener('click', volverAInicio);// Mostrar el botón "Volver"
-
-              btnAgregarOpc.addEventListener('click', function () {
-                  if (window.rolIdSeleccionado) {
-                      window.location.href = `/roleOpcion.html?idRol=${window.rolIdSeleccionado}`;
-                  } else {
-                      alert("Por favor selecciona un rol primero.");
-                  }
-                });
-              });
+           
 
           });
-        })
-        .catch(error => {
-          console.error('Error al cargar los roles:', error);
-        });
-
-
-      //FUNCION PARA MOSTRAR LAS OPCIONES****************************************************************************
-
-      function getOptions(idRol) {
-        fetch(`http://localhost:8080/RoleOpcion/opcionesRol/${idRol}`)
-          .then(response => response.json())
-          .then(opciones => {
-            opciones.forEach(opcion => {
-              const tr = document.createElement('tr');
-
-              // Nombre
-              const tdName = document.createElement('td');
-              tdName.textContent = opcion.nombre;
-              tdName.style.width = '175px';
-
-              // Alta
-              const tdAlta = document.createElement('td');
-              const chkAlta = document.createElement('input');
-              chkAlta.type = 'checkbox';
-              chkAlta.checked = opcion.alta;
-              chkAlta.disabled = true;
-              tdAlta.classList.add('text-center');
-              tdAlta.style.width = '80px';
-              tdAlta.appendChild(chkAlta);
-
-              // Imprimir
-              const tdImprimir = document.createElement('td');
-              const chkImprimir = document.createElement('input');
-              chkImprimir.type = 'checkbox';
-              chkImprimir.checked = opcion.imprimir;
-              chkImprimir.disabled = true;
-              tdImprimir.classList.add('text-center');
-              tdImprimir.style.width = '100px';
-              tdImprimir.appendChild(chkImprimir);
-
-              // Exportar
-              const tdExportar = document.createElement('td');
-              const chkExportar = document.createElement('input');
-              chkExportar.type = 'checkbox';
-              chkExportar.checked = opcion.exportar;
-              chkExportar.disabled = true;
-              tdExportar.classList.add('text-center');
-              tdExportar.style.width = '98px';
-              tdExportar.appendChild(chkExportar);
-
-              // Botón Seleccionar
-              const tdSelect = document.createElement('td');
-              const selectBtn = document.createElement('button');
-              selectBtn.className = 'btn btn-info';
-              selectBtn.textContent = 'Seleccionar';
-              selectBtn.setAttribute('data-id', opcion.idOpcion);
-              selectBtn.setAttribute('data-nombre', opcion.nombre);
-              selectBtn.setAttribute('data-role', idRol);
-              tdSelect.classList.add('text-center');
-              tdSelect.appendChild(selectBtn);
-
-              // Agregar al row
-              tr.appendChild(tdName);
-              tr.appendChild(tdAlta);
-              tr.appendChild(tdImprimir);
-              tr.appendChild(tdExportar);
-              tr.appendChild(tdSelect);
-
-              tableOptions.appendChild(tr);
-
-              // Evento para activar checkboxes y cambiar el botón a "Guardar"
-              selectBtn.addEventListener('click', function seleccionarHandler() {
-                // Activar checkboxes
-                chkAlta.disabled = false;
-                chkImprimir.disabled = false;
-                chkExportar.disabled = false;
-
-                // Deshabilitar todos los demás botones "Seleccionar"
-                const allSelectButtons = document.querySelectorAll('button[data-id]');
-                allSelectButtons.forEach(btn => {
-                  btn.disabled = true;
-                  btn.classList.remove('btn-info');
-                  btn.classList.add('btn-secondary');
-                });
-
-                // Habilitar solo este botón y cambiar su texto
-                selectBtn.disabled = false;
-                selectBtn.textContent = 'Guardar';
-                selectBtn.classList.remove('btn-secondary');
-                selectBtn.classList.add('btn-success');
-
-                // Remover este handler para evitar múltiples bindings
-                selectBtn.removeEventListener('click', seleccionarHandler);
-
-                // Agregar nuevo handler para guardar
-                selectBtn.addEventListener('click', function guardarHandler() {
-                  // recolectar los datos
-                  const datos = {
-                    idOpcion: selectBtn.getAttribute('data-id'),
-                    idRole: selectBtn.getAttribute('data-role'),
-                    nombre: selectBtn.getAttribute('data-nombre'),
-                    alta: chkAlta.checked,
-                    imprimir: chkImprimir.checked,
-                    exportar: chkExportar.checked
-                  };
-
-                  fetch('http://localhost:8080/RoleOpcion/editarRoleOpcion', {
-                    method: 'PUT',
-                    headers: {
-                      'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(datos)
-                  })
-                    .then(response => {
-                      if (!response.ok) {
-                        throw new Error('Error al editar opcion')
-                      }
-                      return response.json();
-                    }).then(data => {
-                      console.log('Opciones de Role Actualizada')
-                    })
-                    .catch(error => {
-                      console.error('Error en la peticion')
-                    })
-
-                  console.log('Guardando datos:', datos);
-
-                  // Desactivar checkboxes nuevamente
-                  chkAlta.disabled = true;
-                  chkImprimir.disabled = true;
-                  chkExportar.disabled = true;
-
-                  // Restaurar texto y estilo del botón
-                  selectBtn.textContent = 'Seleccionar';
-                  selectBtn.classList.remove('btn-success');
-                  selectBtn.classList.add('btn-info');
-
-                  // Habilitar todos los botones "Seleccionar"
-                  allSelectButtons.forEach(btn => {
-                    btn.disabled = false;
-                    btn.classList.remove('btn-secondary');
-                    btn.classList.add('btn-info');
-                  });
-
-                  // Remover el handler de guardar y volver a agregar el de seleccionar
-                  selectBtn.removeEventListener('click', guardarHandler);
-                  selectBtn.addEventListener('click', seleccionarHandler);
-                });
-              });
-            });
-          })
-          .catch(error => {
-            console.error('Error al cargar opciones:', error);
-          });
-      }
-
-      //FUNCION CLIC EN VOLVER****************************************************************************
-      function volverAInicio() {
-        // Mostrar de nuevo la tabla, el encabezado y los botones
-        tableBody.style.display = 'table-row-group';
-        tableHeader.style.display = 'table-header-group';
-        //btnModificar.style.display = 'none';
-        btnAgregar.style.display = 'block';
-        headTableOptions.style.display = 'none';
-        tableOptions.style.display = 'none';
-        labelR.style.display = 'block';
-        labelLR.style.display = 'block';
-        roleTable.style.display = 'block';
-        opcionesTable.style.display = 'none';
-
-        // Ocultar la vista de rol seleccionado y el botón "Volver"
-        rolSeleccionadoDiv.style.display = 'none';
-        formAgregarRolDiv.style.display = 'none';
-        btnVolver.style.display = 'none';
-        btnImprimir.style.display = 'none';
-        btnAgregarOpc.style.display = 'none';
-
-        // Mostrar los botones de selección de nuevo
-        const selectButtons = document.querySelectorAll('button[data-id]');
-        selectButtons.forEach(button => {
-          button.style.display = 'inline-block'; // Mostrar los botones de "Seleccionar"
-        });
-      }
-
-
-
-
-      //MANEJAR ERRORER DE  ENVÍO DEL FORMULARIO PRINCIPAL (PARA MODIFICAR)***************************************************************************
-      formOpciones.addEventListener('submit', function (e) {
-        e.preventDefault();
-
-        const selected = document.querySelector('button.btn-success');
-        if (!selected) {
-          alert('Por favor, selecciona un rol antes de continuar.');
-          return;
-        }
-
-        // Mostrar opciones para modificar el rol
-        document.querySelectorAll('button[data-id]').forEach(el => el.style.display = 'none');
-        //btnModificar.style.display = 'none';
-        btnAgregar.style.display = 'none';
-        rolSeleccionadoDiv.style.display = 'block';
-      });
-
-      //AGREGAR ROL**********************************************************************************************
-      btnAgregar.addEventListener('click', function (e) {
-        e.preventDefault();
-
-        document.querySelectorAll('button[data-id]').forEach(el => el.style.display = 'none');
-        formAgregarRolDiv.style.display = 'block';
-        tableBody.style.display = 'none';
-        btnAgregar.style.display = 'none';
-        rolSeleccionadoDiv.style.display = 'none';
-        tableHeader.style.display = 'none';
-        btnVolverAdd.style.display = 'block';
-        labelR.style.display = 'none';
-        labelLR.style.display = 'none';
-        roleTable.style.display = 'none';
-        opcionesTable.style.display = 'none';
-        btnVolverAdd.addEventListener('click', volverAInicio);
-      });
-
-      document.getElementById('form-nuevo-rol').addEventListener('submit', function (e) {
-        e.preventDefault();
-
-        const nuevoRol = document.getElementById('nombreNuevoRol').value.trim();
-        if (!nuevoRol) {
-          alert('Por favor, ingresa un nombre para el nuevo rol.');
-          return;
-        }
-
-        const data = {
-          nombre: nuevoRol
-        };
-
-        fetch('http://localhost:8080/role/agregar', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(data)
-        })
-          .then(response => {
-            if (!response.ok) {
-              throw new Error('Error al guardar el rol');
-            }
-            return response.json();
-          })
-          .then(result => {
-            alert(`Rol "${result.nombre}" guardado correctamente.`);
-
-            // Limpiar y ocultar formulario
-            document.getElementById('form-nuevo-rol').reset();
-            formAgregarRolDiv.style.display = 'none';
-
-            // Recargar roles (opcional)
-            location.reload(); // ← recarga la página para mostrar el nuevo rol
-          })
-          .catch(error => {
-            console.error('Error:', error);
-            alert('Ocurrió un error al guardar el rol.');
-          });
-      });
-    });
-
-
-    function imprimirOpcionesMarcadas() {
-      const filas = document.querySelectorAll('#options-table-body tr');
-      const opcionesMarcadas = [];
-
-      filas.forEach(fila => {
-        const nombre = fila.querySelector('td:nth-child(1)').textContent.trim();
-        const chkImprimir = fila.querySelector('td:nth-child(3) input[type="checkbox"]');
-
-        if (chkImprimir && chkImprimir.checked) {
-          opcionesMarcadas.push(nombre);
-        }
-      });
-
-      // Generar HTML para imprimir
-      const ventanaImpresion = window.open('', '', 'width=800,height=600');
-      ventanaImpresion.document.write(`
-    <html>
-      <head>
-        <title>Opciones de Rol</title>
-        <style>
-          body { font-family: Arial, sans-serif; padding: 20px; }
-          h2 { color: #333; }
-          ul { font-size: 16px; }
-        </style>
-      </head>
-      <body>
-        <h2>Opciones del rol: ${nombreRolSeleccionado}</h2>
-        <ul>
-          ${opcionesMarcadas.map(nombre => `<li>${nombre}</li>`).join('')}
-        </ul>
-        <script>
-          window.onload = function() {
-            window.print();
-            window.onafterprint = function() { window.close(); }
-          }
-        <\/script>
-      </body>
-    </html>
-  `);
-      ventanaImpresion.document.close();
-    }
-
-
+  });   
   </script>
 </body>
 

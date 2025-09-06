@@ -40,135 +40,197 @@
 </head>
 
 <body>
-  <div class="container">
-  <h3 id="titulo-rol" class="mb-3">Opciones disponibles</h3>
-
-  <div class="mb-3">
-    <label for="select-opciones" class="form-label">Selecciona una opción</label>
-    <select class="form-select" id="select-opciones">
-      <option selected disabled>-- Cargando opciones... --</option>
-    </select>
-  </div>
-
- <div class="form-check mb-2">
-  <input class="form-check-input" type="checkbox" id="chk-imprimir">
-  <label class="form-check-label" for="chk-imprimir">
-    Imprimir opción
-  </label>
+<div class="mt-3 mb-3">
+  <label id="label-rol" class="fw-bold fs-5"></label>
+  <button class="btn btn-primary" onclick="volverRole()">Volver a roles</button>
+</div> 
+ <div class="table-responsive shadow-sm rounded w-100">
+      <table  class="table table-bordered table-hover table-striped align-middle w-100">
+        <thead  class="table-dark" >
+          <tr>
+            <!--<th scope="col">Nombre del Modulo</th>
+            <th scope="col">Nombre del Menu</th>-->
+            <th scope="col">Nombre de la opción</th>
+            <th scope="col" class="text-center" style="width: 80px;">Alta</th>
+            <th scope="col" class="text-center" style="width: 100px;">Imprimir</th>
+            <th scope="col" class="text-center" style="width: 100px;">Exportar</th>
+            <th scope="col" class="text-center" style="width: 120px;">Modificar</th>
+          </tr>
+        </thead>
+        <tbody id="options-table-body">
+          <!-- Las filas se insertarán dinámicamente -->
+        </tbody>
+      </table>
 </div>
-
-<div class="form-check mb-3">
-  <input class="form-check-input" type="checkbox" id="chk-exportar">
-  <label class="form-check-label" for="chk-exportar">
-    Exportar opción
-  </label>
-</div>
-
-
-  <button class="btn btn-warning" onclick="volverRole()">Volver a opciones roles</button>
-  <button class="btn btn-primary" onclick="agregarOpcion()">Agregar opcion</button>
-</div>
+ 
 
 <script>
   // Obtener idRol desde la URL
   const queryParams = new URLSearchParams(window.location.search);
   const idRol = queryParams.get("idRol");
+  const nombre = queryParams.get("nombre");
+  const tableOptions = document.getElementById('options-table-body');
 
-  if (!idRol) {
-    alert("No se ha proporcionado el ID del rol.");
-  } else {
-    fetch(`http://localhost:8080/RoleOpcion/opcionesDisponibles/${idRol}`)
-      .then(response => response.json())
-      .then(opciones => {
-        const select = document.getElementById("select-opciones");
-        select.innerHTML = '';
+  const label = document.getElementById('label-rol');
 
-        if (opciones.length === 0) {
-          const option = document.createElement("option");
-          option.text = "No hay opciones disponibles";
-          option.disabled = true;
-          option.selected = true;
-          select.appendChild(option);
-        } else {
-          const placeholder = document.createElement("option");
-          placeholder.text = "-- Selecciona una opción --";
-          placeholder.disabled = true;
-          placeholder.selected = true;
-          select.appendChild(placeholder);
 
-          opciones.forEach(opcion => {
-            const opt = document.createElement("option");
-            opt.value = opcion.idOpcion;
-            opt.textContent = opcion.nombre;
-            select.appendChild(opt);
+  label.textContent = `Opciones del rol: ${nombre}`;
+  getOptions(idRol);
+
+   function getOptions(idRol) {
+        fetch(`http://localhost:8080/RoleOpcion/opcionesRol/${idRol}`)
+          .then(response => response.json())
+          .then(opciones => {
+            opciones.forEach(opcion => {
+              const tr = document.createElement('tr');
+
+              // Nombre
+              const tdName = document.createElement('td');
+              tdName.textContent = opcion.nombre;
+              tdName.style.width = '175px';
+
+              // Alta
+              const tdAlta = document.createElement('td');
+              const chkAlta = document.createElement('input');
+              chkAlta.type = 'checkbox';
+              chkAlta.checked = opcion.alta;
+              chkAlta.disabled = true;
+              tdAlta.classList.add('text-center');
+              tdAlta.style.width = '80px';
+              tdAlta.appendChild(chkAlta);
+
+              // Imprimir
+              const tdImprimir = document.createElement('td');
+              const chkImprimir = document.createElement('input');
+              chkImprimir.type = 'checkbox';
+              chkImprimir.checked = opcion.imprimir;
+              chkImprimir.disabled = true;
+              tdImprimir.classList.add('text-center');
+              tdImprimir.style.width = '100px';
+              tdImprimir.appendChild(chkImprimir);
+
+              // Exportar
+              const tdExportar = document.createElement('td');
+              const chkExportar = document.createElement('input');
+              chkExportar.type = 'checkbox';
+              chkExportar.checked = opcion.exportar;
+              chkExportar.disabled = true;
+              tdExportar.classList.add('text-center');
+              tdExportar.style.width = '98px';
+              tdExportar.appendChild(chkExportar);
+
+              // Botón Seleccionar
+              const tdSelect = document.createElement('td');
+              const selectBtn = document.createElement('button');
+              selectBtn.className = 'btn btn-warning btn-sm text-black me-2';
+              selectBtn.textContent = 'Editar';
+              selectBtn.setAttribute('data-id', opcion.idOpcion);
+              selectBtn.setAttribute('data-nombre', opcion.nombre);
+              selectBtn.setAttribute('data-role', idRol);
+              tdSelect.classList.add('text-center');
+              tdSelect.appendChild(selectBtn);
+
+              // Agregar al row
+              tr.appendChild(tdName);
+              tr.appendChild(tdAlta);
+              tr.appendChild(tdImprimir);
+              tr.appendChild(tdExportar);
+              tr.appendChild(tdSelect);
+
+              tableOptions.appendChild(tr);
+
+              // Evento para activar checkboxes y cambiar el botón a "Guardar"
+              selectBtn.addEventListener('click', function seleccionarHandler() {
+                // Activar checkboxes
+                chkAlta.disabled = false;
+                chkImprimir.disabled = false;
+                chkExportar.disabled = false;
+
+                // Deshabilitar todos los demás botones "Seleccionar"
+                const allSelectButtons = document.querySelectorAll('button[data-id]');
+                allSelectButtons.forEach(btn => {
+                  btn.disabled = true;
+                  btn.classList.remove('btn-info');
+                  btn.classList.add('btn-secondary');
+                });
+
+                // Habilitar solo este botón y cambiar su texto
+                selectBtn.disabled = false;
+                selectBtn.textContent = 'Guardar';
+                selectBtn.classList.remove('btn-secondary');
+                selectBtn.classList.add('btn-primary');
+
+
+                // Remover este handler para evitar múltiples bindings
+                selectBtn.removeEventListener('click', seleccionarHandler);
+
+                // Agregar nuevo handler para guardar
+                selectBtn.addEventListener('click', function guardarHandler() {
+                  // recolectar los datos
+                  const datos = {
+                    idOpcion: selectBtn.getAttribute('data-id'),
+                    idRole: selectBtn.getAttribute('data-role'),
+                    nombre: selectBtn.getAttribute('data-nombre'),
+                    alta: chkAlta.checked,
+                    imprimir: chkImprimir.checked,
+                    exportar: chkExportar.checked
+                  };
+
+                  fetch('http://localhost:8080/RoleOpcion/editarRoleOpcion', {
+                    method: 'PUT',
+                    headers: {
+                      'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(datos)
+                  })
+                    .then(response => {
+                      if (!response.ok) {
+                        throw new Error('Error al editar opcion')
+                      }
+                      return response.json();
+                    }).then(data => {
+                      console.log('Opciones de Role Actualizada')
+                    })
+                    .catch(error => {
+                      console.error('Error en la peticion')
+                    })
+
+                  console.log('Guardando datos:', datos);
+
+                  // Desactivar checkboxes nuevamente
+                  chkAlta.disabled = true;
+                  chkImprimir.disabled = true;
+                  chkExportar.disabled = true;
+
+                  // Restaurar texto y estilo del botón
+                  selectBtn.textContent = 'Editar';
+                  selectBtn.classList.remove('btn-success');
+                  selectBtn.classList.add('btn-info');
+
+                  // Habilitar todos los botones "Seleccionar"
+                  allSelectButtons.forEach(btn => {
+                    btn.disabled = false;
+                    btn.classList.remove('btn-secondary');
+                    btn.classList.add('btn-info');
+                  });
+
+                  // Remover el handler de guardar y volver a agregar el de seleccionar
+                  selectBtn.removeEventListener('click', guardarHandler);
+                  selectBtn.addEventListener('click', seleccionarHandler);
+                });
+              });
+            });
+          })
+          .catch(error => {
+            console.error('Error al cargar opciones:', error);
           });
-        }
-      })
-      .catch(error => {
-        console.error("Error al obtener las opciones:", error);
-        alert("Ocurrió un error al cargar las opciones.");
-      });
-  }
-
-  function volverRole() {
-     window.location.href = `/role.html`;
-  }
-
-  function agregarOpcion() {
-    const select = document.getElementById("select-opciones");
-    const idOpcion = select.value;
-    const nombre = select.options[select.selectedIndex].text;
-    const imprimir = document.getElementById("chk-imprimir").checked;
-    const exportar = document.getElementById("chk-exportar").checked;
-
-    if (!idOpcion) {
-      alert("Selecciona una opción válida.");
-      return;
-    }
-
-    const datos = {
-      idOpcion: parseInt(idOpcion),
-      idRole: parseInt(idRol),
-      nombre: nombre,
-      alta: true,
-      baja: false,
-      imprimir: imprimir,
-      exportar: exportar
-    };
-
-    fetch("http://localhost:8080/RoleOpcion/agregar", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(datos)
-    })
-    .then(response => {
-      if (!response.ok) {
-        throw new Error("Error al agregar opción.");
       }
-      return response.json();
-    })
-    .then(data => {
-      alert("Opción agregada correctamente.");
 
-      // Limpiar los checkboxes
-      document.getElementById("chk-imprimir").checked = false;
-      document.getElementById("chk-exportar").checked = false;
-
-      // Eliminar la opción del select
-      select.remove(select.selectedIndex);
-
-      // Si no quedan más opciones, mostrar mensaje
-      if (select.options.length === 1) {
-        select.innerHTML = '<option selected disabled>No hay más opciones disponibles</option>';
+      function volverRole() {
+        window.location.href = 'role.html'
       }
-    })
-    .catch(error => {
-      console.error("Error al enviar los datos:", error);
-      alert("Ocurrió un error al guardar la opción.");
-    });
-  }
+
+    
 </script>
 
 
