@@ -73,7 +73,7 @@
             <tr>
               <th scope="col">No.</th>
               <th scope="col">Nombre del Rol</th>
-              <th scope="col" class="text-center">Editar rol</th>
+              <th scope="col" class="text-center">Acciones Rol</th>
               <th scope="col" class="text-center">Editar opciones de rol</th>
             </tr>
           </thead>
@@ -208,7 +208,7 @@ fetch('http://localhost:8080/role/getRoles')
             
             const editBtn = document.createElement('button');
             editBtn.className = 'btn btn-warning btn-sm text-black me-2';
-            editBtn.textContent = 'Acciones Rol';
+            editBtn.textContent = 'Editar Rol';
             editBtn.setAttribute('type', 'button');
             editBtn.setAttribute('data-id', rol.idRole);
             editBtn.setAttribute('data-nombre', rol.nombre);

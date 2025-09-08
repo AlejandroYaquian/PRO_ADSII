@@ -16,7 +16,6 @@ import com.adsii.pro_adsii.Entity.Menu;
 import com.adsii.pro_adsii.Entity.Opcion;
 import com.adsii.pro_adsii.Entity.RoleOpcion;
 import com.adsii.pro_adsii.Entity.RoleOpcionId;
-import com.adsii.pro_adsii.Repository.MenuRepository;
 import com.adsii.pro_adsii.Repository.RoleOpcionRepository;
 
 
@@ -73,6 +72,8 @@ public class RoleOpcionService {
         if (roleOpcion.isPresent()) {
 			RoleOpcion rop = roleOpcion.get();
 			rop.setAlta(opcionDTOActualizado.getAlta() ? true : false);
+            rop.setBaja(opcionDTOActualizado.getBaja() ? true : false);
+            rop.setCambio(opcionDTOActualizado.getCambio() ? true : false);
             rop.setImprimir(opcionDTOActualizado.getImprimir() ? true : false);
             rop.setExportar(opcionDTOActualizado.getExportar() ? true : false);
             rop.setFechaModificacion(fecha);
@@ -125,7 +126,7 @@ public class RoleOpcionService {
 
             roleOpcion.setId(roleOpcionId);
             roleOpcion.setAlta(false);
-            roleOpcion.setBaja(true);
+            roleOpcion.setBaja(false);
             roleOpcion.setCambio(false);
             roleOpcion.setImprimir(false);
             roleOpcion.setExportar(false);
