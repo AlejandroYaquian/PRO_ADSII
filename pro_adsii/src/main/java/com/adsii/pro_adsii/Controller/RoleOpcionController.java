@@ -27,6 +27,11 @@ public class RoleOpcionController {
         return roleOpcionService.obtenerOpcionesPorRol(idRole);
     }
 
+     @PutMapping(path="/editarRoleOpcion")
+    public RoleOpcion actualizarIngrediente(@RequestBody OpcionDTO opcionDTOActualizado) {
+        return roleOpcionService.actualizarRoleOpcion(opcionDTOActualizado);
+    }
+
 
     @GetMapping("/opcionesDisponibles/{idRole}")
     public List<Opcion> agregarOpcionesRole(@PathVariable Integer idRole){

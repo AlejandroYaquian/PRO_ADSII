@@ -32,4 +32,12 @@ public class Modulo {
 
     @Column(name = "UsuarioModificacion", length = 50)
     private String usuarioModificacion;
+
+     public String getNombre() {
+		return nombre;
+	}
+
+	public void setNombre(String nombre) {
+		this.nombre = nombre;
+	}
 }

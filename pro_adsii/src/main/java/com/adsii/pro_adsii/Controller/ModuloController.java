@@ -22,7 +22,7 @@ public class ModuloController {
 
     @GetMapping("/{id}")
     public Modulo obtener(@PathVariable Long id) {
-        return moduloService.obtenerPorId(id).orElse(null);
+        return moduloService.obtenerPorId(id);
     }
 
     @PostMapping("/guardar")

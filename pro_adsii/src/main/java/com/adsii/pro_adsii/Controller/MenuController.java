@@ -28,7 +28,7 @@ public class MenuController {
 
     @GetMapping("/{id}")
     public Menu obtener(@PathVariable Integer id) {
-        return menuService.obtenerPorId(id).orElse(null);
+        return menuService.obtenerPorId(id);
     }
 
     @PostMapping("/guardar")
