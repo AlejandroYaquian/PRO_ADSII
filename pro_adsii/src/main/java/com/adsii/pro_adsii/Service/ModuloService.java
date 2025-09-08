@@ -19,8 +19,9 @@ public class ModuloService {
         return moduloRepository.findAll();
     }
 
-    public Optional<Modulo> obtenerPorId(Long id) {
-        return moduloRepository.findById(id);
+    public Modulo obtenerPorId(Long id) {
+        Optional<Modulo> modulo = moduloRepository.findById(id);	
+		return modulo.isPresent() ? modulo.get() : null;
     }
 
     public Modulo guardar(Modulo modulo, String usuarioActual) {

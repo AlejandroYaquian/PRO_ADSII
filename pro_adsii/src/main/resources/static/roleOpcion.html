@@ -48,10 +48,12 @@
       <table  class="table table-bordered table-hover table-striped align-middle w-100">
         <thead  class="table-dark" >
           <tr>
-            <!--<th scope="col">Nombre del Modulo</th>
-            <th scope="col">Nombre del Menu</th>-->
+            <th scope="col">Nombre del Modulo</th>
+            <th scope="col">Nombre del Menu</th>
             <th scope="col">Nombre de la opción</th>
             <th scope="col" class="text-center" style="width: 80px;">Alta</th>
+            <th scope="col" class="text-center" style="width: 80px;">Baja</th>
+            <th scope="col" class="text-center" style="width: 80px;">Cambio</th>
             <th scope="col" class="text-center" style="width: 100px;">Imprimir</th>
             <th scope="col" class="text-center" style="width: 100px;">Exportar</th>
             <th scope="col" class="text-center" style="width: 120px;">Modificar</th>
@@ -84,6 +86,16 @@
             opciones.forEach(opcion => {
               const tr = document.createElement('tr');
 
+              //Modulo
+              const tdModulo = document.createElement('td');
+              tdModulo.textContent = opcion.modulo;
+              tdModulo.style.width = '175px';
+
+              //Menu
+              const tdMenu = document.createElement('td');
+              tdMenu.textContent = opcion.menu;
+              tdMenu.style.width = '175px';
+
               // Nombre
               const tdName = document.createElement('td');
               tdName.textContent = opcion.nombre;
@@ -98,6 +110,26 @@
               tdAlta.classList.add('text-center');
               tdAlta.style.width = '80px';
               tdAlta.appendChild(chkAlta);
+
+              // Baja
+              const tdBaja = document.createElement('td');
+              const chkBaja = document.createElement('input');
+              chkBaja.type = 'checkbox';
+              chkBaja.checked = opcion.baja;
+              chkBaja.disabled = true;
+              tdBaja.classList.add('text-center');
+              tdBaja.style.width = '80px';
+              tdBaja.appendChild(chkBaja);
+
+              //Cambio
+              const tdCambio = document.createElement('td');
+              const chkCambio = document.createElement('input');
+              chkCambio.type = 'checkbox';
+              chkCambio.checked = opcion.cambio;
+              chkCambio.disabled = true;
+              tdCambio.classList.add('text-center');
+              tdCambio.style.width = '80px';
+              tdCambio.appendChild(chkCambio);
 
               // Imprimir
               const tdImprimir = document.createElement('td');
@@ -131,8 +163,12 @@
               tdSelect.appendChild(selectBtn);
 
               // Agregar al row
+              tr.appendChild(tdModulo);
+              tr.appendChild(tdMenu);
               tr.appendChild(tdName);
               tr.appendChild(tdAlta);
+              tr.appendChild(tdBaja);
+              tr.appendChild(tdCambio);
               tr.appendChild(tdImprimir);
               tr.appendChild(tdExportar);
               tr.appendChild(tdSelect);
@@ -143,6 +179,8 @@
               selectBtn.addEventListener('click', function seleccionarHandler() {
                 // Activar checkboxes
                 chkAlta.disabled = false;
+                chkBaja.disabled = false;
+                chkCambio.disabled = false;
                 chkImprimir.disabled = false;
                 chkExportar.disabled = false;
 
@@ -172,6 +210,8 @@
                     idRole: selectBtn.getAttribute('data-role'),
                     nombre: selectBtn.getAttribute('data-nombre'),
                     alta: chkAlta.checked,
+                    baja: chkBaja.checked,
+                    cambio: chkCambio.checked,
                     imprimir: chkImprimir.checked,
                     exportar: chkExportar.checked
                   };
@@ -199,6 +239,8 @@
 
                   // Desactivar checkboxes nuevamente
                   chkAlta.disabled = true;
+                  chkBaja.disabled = true;
+                  chkCambio.disabled = true;
                   chkImprimir.disabled = true;
                   chkExportar.disabled = true;
 

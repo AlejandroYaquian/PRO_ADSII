@@ -6,8 +6,7 @@ import org.springframework.stereotype.Repository;
 import com.adsii.pro_adsii.Entity.Menu;
 
 
-@Repository
-
+@Repository("menuRepository")
 public interface MenuRepository extends JpaRepository<Menu, Integer>{
 
 }

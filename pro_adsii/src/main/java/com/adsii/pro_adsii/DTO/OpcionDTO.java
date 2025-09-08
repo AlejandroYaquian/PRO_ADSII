@@ -9,6 +9,7 @@ public class OpcionDTO {
     private String nombre;
     private Boolean alta;
     private Boolean baja;
+    private Boolean cambio;
     private Boolean imprimir;
     private Boolean exportar;
     
@@ -70,6 +71,12 @@ public class OpcionDTO {
     }
     public void setExportar(Boolean exportar) {
         this.exportar = exportar;
+    }
+    public Boolean getCambio() {
+        return cambio;
+    }
+    public void setCambio(Boolean cambio) {
+        this.cambio = cambio;
     }
    
 

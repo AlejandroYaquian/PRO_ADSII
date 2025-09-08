@@ -12,9 +12,11 @@ import org.springframework.stereotype.Service;
 
 
 import com.adsii.pro_adsii.DTO.OpcionDTO;
+import com.adsii.pro_adsii.Entity.Menu;
 import com.adsii.pro_adsii.Entity.Opcion;
 import com.adsii.pro_adsii.Entity.RoleOpcion;
 import com.adsii.pro_adsii.Entity.RoleOpcionId;
+import com.adsii.pro_adsii.Repository.MenuRepository;
 import com.adsii.pro_adsii.Repository.RoleOpcionRepository;
 
 
@@ -30,6 +32,12 @@ public class RoleOpcionService {
     @Autowired
     RoleService roleR;
 
+    @Autowired
+    MenuService menuService;
+
+    @Autowired
+    ModuloService moduloService;
+
 
 
     public List<OpcionDTO> obtenerOpcionesPorRol(int idRole) {
@@ -43,11 +51,15 @@ public class RoleOpcionService {
         for (RoleOpcion roleOpcion : roleOpciones) {
             op = opcion.buscarOpcion(roleOpcion.getId().getIdOpcion());
             opcionDTO = new OpcionDTO();
+            Menu menuM = menuService.obtenerPorId(op.getIdMenu());
+            opcionDTO.setModulo(moduloService.obtenerPorId((long)(menuM.getIdModulo())).getNombre());
+            opcionDTO.setMenu(menuM.getNombre());     
             opcionDTO.setIdRole(roleOpcion.getId().getIdRole());
             opcionDTO.setIdOpcion(roleOpcion.getId().getIdOpcion());
             opcionDTO.setNombre(op.getNombre());
             opcionDTO.setAlta(roleOpcion.getAlta());
             opcionDTO.setBaja(roleOpcion.getBaja());
+            opcionDTO.setCambio(roleOpcion.getCambio());
             opcionDTO.setImprimir(roleOpcion.getImprimir());
             opcionDTO.setExportar(roleOpcion.getExportar());
             ops.add(opcionDTO);
