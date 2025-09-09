@@ -12,10 +12,12 @@
         border: 1px solid #fff;
         color: #fff;
     }
+
     #btnCerrarSesion:hover {
         background-color: rgba(255, 255, 255, 0.2);
     }
 </style>
+
 <body class="bg-light">
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
         <div class="container-fluid">
@@ -85,19 +87,21 @@
     </div>
 
     <script>
+        // Obtener usuario logueado desde sessionStorage
         const usuario = sessionStorage.getItem('usuarioActual');
-
         if (!usuario) {
             window.location.href = 'login.html';
         } else {
             document.getElementById('navUsuario').textContent = usuario;
         }
 
+        // Cerrar sesión
         document.getElementById('btnCerrarSesion').addEventListener('click', () => {
             sessionStorage.removeItem('usuarioActual');
             window.location.href = 'login.html';
         });
 
+        // Cargar tipos de acceso
         async function cargarTipoAccesos() {
             const res = await fetch("/tipoacceso/listar");
             const data = await res.json();
@@ -127,19 +131,20 @@
             });
         }
 
+        // Guardar o actualizar tipo de acceso
         async function guardarTipoAcceso() {
             const id = document.getElementById("tipoAccesoId").value;
             const nombre = document.getElementById("nombre").value;
             if (!nombre) return alert("Ingrese nombre");
 
-            const tipoAcceso = {
-                idTipoAcceso: id || null,
-                nombre
-            };
+            const tipoAcceso = { idTipoAcceso: id || null, nombre };
 
             await fetch("/tipoacceso/guardar", {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: {
+                    "Content-Type": "application/json",
+                    "usuario": usuario // <-- enviamos el usuario logueado al backend
+                },
                 body: JSON.stringify(tipoAcceso)
             });
 
@@ -147,6 +152,7 @@
             cargarTipoAccesos();
         }
 
+        // Editar tipo de acceso
         async function editarTipoAcceso(id) {
             const res = await fetch(`/tipoacceso/${id}`);
             const t = await res.json();
@@ -157,6 +163,7 @@
             document.getElementById("btnGuardar").textContent = "Actualizar";
         }
 
+        // Cancelar edición
         function cancelarEdicion() {
             document.getElementById("tipoAccesoId").value = "";
             document.getElementById("nombre").value = "";
@@ -164,6 +171,7 @@
             document.getElementById("btnGuardar").textContent = "Guardar";
         }
 
+        // Eliminar tipo de acceso
         async function eliminarTipoAcceso(id) {
             if (!confirm("¿Seguro de eliminar?")) return;
             await fetch(`/tipoacceso/eliminar/${id}`, { method: "DELETE" });
@@ -173,4 +181,6 @@
         // Cargar al iniciar
         cargarTipoAccesos();
     </script>
-    </
+</body>
+
+</html>

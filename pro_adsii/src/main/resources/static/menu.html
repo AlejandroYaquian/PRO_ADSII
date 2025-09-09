@@ -1,157 +1,195 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
+
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestión de Menu</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous"> 
+    <title>CRUD Menú</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
 </head>
-<body class="bg-light">
-<div class="container py-5">
-    <h2 class="mb-4 text-center">Gestión de Menu</h2>
+<style>
+    #btnCerrarSesion {
+        background-color: transparent;
+        border: 1px solid #fff;
+        color: #fff;
+    }
+    #btnCerrarSesion:hover {
+        background-color: rgba(255, 255, 255, 0.2);
+    }
+</style>
 
-    <!-- Formulario para agregar / editar -->
-    <div class="card mb-4">
-        <div class="card-header">Agregar / Editar Menu</div>
-        <div class="card-body">
-            <input type="hidden" id="menuId">
-            <div class="row g-2">
-                <div class="col-md-4">
-                    <input type="text" id="nombreMenu" class="form-control" placeholder="Nombre" required>
-                </div>
-                <div class="col-md-2">
-                    <input type="number" id="ordenMenu" class="form-control" placeholder="Orden" required>
-                </div>
-                <div class="col-md-3">
-                    <input type="text" id="usuarioCreacion" class="form-control" placeholder="Usuario Creación" required>
-                </div>
-                <div class="col-md-3 d-flex gap-2">
-                    <button class="btn btn-primary" onclick="guardarMenu()" id="btnGuardar">Guardar</button>
-                    <button class="btn btn-secondary" onclick="cancelarEdicion()" id="btnCancelar">Cancelar</button>
-                </div>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="index.html">Inicio</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMenu">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarMenu">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                </ul>
+                <span class="navbar-text me-3" id="navUsuario"></span>
+                <button class="btn ms-2" id="btnCerrarSesion">Cerrar Sesión</button>
             </div>
         </div>
-    </div>
+    </nav>
+    <div class="container mt-4">
+        <h2 class="mb-4">Gestión de Menús</h2>
 
+        <!-- Formulario -->
+        <form id="menuForm" class="mb-4">
+            <input type="hidden" id="idMenu">
 
-<!-- Tabla de módulos -->
-    <div class="card">
-        <div class="card-header">Listado de Menu</div>
-        <div class="card-body">
-            <table class="table table-bordered table-hover">
-                <thead class="table-dark">
+            <div class="mb-3">
+                <label for="idModulo" class="form-label">Módulo</label>
+                <select id="idModulo" class="form-select" required>
+                    <option value="">-- Selecciona un módulo --</option>
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label for="nombre" class="form-label">Nombre del Menú</label>
+                <input type="text" class="form-control" id="nombre" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="ordenMenu" class="form-label">Orden Menú</label>
+                <input type="number" class="form-control" id="ordenMenu">
+            </div>
+
+            <button type="submit" class="btn btn-primary">Guardar</button>
+            <button type="reset" class="btn btn-secondary">Limpiar</button>
+        </form>
+
+        <!-- Tabla -->
+        <table class="table table-striped">
+            <thead>
                 <tr>
-                    <th>Id Menu</th>
-                    <th>Id Modulo</th>
+                    <th>ID</th>
+                    <th>Módulo</th>
                     <th>Nombre</th>
                     <th>Orden</th>
-                    <th>Fecha Creación</th>
                     <th>Usuario Creación</th>
-                    <th>Fecha Modificación</th>
+                    <th>Fecha Creación</th>
                     <th>Usuario Modificación</th>
+                    <th>Fecha Modificación</th>
                     <th>Acciones</th>
                 </tr>
-                </thead>
-                <tbody id="menu-body">
-                    <tr><td colspan="9" class="text-center">Cargando...</td></tr>
-                </tbody>
-            </table>
-        </div>
+            </thead>
+            <tbody id="menuTableBody">
+            </tbody>
+        </table>
+
+        <script>
+            
+            const API_URL_MENU = "http://localhost:8080/menu";
+            const API_URL_MODULO = "http://localhost:8080/modulo";
+            const usuario = sessionStorage.getItem("usuarioActual");
+
+            if (!usuario) {
+                window.location.href = 'login.html';
+            } else {
+                document.getElementById('navUsuario').textContent = usuario;
+            }
+
+            document.getElementById('btnCerrarSesion').addEventListener('click', () => {
+                sessionStorage.removeItem('usuarioActual');
+                window.location.href = 'login.html';
+            });
+            // Guardar lista de módulos cargados
+            let modulos = [];
+
+            // Listar módulos en el select
+            async function cargarModulos() {
+                const res = await fetch(`${API_URL_MODULO}/listar`);
+                modulos = await res.json();
+
+                const select = document.getElementById("idModulo");
+                select.innerHTML = `<option value="">-- Selecciona un módulo --</option>`;
+                modulos.forEach(m => {
+                    select.innerHTML += `<option value="${m.idModulo}">${m.nombre}</option>`;
+                });
+            }
+
+            // Listar menús
+            async function listarMenus() {
+                const res = await fetch(`${API_URL_MENU}/listar`);
+                const data = await res.json();
+
+                const tbody = document.getElementById("menuTableBody");
+                tbody.innerHTML = "";
+
+                data.forEach(m => {
+                    const moduloNombre = modulos.find(mod => mod.idModulo === m.idModulo)?.nombre || m.idModulo;
+                    tbody.innerHTML += `
+                    <tr>
+                        <td>${m.idMenu}</td>
+                        <td>${moduloNombre}</td>
+                        <td>${m.nombre}</td>
+                        <td>${m.ordenMenu ?? ""}</td>
+                        <td>${m.usuarioCreacion ?? ""}</td>
+                        <td>${m.fechaCreacion ?? ""}</td>
+                        <td>${m.usuarioModificacion ?? ""}</td>
+                        <td>${m.fechaModificacion ?? ""}</td>
+                        <td>
+                            <button class="btn btn-sm btn-warning" onclick="editarMenu(${m.idMenu})">Editar</button>
+                            <button class="btn btn-sm btn-danger" onclick="eliminarMenu(${m.idMenu})">Eliminar</button>
+                        </td>
+                    </tr>
+                `;
+                });
+            }
+
+            // Guardar o actualizar
+            document.getElementById("menuForm").addEventListener("submit", async (e) => {
+                e.preventDefault();
+
+                const idMenu = document.getElementById("idMenu").value;
+                const menu = {
+                    idMenu: idMenu ? parseInt(idMenu) : null,
+                    idModulo: parseInt(document.getElementById("idModulo").value),
+                    nombre: document.getElementById("nombre").value,
+                    ordenMenu: document.getElementById("ordenMenu").value ? parseInt(document.getElementById("ordenMenu").value) : null
+                };
+
+                await fetch(`${API_URL_MENU}/guardar`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "usuario": usuario
+                    },
+                    body: JSON.stringify(menu)
+                });
+
+                e.target.reset();
+                listarMenus();
+            });
+
+            // Editar
+            async function editarMenu(id) {
+                const res = await fetch(`${API_URL_MENU}/${id}`);
+                const m = await res.json();
+
+                document.getElementById("idMenu").value = m.idMenu;
+                document.getElementById("idModulo").value = m.idModulo;
+                document.getElementById("nombre").value = m.nombre;
+                document.getElementById("ordenMenu").value = m.ordenMenu ?? "";
+            }
+
+            // Eliminar
+            async function eliminarMenu(id) {
+                if (confirm("¿Seguro que deseas eliminar este menú?")) {
+                    await fetch(`${API_URL_MENU}/eliminar/${id}`, { method: "DELETE" });
+                    listarMenus();
+                }
+            }
+
+            // Inicialización
+            (async () => {
+                await cargarModulos();
+                listarMenus();
+            })();
+        </script>
     </div>
-</div>
-
-<script>
-    async function cargarMenu() {
-        const res = await fetch("/menu/listar");
-        const data = await res.json();
-
-        const tbody = document.getElementById("menu-body");
-        tbody.innerHTML = "";
-
-        if (data.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="8" class="text-center">No hay módulos registrados.</td></tr>`;
-            return;
-        }
-
-        data.forEach(m => {
-            const row = `
-                <tr>
-                    <td>${m.idMenu}</td>
-                    <td>${m.idModulo}</td>
-                    <td>${m.nombre ?? ""}</td>
-                    <td>${m.ordenMenu ?? ""}</td>
-                    <td>${m.fechaCreacion ? new Date(m.fechaCreacion).toLocaleString() : ""}</td>
-                    <td>${m.usuarioCreacion ?? ""}</td>
-                    <td>${m.fechaModificacion ? new Date(m.fechaModificacion).toLocaleString() : ""}</td>
-                    <td>${m.usuarioModificacion ?? ""}</td>
-                    <td>
-                        <button class="btn btn-warning btn-sm" onclick="editarMenu(${m.idMenu})">Editar</button>
-                        <button class="btn btn-danger btn-sm" onclick="eliminarMenu(${m.idMenu})">Eliminar</button>
-                    </td>
-                </tr>
-            `;
-            tbody.innerHTML += row;
-        });
-    }
-
-    async function guardarMenu() {
-        const id = document.getElementById("menuId").value;
-        const nombre = document.getElementById("nombreMenu").value;
-        const ordenMenu = parseInt(document.getElementById("ordenMenu").value);
-        const usuarioCreacion = document.getElementById("usuarioCreacion").value;
-
-        if (!nombre || !ordenMenu || !usuarioCreacion) {
-            return alert("Complete todos los campos requeridos");
-        }
-
-        const menu = {
-            idMenu: id || undefined,
-            nombre,
-            ordenMenu,
-            usuarioCreacion
-        };
-
-        const metodo = id ? "POST" : "POST";
-        await fetch("/menu/guardar", {
-            method: metodo,
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(menu)
-        });
-
-        cancelarEdicion();
-        cargarMenu();
-    }
-
-    async function editarMenu(id) {
-        const res = await fetch(`/menu/${id}`);
-        const m = await res.json();
-
-        document.getElementById("menuId").value = m.idMenu;
-        document.getElementById("nombreModulo").value = m.nombre;
-        document.getElementById("ordenMenu").value = m.ordenMenu;
-        document.getElementById("usuarioCreacion").value = m.usuarioCreacion;
-
-        document.getElementById("btnCancelar").style.display = "inline-block";
-        document.getElementById("btnGuardar").textContent = "Actualizar";
-    }
-
-    function cancelarEdicion() {
-        document.getElementById("moduloId").value = "";
-        document.getElementById("nombreModulo").value = "";
-        document.getElementById("ordenMenu").value = "";
-        document.getElementById("usuarioCreacion").value = "";
-        document.getElementById("btnCancelar").style.display = "none";
-        document.getElementById("btnGuardar").textContent = "Guardar";
-    }
-
-    async function eliminarMenu(id) {
-        if (!confirm("¿Seguro de eliminar este menu?")) return;
-
-        await fetch(`/menu/eliminar/${id}`, { method: "DELETE" });
-        cargarMenu();
-    }
-
-    cargarMenu();
-</script>
 </body>
+
 </html>

@@ -8,12 +8,12 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.adsii.pro_adsii.Entity.TipoAcceso;
 import com.adsii.pro_adsii.Service.TipoAccesoService;
-
 @RestController
 @RequestMapping("/tipoacceso")
 public class TipoAccesoController {
@@ -32,8 +32,10 @@ public class TipoAccesoController {
     }
 
     @PostMapping("/guardar")
-    public TipoAcceso guardar(@RequestBody TipoAcceso tipoAcceso) {
-        String usuarioActual = "Admin"; // usuario logueado
+    public TipoAcceso guardar(
+            @RequestBody TipoAcceso tipoAcceso,
+            @RequestHeader("usuario") String usuarioActual // <-- se recibe el usuario desde el header
+    ) {
         return tipoAccesoService.guardar(tipoAcceso, usuarioActual);
     }
 
