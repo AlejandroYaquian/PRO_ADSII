@@ -1,0 +1,290 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8"/>
+  <title>Usuarios · CRUD</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <style>
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin:24px;line-height:1.4;}
+    h1{margin-bottom:8px} .muted{color:#666}
+    table{width:100%;border-collapse:collapse;margin-top:16px}
+    th,td{border:1px solid #ddd;padding:8px;font-size:14px}
+    th{background:#f7f7f7;text-align:left}
+    .row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+    .row-2{grid-template-columns:repeat(2,1fr)}
+    .card{border:1px solid #e5e5e5;border-radius:12px;padding:16px;margin-top:16px;box-shadow:0 1px 6px rgba(0,0,0,0.05)}
+    input,select,button{padding:8px;border:1px solid #ccc;border-radius:8px;font-size:14px}
+    label{font-weight:600;font-size:12px}
+    .actions{display:flex;gap:8px}
+    .btn{cursor:pointer}
+    .btn.primary{background:#111;color:#fff;border-color:#111}
+    .btn.danger{background:#b00020;color:#fff;border-color:#b00020}
+    .right{display:flex;justify-content:flex-end;gap:8px}
+    .error{color:#b00020;font-weight:600}
+    .ok{color:#0a7c2f;font-weight:600}
+  </style>
+</head>
+<body>
+  <h1>Usuarios</h1>
+  <div class="muted"></div>
+
+  <div class="card">
+    <h3>Formulario de Usuario</h3>
+    <div id="msg"></div>
+    <form id="formUsuario">
+      <div class="row row-2">
+        <div>
+          <label>ID (solo edición)</label>
+          <input id="idUsuario" type="number" placeholder="(auto)" readonly/>
+        </div>
+        <div>
+          <label>Fotografía (URL/base64)</label>
+          <input id="fotografia" type="text" placeholder="https://... o base64"/>
+        </div>
+      </div>
+
+      <div class="row">
+        <div>
+          <label>Nombre</label>
+          <input id="nombre" required/>
+        </div>
+        <div>
+          <label>Apellido</label>
+          <input id="apellido" required/>
+        </div>
+        <div>
+          <label>Fecha Nacimiento</label>
+          <input id="fechaNacimiento" type="date"/>
+        </div>
+        <div>
+          <label>Correo Electrónico</label>
+          <input id="correoElectronico" type="email"/>
+        </div>
+      </div>
+
+      <div class="row">
+        <div>
+          <label>Teléfono Móvil</label>
+          <input id="telefonoMovil" type="text"/>
+        </div>
+        <div>
+          <label>Password</label>
+          <input id="password" type="password"/>
+        </div>
+        <div>
+          <label>Intentos de Acceso</label>
+          <input id="intentosDeAcceso" type="number" value="0" min="0"/>
+        </div>
+        <div>
+          <label>Requiere Cambiar Password</label>
+          <select id="requiereCambiarPassword">
+            <option value="false">No</option>
+            <option value="true">Sí</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="row">
+        <div>
+          <label>Pregunta</label>
+          <input id="pregunta" type="text"/>
+        </div>
+        <div>
+          <label>Respuesta</label>
+          <input id="respuesta" type="text"/>
+        </div>
+        <div>
+          <label>Género (IdGenero)</label>
+          <select id="idGenero"></select>
+        </div>
+        <div>
+          <label>Estatus (IdStatusUsuario)</label>
+          <select id="idStatusUsuario"></select>
+        </div>
+      </div>
+
+      <div class="row">
+        <div>
+          <label>Rol (IdRole)</label>
+          <select id="idRole"></select>
+        </div>
+        <div>
+          <label>Sucursal (IdSucursal)</label>
+          <select id="idSucursal"></select>
+        </div>
+        <div>
+          <label>Usuario Creación (solo info)</label>
+          <input id="usuarioCreacion" readonly/>
+        </div>
+        <div>
+          <label>Usuario Modificación (auto)</label>
+          <input id="usuarioModificacion" placeholder="se envía en X-User" readonly/>
+        </div>
+      </div>
+
+      <div class="right" style="margin-top:12px">
+        <button type="button" class="btn" onclick="limpiar()">Limpiar</button>
+        <button type="submit" class="btn primary">Guardar</button>
+      </div>
+    </form>
+  </div>
+
+  <div class="card">
+    <div class="right">
+      <button class="btn" onclick="cargarUsuarios()">Refrescar</button>
+    </div>
+    <table id="tabla">
+      <thead>
+      <tr>
+        <th>ID</th><th>Nombre</th><th>Apellido</th><th>Email</th>
+        <th>Estatus</th><th>Rol</th><th>Acciones</th>
+      </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+<script>
+const API = '';
+const H_USR = {'X-User':'admin'}; 
+
+async function safeFetch(url, opts) {
+  const res = await fetch(url, opts);
+  if (!res.ok) throw new Error(await res.text().catch(()=>res.statusText));
+  return res.json().catch(()=>null);
+}
+
+function toDateInput(value){
+  if(!value) return '';
+  return (''+value).substring(0,10);
+}
+
+function showMsg(txt, ok=true){
+  const el = document.getElementById('msg');
+  el.className = ok ? 'ok' : 'error';
+  el.textContent = txt;
+  setTimeout(()=>{ el.textContent=''; el.className=''; }, 3500);
+}
+
+async function cargarCatalogo(url, selectId, valueField='id', labelField='nombre') {
+  try{
+    const data = await safeFetch(url, {headers:H_USR});
+    const sel = document.getElementById(selectId);
+    sel.innerHTML = '<option value="">-- Seleccione --</option>';
+    (data||[]).forEach(it=>{
+      const opt = document.createElement('option');
+      opt.value = it[valueField] ?? it['id'+labelField] ?? it['id'];
+      opt.textContent = it[labelField] ?? it['nombre'] ?? JSON.stringify(it);
+      sel.appendChild(opt);
+    });
+  }catch(e){
+    document.getElementById(selectId).innerHTML = '<option value="">(vacío)</option>';
+  }
+}
+
+async function cargarUsuarios(){
+  try{
+    const data = await safeFetch(`${API}/usuario/listar`, {headers:H_USR});
+    const tb = document.querySelector('#tabla tbody');
+    tb.innerHTML = '';
+    (data||[]).forEach(u=>{
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${u.idUsuario ?? ''}</td>
+        <td>${u.nombre ?? ''}</td>
+        <td>${u.apellido ?? ''}</td>
+        <td>${u.correoElectronico ?? ''}</td>
+        <td>${u.idStatusUsuario ?? ''}</td>
+        <td>${u.idRole ?? ''}</td>
+        <td class="actions">
+          <button class="btn" onclick='editar(${u.idUsuario})'>Editar</button>
+          <button class="btn danger" onclick='borrar(${u.idUsuario})'>Eliminar</button>
+        </td>`;
+      tb.appendChild(tr);
+    });
+  }catch(e){ showMsg(`Error al listar: ${e.message}`, false); }
+}
+
+async function editar(id){
+  try{
+    const u = await safeFetch(`${API}/usuario/obtener/${id}`, {headers:H_USR});
+    document.getElementById('idUsuario').value = u.idUsuario ?? '';
+    document.getElementById('nombre').value = u.nombre ?? '';
+    document.getElementById('apellido').value = u.apellido ?? '';
+    document.getElementById('fechaNacimiento').value = toDateInput(u.fechaNacimiento);
+    document.getElementById('correoElectronico').value = u.correoElectronico ?? '';
+    document.getElementById('telefonoMovil').value = u.telefonoMovil ?? '';
+    document.getElementById('password').value = u.password ?? '';
+    document.getElementById('intentosDeAcceso').value = u.intentosDeAcceso ?? 0;
+    document.getElementById('requiereCambiarPassword').value = String(u.requiereCambiarPassword ?? false);
+    document.getElementById('pregunta').value = u.pregunta ?? '';
+    document.getElementById('respuesta').value = u.respuesta ?? '';
+    document.getElementById('idGenero').value = u.idGenero ?? '';
+    document.getElementById('idStatusUsuario').value = u.idStatusUsuario ?? '';
+    document.getElementById('idRole').value = u.idRole ?? '';
+    document.getElementById('idSucursal').value = u.idSucursal ?? '';
+    document.getElementById('fotografia').value = u.fotografia ?? '';
+    document.getElementById('usuarioCreacion').value = u.usuarioCreacion ?? '';
+  }catch(e){ showMsg(`Error al obtener: ${e.message}`, false); }
+}
+
+async function borrar(id){
+  if(!confirm(`¿Eliminar usuario ${id}?`)) return;
+  try{
+    await fetch(`${API}/usuario/eliminar/${id}`, {method:'DELETE', headers:H_USR});
+    showMsg('Usuario eliminado');
+    cargarUsuarios();
+    limpiar();
+  }catch(e){ showMsg(`Error al eliminar: ${e.message}`, false); }
+}
+
+function limpiar(){
+  document.getElementById('formUsuario').reset();
+  document.getElementById('idUsuario').value='';
+  document.getElementById('usuarioCreacion').value='';
+}
+
+document.getElementById('formUsuario').addEventListener('submit', async (ev)=>{
+  ev.preventDefault();
+  const body = {
+    idUsuario: document.getElementById('idUsuario').value ? Number(document.getElementById('idUsuario').value) : null,
+    nombre: document.getElementById('nombre').value || null,
+    apellido: document.getElementById('apellido').value || null,
+    fechaNacimiento: document.getElementById('fechaNacimiento').value || null,
+    idStatusUsuario: document.getElementById('idStatusUsuario').value ? Number(document.getElementById('idStatusUsuario').value) : null,
+    idGenero: document.getElementById('idGenero').value ? Number(document.getElementById('idGenero').value) : null,
+    password: document.getElementById('password').value || null,
+    correoElectronico: document.getElementById('correoElectronico').value || null,
+    telefonoMovil: document.getElementById('telefonoMovil').value || null,
+    fotografia: document.getElementById('fotografia').value || null,
+    idSucursal: document.getElementById('idSucursal').value ? Number(document.getElementById('idSucursal').value) : null,
+    idRole: document.getElementById('idRole').value ? Number(document.getElementById('idRole').value) : null,
+    intentosDeAcceso: document.getElementById('intentosDeAcceso').value ? Number(document.getElementById('intentosDeAcceso').value) : 0,
+    requiereCambiarPassword: document.getElementById('requiereCambiarPassword').value === 'true',
+    pregunta: document.getElementById('pregunta').value || null,
+    respuesta: document.getElementById('respuesta').value || null
+  };
+  try{
+    await safeFetch(`${API}/usuario/guardar`, {
+      method:'POST',
+      headers:{'Content-Type':'application/json', ...H_USR},
+      body: JSON.stringify(body)
+    });
+    showMsg('Guardado con éxito');
+    cargarUsuarios();
+    limpiar();
+  }catch(e){ showMsg(`Error al guardar: ${e.message}`, false); }
+});
+
+(async function init(){
+  await Promise.all([
+    cargarCatalogo(`${API}/status_usuario/listar`, 'idStatusUsuario', 'idStatusUsuario', 'nombre'),
+    cargarCatalogo(`${API}/genero/listar`, 'idGenero', 'idGenero', 'nombre'),
+    cargarCatalogo(`${API}/role/listar`, 'idRole', 'idRole', 'nombre'),
+    cargarCatalogo(`${API}/sucursal/listar`, 'idSucursal', 'idSucursal', 'nombre'),
+  ]);
+  cargarUsuarios();
+})();
+</script>
+</body>
+</html>
