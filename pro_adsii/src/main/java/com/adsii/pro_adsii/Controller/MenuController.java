@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -28,20 +29,24 @@ public class MenuController {
 
     @GetMapping("/{id}")
     public Menu obtener(@PathVariable Integer id) {
-        return menuService.obtenerPorId(id);
+        return menuService.obtenerPorId(id).orElse(null);
+    }
+
+     @GetMapping("/obtenerMenu/{id}")
+    public Menu obtenerMenu(@PathVariable Integer id) {
+        return menuService.obtenerMenuPorId(id);
     }
 
     @PostMapping("/guardar")
-    public Menu guardar(@RequestBody Menu menu) {
-        String usuarioActual = "Admin"; // usuario real del login
-        return menuService.guardar(menu, usuarioActual);
+    public Menu guardar(@RequestBody Menu menu, @RequestHeader("usuario") String usuario) {
+        return menuService.guardar(menu, usuario);
     }
 
     @DeleteMapping("/eliminar/{id}")
     public void eliminar(@PathVariable Integer id) {
         menuService.eliminar(id);
     }
+
+    
 }
-
-
 

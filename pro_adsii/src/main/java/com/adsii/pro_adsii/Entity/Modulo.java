@@ -16,7 +16,7 @@ public class Modulo {
     private Long IdModulo;
 
     @Column(name = "Nombre", nullable = false, length = 100)
-    private String Nombre;
+    private String nombre;
 
     @Column(name = "OrdenMenu", nullable = false)
     private Integer ordenMenu;

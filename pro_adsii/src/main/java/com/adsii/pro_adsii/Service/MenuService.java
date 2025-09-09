@@ -20,11 +20,15 @@ public class MenuService {
 		return menuRepository.findAll();
 	}
 
-	public Menu obtenerPorId(Integer id) {
+	public Menu obtenerMenuPorId(Integer id) {
 
 		Optional<Menu> menu = menuRepository.findById(id);	
 		return menu.isPresent() ? menu.get() : null;
 	}
+
+	public Optional<Menu> obtenerPorId(Integer id) {
+        return menuRepository.findById(id);
+    }
 
 	public Menu guardar(Menu menu, String usuarioActual) {
 		if (menu.getIdModulo() == null) {

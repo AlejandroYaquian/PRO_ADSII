@@ -50,7 +50,7 @@ public class RoleOpcionService {
         for (RoleOpcion roleOpcion : roleOpciones) {
             op = opcion.buscarOpcion(roleOpcion.getId().getIdOpcion());
             opcionDTO = new OpcionDTO();
-            Menu menuM = menuService.obtenerPorId(op.getIdMenu());
+            Menu menuM = menuService.obtenerMenuPorId(op.getIdMenu());
             opcionDTO.setModulo(moduloService.obtenerPorId((long)(menuM.getIdModulo())).getNombre());
             opcionDTO.setMenu(menuM.getNombre());     
             opcionDTO.setIdRole(roleOpcion.getId().getIdRole());
