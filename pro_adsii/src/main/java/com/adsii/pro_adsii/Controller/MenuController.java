@@ -32,7 +32,7 @@ public class MenuController {
         return menuService.obtenerPorId(id).orElse(null);
     }
 
-     @GetMapping("/obtenerMenu/{id}")
+    @GetMapping("/obtenerMenu/{id}")
     public Menu obtenerMenu(@PathVariable Integer id) {
         return menuService.obtenerMenuPorId(id);
     }
@@ -47,6 +47,9 @@ public class MenuController {
         menuService.eliminar(id);
     }
 
-    
-}
+    @GetMapping("/listarPorModulo/{idModulo}")
+    public List<Menu> listarPorModulo(@PathVariable Integer idModulo) {
+        return menuService.listarPorModulo(idModulo);
+    }
 
+}

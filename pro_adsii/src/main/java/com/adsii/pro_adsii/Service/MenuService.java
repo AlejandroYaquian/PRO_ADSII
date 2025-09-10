@@ -48,5 +48,9 @@ public class MenuService {
 	public void eliminar(Integer id) {
         menuRepository.deleteById(id);
     }
+
+	    public List<Menu> listarPorModulo(Integer idModulo) {
+        return menuRepository.findByIdModulo(idModulo);
+    }
 }
 

@@ -34,13 +34,18 @@ public class OpcionController {
 
     @PostMapping("/guardar")
     public Opcion guardar(@RequestBody Opcion opcion) {
-        String usuarioActual = "Admin"; 
+        String usuarioActual = "Admin";
         return opcionService.guardar(opcion, usuarioActual);
     }
 
     @DeleteMapping("/eliminar/{id}")
     public void eliminar(@PathVariable Integer id) {
         opcionService.eliminar(id);
+    }
+
+    @GetMapping("/listarPorMenu/{idMenu}")
+    public List<Opcion> listarPorMenu(@PathVariable Integer idMenu) {
+        return opcionService.listarPorMenu(idMenu);
     }
 
 }

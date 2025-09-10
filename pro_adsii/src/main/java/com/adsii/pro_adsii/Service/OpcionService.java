@@ -50,4 +50,8 @@ public class OpcionService {
 		return opcion.isPresent() ? opcion.get() : null;
 	}
 
+	    public List<Opcion> listarPorMenu(Integer idMenu) {
+        return opcionRepository.findByIdMenu(idMenu);
+    }
+
 }
