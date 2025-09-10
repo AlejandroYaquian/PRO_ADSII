@@ -62,5 +62,7 @@ public class UsuarioService {
             throw new RuntimeException("Error generando hash MD5", e);
         }
     }
+
+    
 }
 
