@@ -50,9 +50,11 @@
 <!-- PANTALLA ROLE---------------------------------------------------------->
 
 <!-- Formulario de agregar rol--->
+<h2 class="mt-4 mb-4 text-center">Gestión de Rol</h2> 
 <div class="card w-50 mx-auto mt-4">
+  <div class="card-header">Agregar Rol</div>
+      
   <div class="card-body text-center">
-    <h4 class="mb-4">Agregar nuevo rol</h4>
     <form id="form-nuevo-rol">
       <div class="mb-3">
         <label for="nombreNuevoRol" class="form-label">Nombre del nuevo rol</label>
@@ -63,32 +65,37 @@
       </div>
     </form>
   </div>
+  </div>
 </div>
 
 <!-- Listado de roles --->
-<div class="container">
-    <h2 class="mb-4" id='labelRol'>Gestión de Roles y Permisos</h2>
-    <!-- Aquí vamos a mostrar la tabla con los roles--------------------------------------------------------------->
-    <form id="form-opciones" class="mt-4">
-      <!-- Título arriba de la tabla -->
-      <h5 class="mb-3" id="labelListRole">Listado de Roles</h5>
 
-      <div class="table-responsive shadow-sm rounded w-100">
-        <table id='rolesTable' class="table table-bordered table-hover table-striped align-middle w-100">
-          <thead id="thead-roles" class="table-dark">
-            <tr>
-              <th scope="col">No.</th>
-              <th scope="col">Nombre del Rol</th>
-              <th scope="col" class="text-center">Acciones Rol</th>
-              <th scope="col" class="text-center">Editar opciones de rol</th>
-            </tr>
-          </thead>
-          <tbody id="roles-table-body">
-            <!-- Los roles se insertarán dinámicamente aquí -->
-          </tbody>
-        </table>
-      </div>     
-    </form>
+<div class="card w-50 mx-auto mt-4 mb-4">
+  <div class="card-header">Listado de Opciones</div>
+    <div class="card-body">
+    <!-- Aquí vamos a mostrar la tabla con los roles--------------------------------------------------------------->
+      <form id="form-opciones" class="mt-4">
+        <!-- Título arriba de la tabla -->
+        <h5 class="mb-3" id="labelListRole">Listado de Roles</h5>
+
+        <div class="table-responsive shadow-sm rounded w-100">
+          <table id='rolesTable' class="table table-bordered table-hover table-striped align-middle w-100">
+            <thead id="thead-roles" class="table-dark">
+              <tr>
+                <th scope="col">No.</th>
+                <th scope="col">Nombre del Rol</th>
+                <th scope="col" class="text-center">Acciones Rol</th>
+                <th scope="col" class="text-center">Editar opciones de rol</th>
+              </tr>
+            </thead>
+            <tbody id="roles-table-body">
+              <!-- Los roles se insertarán dinámicamente aquí -->
+            </tbody>
+          </table>
+        </div>     
+      </form>
+    </div>
+  </div>
 </div>
 
 
