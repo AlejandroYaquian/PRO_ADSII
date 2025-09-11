@@ -2,163 +2,197 @@
 <html lang="es">
 <head>
   <meta charset="utf-8"/>
-  <title>Usuarios · CRUD</title>
+  <title>Gestión de Usuarios</title>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
+
+  <!-- Estilos con look tipo “Gestión de Empresas” -->
   <style>
-    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin:24px;line-height:1.4;}
-    h1{margin-bottom:8px} .muted{color:#666}
-    table{width:100%;border-collapse:collapse;margin-top:16px}
-    th,td{border:1px solid #ddd;padding:8px;font-size:14px}
-    th{background:#f7f7f7;text-align:left}
+    :root{
+      --bg:#f6f7fb; --card:#fff; --muted:#6b7280; --line:#e5e7eb;
+      --primary:#0d6efd; --danger:#dc3545; --warning:#fd7e14; --header:#0b0b0b;
+    }
+    *{box-sizing:border-box}
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin:0;background:var(--bg);color:#111}
+    .wrapper{max-width:1180px;margin:24px auto;padding:0 16px}
+    h1{margin:8px 0 20px;text-align:center;font-weight:700}
+    .muted{color:var(--muted)}
+
+    .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px;
+          box-shadow:0 1px 2px rgba(0,0,0,.04)}
+    .card + .card{margin-top:16px}
+    .card-title{font-weight:600;color:#111;background:#f3f4f6;border:1px solid var(--line);
+                border-radius:8px;padding:8px 10px;margin:-6px 0 12px}
+
     .row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
     .row-2{grid-template-columns:repeat(2,1fr)}
-    .card{border:1px solid #e5e5e5;border-radius:12px;padding:16px;margin-top:16px;box-shadow:0 1px 6px rgba(0,0,0,0.05)}
-    input,select,button{padding:8px;border:1px solid #ccc;border-radius:8px;font-size:14px}
-    label{font-weight:600;font-size:12px}
-    .actions{display:flex;gap:8px}
-    .btn{cursor:pointer}
-    .btn.primary{background:#111;color:#fff;border-color:#111}
-    .btn.danger{background:#b00020;color:#fff;border-color:#b00020}
+    @media (max-width:960px){ .row,.row-2{grid-template-columns:1fr} }
+
+    label{font-weight:600;font-size:12px;margin:4px 2px}
+    input,select,button{padding:10px 12px;border:1px solid var(--line);border-radius:8px;font-size:14px}
     .right{display:flex;justify-content:flex-end;gap:8px}
+
+    table{width:100%;border-collapse:collapse;border:1px solid var(--line);overflow:hidden;border-radius:10px}
+    thead{background:var(--header);color:#fff}
+    th,td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--line)}
+    tbody tr:hover{background:#fafafa}
+    .cell-actions{min-width:148px}
+
+    .btn{cursor:pointer;border:none;border-radius:8px;padding:8px 12px;font-weight:600}
+    .btn.primary{background:var(--primary);color:#fff}
+    .btn.danger{background:var(--danger);color:#fff}
+    .btn.warn{background:var(--warning);color:#fff}
+    .btn.light{background:#e5e7eb}
     .error{color:#b00020;font-weight:600}
     .ok{color:#0a7c2f;font-weight:600}
   </style>
 </head>
 <body>
-  <h1>Usuarios</h1>
-  <div class="muted"></div>
+  <div class="wrapper">
+    <h1>Gestión de Usuarios</h1>
+    <div class="muted"></div>
 
-  <div class="card">
-    <h3>Formulario de Usuario</h3>
-    <div id="msg"></div>
-    <form id="formUsuario">
-      <div class="row row-2">
-        <div>
-          <label>ID (solo edición)</label>
-          <input id="idUsuario" type="number" placeholder="(auto)" readonly/>
-        </div>
-        <div>
-          <label>Fotografía (URL/base64)</label>
-          <input id="fotografia" type="text" placeholder="https://... o base64"/>
-        </div>
-      </div>
+    <!-- Card: Formulario -->
+    <div class="card">
+      <div class="card-title">Agregar / Editar Usuario</div>
+      <div id="msg"></div>
 
-      <div class="row">
-        <div>
-          <label>Nombre</label>
-          <input id="nombre" required/>
+      <form id="formUsuario">
+        <div class="row row-2">
+          <div>
+            <label>ID (solo edición)</label>
+            <input id="idUsuario" type="number" placeholder="(auto)" readonly/>
+          </div>
+          <div>
+            <label>Fotografía (URL/base64)</label>
+            <input id="fotografia" type="text" placeholder="https://... o base64"/>
+          </div>
         </div>
-        <div>
-          <label>Apellido</label>
-          <input id="apellido" required/>
-        </div>
-        <div>
-          <label>Fecha Nacimiento</label>
-          <input id="fechaNacimiento" type="date"/>
-        </div>
-        <div>
-          <label>Correo Electrónico</label>
-          <input id="correoElectronico" type="email"/>
-        </div>
-      </div>
 
-      <div class="row">
-        <div>
-          <label>Teléfono Móvil</label>
-          <input id="telefonoMovil" type="text"/>
+        <div class="row">
+          <div>
+            <label>Nombre</label>
+            <input id="nombre" required/>
+          </div>
+          <div>
+            <label>Apellido</label>
+            <input id="apellido" required/>
+          </div>
+          <div>
+            <label>Fecha Nacimiento</label>
+            <input id="fechaNacimiento" type="date"/>
+          </div>
+          <div>
+            <label>Correo Electrónico</label>
+            <input id="correoElectronico" type="email"/>
+          </div>
         </div>
-        <div>
-          <label>Password</label>
-          <input id="password" type="password"/>
-        </div>
-        <div>
-          <label>Intentos de Acceso</label>
-          <input id="intentosDeAcceso" type="number" value="0" min="0"/>
-        </div>
-        <div>
-          <label>Requiere Cambiar Password</label>
-          <select id="requiereCambiarPassword">
-            <option value="false">No</option>
-            <option value="true">Sí</option>
-          </select>
-        </div>
-      </div>
 
-      <div class="row">
-        <div>
-          <label>Pregunta</label>
-          <input id="pregunta" type="text"/>
+        <div class="row">
+          <div>
+            <label>Teléfono Móvil</label>
+            <input id="telefonoMovil" type="text"/>
+          </div>
+          <div>
+            <label>Password</label>
+            <input id="password" type="password"/>
+          </div>
+          <div>
+            <label>Intentos de Acceso</label>
+            <input id="intentosDeAcceso" type="number" value="0" min="0"/>
+          </div>
+          <div>
+            <label>Requiere Cambiar Password</label>
+            <select id="requiereCambiarPassword">
+              <option value="false">No</option>
+              <option value="true">Sí</option>
+            </select>
+          </div>
         </div>
-        <div>
-          <label>Respuesta</label>
-          <input id="respuesta" type="text"/>
-        </div>
-        <div>
-          <label>Género (IdGenero)</label>
-          <select id="idGenero"></select>
-        </div>
-        <div>
-          <label>Estatus (IdStatusUsuario)</label>
-          <select id="idStatusUsuario"></select>
-        </div>
-      </div>
 
-      <div class="row">
-        <div>
-          <label>Rol (IdRole)</label>
-          <select id="idRole"></select>
+        <div class="row">
+          <div>
+            <label>Pregunta</label>
+            <input id="pregunta" type="text"/>
+          </div>
+          <div>
+            <label>Respuesta</label>
+            <input id="respuesta" type="text"/>
+          </div>
+          <div>
+            <label>Género (IdGenero)</label>
+            <select id="idGenero"></select>
+          </div>
+          <div>
+            <label>Estatus (IdStatusUsuario)</label>
+            <select id="idStatusUsuario"></select>
+          </div>
         </div>
-        <div>
-          <label>Sucursal (IdSucursal)</label>
-          <select id="idSucursal"></select>
-        </div>
-        <div>
-          <label>Usuario Creación (solo info)</label>
-          <input id="usuarioCreacion" readonly/>
-        </div>
-        <div>
-          <label>Usuario Modificación (auto)</label>
-          <input id="usuarioModificacion" placeholder="se envía en X-User" readonly/>
-        </div>
-      </div>
 
-      <div class="right" style="margin-top:12px">
-        <button type="button" class="btn" onclick="limpiar()">Limpiar</button>
-        <button type="submit" class="btn primary">Guardar</button>
-      </div>
-    </form>
-  </div>
+        <div class="row">
+          <div>
+            <label>Rol (IdRole)</label>
+            <select id="idRole"></select>
+          </div>
+          <div>
+            <label>Sucursal (IdSucursal)</label>
+            <select id="idSucursal"></select>
+          </div>
+          <div>
+            <label>Usuario Creación (solo info)</label>
+            <input id="usuarioCreacion" readonly/>
+          </div>
+          <div>
+            <label>Usuario Modificación (auto)</label>
+            <input id="usuarioModificacion" placeholder="se envía en X-User" readonly/>
+          </div>
+        </div>
 
-  <div class="card">
-    <div class="right">
-      <button class="btn" onclick="cargarUsuarios()">Refrescar</button>
+        <div class="right" style="margin-top:12px">
+          <button type="button" class="btn light" onclick="limpiar()">Limpiar</button>
+          <button type="submit" class="btn primary">Guardar</button>
+        </div>
+      </form>
     </div>
-    <table id="tabla">
-      <thead>
-      <tr>
-        <th>ID</th><th>Nombre</th><th>Apellido</th><th>Email</th>
-        <th>Estatus</th><th>Rol</th><th>Acciones</th>
-      </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
-  </div>
+
+    <!-- Card: Tabla -->
+    <div class="card">
+      <div class="card-title">Listado de Usuarios</div>
+      <div class="right" style="margin:6px 2px 10px">
+        <button class="btn light" onclick="cargarUsuarios()">Refrescar</button>
+      </div>
+
+      <div style="overflow:auto">
+        <table id="tabla">
+          <thead>
+          <tr>
+            <th>ID</th><th>Nombre</th><th>Apellido</th><th>Email</th>
+            <th>Estatus</th><th>Rol</th><th class="cell-actions">Acciones</th>
+          </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </div> <!-- /.wrapper -->
 
 <script>
-const API = '';
-const H_USR = {'X-User':'admin'}; 
+const API = '';                          
+const H_USR = {'X-User':'admin'};        
+
+//  estado / catálogos
+let _roles = [], _estatus = [], _generos = [], _sucursales = [];
+const mapBy = (arr, key='id', label='nombre') =>
+  Object.fromEntries((arr||[]).map(it => [String(it[key] ?? it['id']), it[label] ?? '']));
+let rolesById = {}, estatusById = {};
+function nombreRol(id){ return rolesById[String(id)] ?? (id ?? ''); }
+function nombreEstatus(id){ return estatusById[String(id)] ?? (id ?? ''); }
 
 async function safeFetch(url, opts) {
   const res = await fetch(url, opts);
   if (!res.ok) throw new Error(await res.text().catch(()=>res.statusText));
   return res.json().catch(()=>null);
 }
-
-function toDateInput(value){
-  if(!value) return '';
-  return (''+value).substring(0,10);
-}
-
+function toDateInput(value){ return value ? (''+value).substring(0,10) : ''; }
 function showMsg(txt, ok=true){
   const el = document.getElementById('msg');
   el.className = ok ? 'ok' : 'error';
@@ -166,6 +200,7 @@ function showMsg(txt, ok=true){
   setTimeout(()=>{ el.textContent=''; el.className=''; }, 3500);
 }
 
+// Catálogos (regresa data para mapear nombres)
 async function cargarCatalogo(url, selectId, valueField='id', labelField='nombre') {
   try{
     const data = await safeFetch(url, {headers:H_USR});
@@ -177,11 +212,14 @@ async function cargarCatalogo(url, selectId, valueField='id', labelField='nombre
       opt.textContent = it[labelField] ?? it['nombre'] ?? JSON.stringify(it);
       sel.appendChild(opt);
     });
+    return data;
   }catch(e){
     document.getElementById(selectId).innerHTML = '<option value="">(vacío)</option>';
+    return [];
   }
 }
 
+// listado
 async function cargarUsuarios(){
   try{
     const data = await safeFetch(`${API}/usuario/listar`, {headers:H_USR});
@@ -194,17 +232,20 @@ async function cargarUsuarios(){
         <td>${u.nombre ?? ''}</td>
         <td>${u.apellido ?? ''}</td>
         <td>${u.correoElectronico ?? ''}</td>
-        <td>${u.idStatusUsuario ?? ''}</td>
-        <td>${u.idRole ?? ''}</td>
-        <td class="actions">
-          <button class="btn" onclick='editar(${u.idUsuario})'>Editar</button>
-          <button class="btn danger" onclick='borrar(${u.idUsuario})'>Eliminar</button>
+        <td>${nombreEstatus(u.idStatusUsuario)}</td>
+        <td>${nombreRol(u.idRole)}</td>
+        <td class="cell-actions">
+          <div class="right">
+            <button class="btn warn" onclick='editar(${u.idUsuario})'>Editar</button>
+            <button class="btn danger" onclick='borrar(${u.idUsuario})'>Eliminar</button>
+          </div>
         </td>`;
       tb.appendChild(tr);
     });
   }catch(e){ showMsg(`Error al listar: ${e.message}`, false); }
 }
 
+// edición
 async function editar(id){
   try{
     const u = await safeFetch(`${API}/usuario/obtener/${id}`, {headers:H_USR});
@@ -225,9 +266,11 @@ async function editar(id){
     document.getElementById('idSucursal').value = u.idSucursal ?? '';
     document.getElementById('fotografia').value = u.fotografia ?? '';
     document.getElementById('usuarioCreacion').value = u.usuarioCreacion ?? '';
+    window.scrollTo({top:0, behavior:'smooth'});
   }catch(e){ showMsg(`Error al obtener: ${e.message}`, false); }
 }
 
+// borrar
 async function borrar(id){
   if(!confirm(`¿Eliminar usuario ${id}?`)) return;
   try{
@@ -238,12 +281,7 @@ async function borrar(id){
   }catch(e){ showMsg(`Error al eliminar: ${e.message}`, false); }
 }
 
-function limpiar(){
-  document.getElementById('formUsuario').reset();
-  document.getElementById('idUsuario').value='';
-  document.getElementById('usuarioCreacion').value='';
-}
-
+// Guardar
 document.getElementById('formUsuario').addEventListener('submit', async (ev)=>{
   ev.preventDefault();
   const body = {
@@ -276,15 +314,29 @@ document.getElementById('formUsuario').addEventListener('submit', async (ev)=>{
   }catch(e){ showMsg(`Error al guardar: ${e.message}`, false); }
 });
 
+// 
+function limpiar(){
+  document.getElementById('formUsuario').reset();
+  document.getElementById('idUsuario').value='';
+  document.getElementById('usuarioCreacion').value='';
+}
+
+// carga catálogos y mapea nombres para la tabla
 (async function init(){
-  await Promise.all([
+  const [est, gen, rol, suc] = await Promise.all([
     cargarCatalogo(`${API}/status_usuario/listar`, 'idStatusUsuario', 'idStatusUsuario', 'nombre'),
     cargarCatalogo(`${API}/genero/listar`, 'idGenero', 'idGenero', 'nombre'),
     cargarCatalogo(`${API}/role/listar`, 'idRole', 'idRole', 'nombre'),
     cargarCatalogo(`${API}/sucursal/listar`, 'idSucursal', 'idSucursal', 'nombre'),
   ]);
+  _estatus = est; _generos = gen; _roles = rol; _sucursales = suc;
+  rolesById = mapBy(_roles, 'idRole', 'nombre');
+  estatusById = mapBy(_estatus, 'idStatusUsuario', 'nombre');
+
   cargarUsuarios();
 })();
 </script>
 </body>
 </html>
+
+
