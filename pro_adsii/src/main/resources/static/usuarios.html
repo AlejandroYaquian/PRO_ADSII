@@ -359,8 +359,8 @@ function limpiar(){
   const [est, gen, rol, suc] = await Promise.all([
     cargarCatalogo(`${API}/status_usuario/listar`, 'idStatusUsuario', 'idStatusUsuario', 'nombre'),
     cargarCatalogo(`${API}/genero/listar`, 'idGenero', 'idGenero', 'nombre'),
-    cargarCatalogo(`${API}/role/listar`, 'idRole', 'idRole', 'nombre'),
-    cargarCatalogo(`${API}/sucursal/listar`, 'idSucursal', 'idSucursal', 'nombre'),
+    cargarCatalogo(`${API}/role/getRoles`, 'idRole', 'idRole', 'nombre'),
+    cargarCatalogo(`${API}/sucursal`, 'idSucursal', 'idSucursal', 'nombre'),
   ]);
   _estatus = est; _generos = gen; _roles = rol; _sucursales = suc;
   rolesById = mapBy(_roles, 'idRole', 'nombre');

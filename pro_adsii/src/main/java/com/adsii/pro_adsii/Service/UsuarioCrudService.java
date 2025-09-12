@@ -7,11 +7,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class UsuarioCrudService {
 
- public static final int STATUS_INACTIVO_ID = 2;
+    public static final int STATUS_INACTIVO_ID = 2;
 
     private final UsuarioRepository usuarioRepository;
 
@@ -26,39 +27,38 @@ public class UsuarioCrudService {
     public Usuario obtener(String idUsuario) {
         return usuarioRepository.findByIdUsuario(idUsuario);
     }
- @Transactional
+
+    @Transactional
     public Usuario guardar(Usuario input, String usuarioAccion) {
         LocalDateTime ahora = LocalDateTime.now();
 
         if (input.getIdUsuario() == null || input.getIdUsuario().isBlank()) {
-            // Alta
+            // ALTA: asigna un UUID como String
+            input.setIdUsuario(UUID.randomUUID().toString());
             input.setFechaCreacion(ahora);
             input.setUsuarioCreacion(usuarioAccion);
         } else {
-            // Edición
+            // EDICIÓN: conserva datos de creación si existe
             Usuario actual = usuarioRepository.findByIdUsuario(input.getIdUsuario());
             if (actual != null) {
                 input.setFechaCreacion(actual.getFechaCreacion());
                 input.setUsuarioCreacion(actual.getUsuarioCreacion());
             } else {
-                
                 input.setFechaCreacion(ahora);
                 input.setUsuarioCreacion(usuarioAccion);
             }
         }
 
-        //modificación
         input.setFechaModificacion(ahora);
         input.setUsuarioModificacion(usuarioAccion);
 
         return usuarioRepository.save(input);
     }
-      @Transactional
-public void eliminar(String idUsuario) {
-    Usuario u = usuarioRepository.findByIdUsuario(idUsuario);
-    if (u == null) throw new IllegalArgumentException("Usuario no encontrado");
-    usuarioRepository.delete(u);   
-}
-}
 
-
+    @Transactional
+    public void eliminar(String idUsuario) {
+        Usuario u = usuarioRepository.findByIdUsuario(idUsuario);
+        if (u == null) throw new IllegalArgumentException("Usuario no encontrado");
+        usuarioRepository.delete(u);
+    }
+}
