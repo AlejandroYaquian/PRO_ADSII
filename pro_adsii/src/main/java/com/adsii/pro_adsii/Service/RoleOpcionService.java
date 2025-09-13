@@ -3,8 +3,10 @@ package com.adsii.pro_adsii.Service;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import com.adsii.pro_adsii.DTO.OpcionDTO;
 import com.adsii.pro_adsii.Entity.Menu;
+import com.adsii.pro_adsii.Entity.Modulo;
 import com.adsii.pro_adsii.Entity.Opcion;
 import com.adsii.pro_adsii.Entity.RoleOpcion;
 import com.adsii.pro_adsii.Entity.RoleOpcionId;
@@ -43,6 +46,14 @@ public class RoleOpcionService {
 
         List<RoleOpcion> roleOpciones = roleOpcionRepository.findById_IdRole(idRole);
         List<OpcionDTO> ops = new ArrayList<>();
+        List<Modulo> modulos = moduloService.listarTodos();
+        List<Menu> menus =  menuService.listarTodos();
+
+        Map<Long, Modulo> mapaModulos = modulos.stream()
+        .collect(Collectors.toMap(Modulo::getIdModulo, Function.identity()));
+
+        Map<Integer, Menu> mapaMenus = menus.stream()
+        .collect(Collectors.toMap(Menu::getIdMenu, Function.identity()));
 
         Opcion op;        
         OpcionDTO opcionDTO;
@@ -50,8 +61,9 @@ public class RoleOpcionService {
         for (RoleOpcion roleOpcion : roleOpciones) {
             op = opcion.buscarOpcion(roleOpcion.getId().getIdOpcion());
             opcionDTO = new OpcionDTO();
-            Menu menuM = menuService.obtenerMenuPorId(op.getIdMenu());
-            opcionDTO.setModulo(moduloService.obtenerPorId((long)(menuM.getIdModulo())).getNombre());
+            Menu menuM = mapaMenus.get((Integer)op.getIdMenu()); 
+            Modulo modulo = mapaModulos.get((long) menuM.getIdModulo());
+            opcionDTO.setModulo(modulo != null ? modulo.getNombre() : "Desconocido");
             opcionDTO.setMenu(menuM.getNombre());     
             opcionDTO.setIdRole(roleOpcion.getId().getIdRole());
             opcionDTO.setIdOpcion(roleOpcion.getId().getIdOpcion());
@@ -77,7 +89,7 @@ public class RoleOpcionService {
             rop.setImprimir(opcionDTOActualizado.getImprimir() ? true : false);
             rop.setExportar(opcionDTOActualizado.getExportar() ? true : false);
             rop.setFechaModificacion(fecha);
-            rop.setUsuarioModificacion("admin01");
+            rop.setUsuarioModificacion(opcionDTOActualizado.getUsuario());
 			return roleOpcionRepository.save(rop);			
 		}else {
 			return null;
@@ -113,7 +125,7 @@ public class RoleOpcionService {
 
 
     
-	public void agregarRoleOpcion(Integer rolID) {
+	public void agregarRoleOpcion(Integer rolID, String usuario) {
 
         Date fecha = new Date(); // fecha actual
         List<Opcion> opciones = opcion.listarTodos() ;
@@ -131,7 +143,7 @@ public class RoleOpcionService {
             roleOpcion.setImprimir(false);
             roleOpcion.setExportar(false);
             roleOpcion.setFechaCreacion(fecha);
-            roleOpcion.setUsuarioCreacion("admin01");
+            roleOpcion.setUsuarioCreacion(usuario);
             roleOpcion.setFechaModificacion(null);
             roleOpcion.setUsuarioModificacion(null);
             roleOpcionRepository.save(roleOpcion);

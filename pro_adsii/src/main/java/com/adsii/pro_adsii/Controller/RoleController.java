@@ -40,7 +40,7 @@ public class RoleController {
     @PostMapping("/agregar")
     public Role agregarRole(@RequestBody RoleDTO roleAdd) {
         Role rol = roleService.guardarRole(roleAdd);
-        roleOpcionService.agregarRoleOpcion(rol.getIdRole());
+        roleOpcionService.agregarRoleOpcion(rol.getIdRole(), roleAdd.getUsuario());
         return rol;
     }
 

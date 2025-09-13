@@ -12,7 +12,7 @@ public class OpcionDTO {
     private Boolean cambio;
     private Boolean imprimir;
     private Boolean exportar;
-    
+    private String usuario;
     
     public String getModulo() {
         return modulo;
@@ -77,6 +77,12 @@ public class OpcionDTO {
     }
     public void setCambio(Boolean cambio) {
         this.cambio = cambio;
+    }
+    public String getUsuario() {
+        return usuario;
+    }
+    public void setUsuario(String usuario) {
+        this.usuario = usuario;
     }
    
 
