@@ -27,15 +27,14 @@ public class OpcionController {
         return opcionService.listarTodos();
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/{id:\\d+}") // Solo acepta números
     public Opcion obtener(@PathVariable Integer id) {
         return opcionService.obtenerPorId(id).orElse(null);
     }
 
     @PostMapping("/guardar")
     public Opcion guardar(@RequestBody Opcion opcion) {
-        String usuarioActual = "Admin";
-        return opcionService.guardar(opcion, usuarioActual);
+        return opcionService.guardar(opcion);
     }
 
     @DeleteMapping("/eliminar/{id}")

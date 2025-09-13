@@ -145,17 +145,21 @@
                 return alert("Complete todos los campos requeridos.");
             }
 
+             const usu = sessionStorage.getItem('usuarioActual');
             // Crear objeto para enviar
             const opcion = {
                 idMenu: parseInt(menuId),
                 nombre,
                 ordenMenu: parseInt(ordenOpcion),
-                pagina
+                pagina,
             };
 
             // Si estamos editando, agregamos el idOpcion
             if (opcionEditandoId) {
                 opcion.idOpcion = opcionEditandoId;
+                opcion.usuarioModificacion = usu; // Solo en edición
+            } else {
+                opcion.usuarioCreacion = usu; // Solo en creación
             }
 
             try {
