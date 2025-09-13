@@ -205,6 +205,7 @@
                 // Agregar nuevo handler para guardar
                 selectBtn.addEventListener('click', function guardarHandler() {
                   // recolectar los datos
+                const usu = sessionStorage.getItem('usuarioActual');  
                   const datos = {
                     idOpcion: selectBtn.getAttribute('data-id'),
                     idRole: selectBtn.getAttribute('data-role'),
@@ -213,7 +214,8 @@
                     baja: chkBaja.checked,
                     cambio: chkCambio.checked,
                     imprimir: chkImprimir.checked,
-                    exportar: chkExportar.checked
+                    exportar: chkExportar.checked,
+                    usuario: usu
                   };
 
                   fetch('http://localhost:8080/RoleOpcion/editarRoleOpcion', {

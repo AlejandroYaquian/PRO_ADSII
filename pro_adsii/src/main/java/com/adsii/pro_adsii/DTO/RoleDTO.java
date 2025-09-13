@@ -2,6 +2,7 @@ package com.adsii.pro_adsii.DTO;
 
 public class RoleDTO {
     private String nombre;
+    private String usuario;
     private int idRole;
 
     public RoleDTO() {}
@@ -9,6 +10,7 @@ public class RoleDTO {
     public RoleDTO(String nombre) {
         this.nombre = nombre;
     }
+
 
     public String getNombre() {
         return nombre;
@@ -24,5 +26,13 @@ public class RoleDTO {
 
     public void setIdRole(int idRole) {
         this.idRole = idRole;
+    }
+
+    public String getUsuario() {
+        return usuario;
+    }
+
+    public void setUsuario(String usuario) {
+        this.usuario = usuario;
     }
 }

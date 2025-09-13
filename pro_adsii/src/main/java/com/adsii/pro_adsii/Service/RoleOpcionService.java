@@ -89,7 +89,7 @@ public class RoleOpcionService {
             rop.setImprimir(opcionDTOActualizado.getImprimir() ? true : false);
             rop.setExportar(opcionDTOActualizado.getExportar() ? true : false);
             rop.setFechaModificacion(fecha);
-            rop.setUsuarioModificacion("admin01");
+            rop.setUsuarioModificacion(opcionDTOActualizado.getUsuario());
 			return roleOpcionRepository.save(rop);			
 		}else {
 			return null;
@@ -125,7 +125,7 @@ public class RoleOpcionService {
 
 
     
-	public void agregarRoleOpcion(Integer rolID) {
+	public void agregarRoleOpcion(Integer rolID, String usuario) {
 
         Date fecha = new Date(); // fecha actual
         List<Opcion> opciones = opcion.listarTodos() ;
@@ -143,7 +143,7 @@ public class RoleOpcionService {
             roleOpcion.setImprimir(false);
             roleOpcion.setExportar(false);
             roleOpcion.setFechaCreacion(fecha);
-            roleOpcion.setUsuarioCreacion("admin01");
+            roleOpcion.setUsuarioCreacion(usuario);
             roleOpcion.setFechaModificacion(null);
             roleOpcion.setUsuarioModificacion(null);
             roleOpcionRepository.save(roleOpcion);

@@ -122,10 +122,12 @@
               return;
             }
 
+            const usu = sessionStorage.getItem('usuarioActual');
             const data = {
-              nombre: nuevoRol
+              nombre: nuevoRol,
+              usuario: usu
             };
-
+            console.log("Datos enviados al backend:", data); // <-- IMPORTANTE
             fetch('http://localhost:8080/role/agregar', {
               method: 'POST',
               headers: {
@@ -257,10 +259,12 @@ fetch('http://localhost:8080/role/getRoles')
                 saveBtn.addEventListener('click',() =>{
                     deleteBtn.style.display = '';
 
-                    event.preventDefault();   
+                    event.preventDefault();  
+                    const usu = sessionStorage.getItem('usuarioActual'); 
                     const data = {
                       idRole: editBtn.getAttribute('data-id'),
-                      nombre: inputName.value
+                      nombre: inputName.value,
+                      usuario: usu
                     };
                    fetch('http://localhost:8080/role/editar', {
                       method: 'PUT',
