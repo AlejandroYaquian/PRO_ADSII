@@ -1,5 +1,7 @@
 package com.adsii.pro_adsii.Controller;
 
+import com.adsii.pro_adsii.DTO.LoginRequest;
+import com.adsii.pro_adsii.DTO.LoginResponse;
 import com.adsii.pro_adsii.Entity.Usuario;
 import com.adsii.pro_adsii.Service.UsuarioCrudService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,4 +45,5 @@ public class UsuarioCrudController {
         service.eliminar(id);
         return ResponseEntity.noContent().build();
     }
+    
 }

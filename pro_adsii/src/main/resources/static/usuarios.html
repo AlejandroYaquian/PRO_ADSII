@@ -1,45 +1,17 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Gestión</title>
-  <!-- Bootstrap CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
-<style>
-    #btnCerrarSesion {
-        background-color: transparent;
-        border: 1px solid #fff;
-        color: #fff;
-    }
-    #btnCerrarSesion:hover {
-        background-color: rgba(255, 255, 255, 0.2);
-    }
-</style>
-<body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="index.html">Inicio</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMenu">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarMenu">
-                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                    <li class="nav-item"><a class="nav-link" href="genero.html">Género</a></li>
-                    <li class="nav-item"><a class="nav-link" href="modulo.html">Módulo</a></li>
-                    <li class="nav-item"><a class="nav-link" href="role.html">Rol</a></li>
-                    <li class="nav-item"><a class="nav-link" href="bitacora.html">Bitácora</a></li>
-                    <li class="nav-item"><a class="nav-link" href="tipoacceso.html">Tipo Acceso</a></li>
-                </ul>
-                <span class="navbar-text me-3" id="navUsuario"></span>
-                <button class="btn ms-2" id="btnCerrarSesion">Cerrar Sesión</button>
-            </div>
-        </div>
-    </nav>
-  <!-- Estilos “Gestión de Empresas” -->
+
   <style>
+    /* Botón cerrar sesión (navbar) */
+    #btnCerrarSesion { background-color: transparent; border: 1px solid #fff; color: #fff; }
+    #btnCerrarSesion:hover { background-color: rgba(255, 255, 255, 0.2); }
+
+    /* Estilos “Gestión de Usuarios” */
     :root{
       --bg:#f6f7fb; --card:#fff; --muted:#6b7280; --line:#e5e7eb;
       --primary:#0d6efd; --danger:#dc3545; --warning:#fd7e14; --header:#0b0b0b;
@@ -80,6 +52,26 @@
   </style>
 </head>
 <body>
+  <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="index.html">Inicio</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMenu">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarMenu">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+          <li class="nav-item"><a class="nav-link" href="genero.html">Género</a></li>
+          <li class="nav-item"><a class="nav-link" href="modulo.html">Módulo</a></li>
+          <li class="nav-item"><a class="nav-link" href="role.html">Rol</a></li>
+          <li class="nav-item"><a class="nav-link" href="bitacora.html">Bitácora</a></li>
+          <li class="nav-item"><a class="nav-link" href="tipoacceso.html">Tipo Acceso</a></li>
+        </ul>
+        <span class="navbar-text me-3" id="navUsuario"></span>
+        <button class="btn ms-2" id="btnCerrarSesion">Cerrar Sesión</button>
+      </div>
+    </div>
+  </nav>
+
   <div class="wrapper">
     <h1>Gestión de Usuarios</h1>
     <div class="muted"></div>
@@ -93,7 +85,7 @@
         <div class="row row-2">
           <div>
             <label>ID (solo edición)</label>
-             <input id="idUsuario" type="text" placeholder="(auto)" readonly/>
+            <input id="idUsuario" type="text" placeholder="(auto)" readonly/>
           </div>
           <div>
             <label>Fotografía (URL/base64)</label>
@@ -197,178 +189,212 @@
       <div style="overflow:auto">
         <table id="tabla">
           <thead>
-          <tr>
-            <th>ID</th><th>Nombre</th><th>Apellido</th><th>Email</th>
-            <th>Estatus</th><th>Rol</th><th class="cell-actions">Acciones</th>
-          </tr>
+            <tr>
+              <th>ID</th>
+              <th>Nombre</th>
+              <th>Apellido</th>
+              <th>Email</th>
+              <th>Estatus</th>
+              <th>Rol</th>
+              <th class="cell-actions">Acciones</th>
+            </tr>
           </thead>
           <tbody></tbody>
         </table>
       </div>
+      <div id="msgTabla" style="margin-top:10px;"></div>
     </div>
   </div> <!-- /.wrapper -->
 
-<script>
-const API = '';                          
-const H_USR = {'X-User':'admin'};        
+  <script>
+  // ================== CONFIG ==================
+  const API = '';                           // ← pon aquí tu base URL
+  const H_USR = {'X-User':'admin'};         // ← header que usas
 
-//  estado / catálogos
-let _roles = [], _estatus = [], _generos = [], _sucursales = [];
-const mapBy = (arr, key='id', label='nombre') =>
-  Object.fromEntries((arr||[]).map(it => [String(it[key] ?? it['id']), it[label] ?? '']));
-let rolesById = {}, estatusById = {};
-function nombreRol(id){ return rolesById[String(id)] ?? (id ?? ''); }
-function nombreEstatus(id){ return estatusById[String(id)] ?? (id ?? ''); }
+  // ================== HELPERS ==================
+  const mapBy = (arr, key='id', label='nombre') =>
+    Object.fromEntries((arr||[]).map(it => [String(it[key] ?? it['id']), it[label] ?? '']));
 
-async function safeFetch(url, opts) {
-  const res = await fetch(url, opts);
-  if (!res.ok) throw new Error(await res.text().catch(()=>res.statusText));
-  return res.json().catch(()=>null);
-}
-function toDateInput(value){ return value ? (''+value).substring(0,10) : ''; }
-function showMsg(txt, ok=true){
-  const el = document.getElementById('msg');
-  el.className = ok ? 'ok' : 'error';
-  el.textContent = txt;
-  setTimeout(()=>{ el.textContent=''; el.className=''; }, 3500);
-}
+  let rolesById = {}, estatusById = {};
 
-// Catálogos (regresa data para mapear nombres)
-async function cargarCatalogo(url, selectId, valueField='id', labelField='nombre') {
-  try{
-    const data = await safeFetch(url, {headers:H_USR});
-    const sel = document.getElementById(selectId);
-    sel.innerHTML = '<option value="">-- Seleccione --</option>';
-    (data||[]).forEach(it=>{
-      const opt = document.createElement('option');
-      opt.value = it[valueField] ?? it['id'+labelField] ?? it['id'];
-      opt.textContent = it[labelField] ?? it['nombre'] ?? JSON.stringify(it);
-      sel.appendChild(opt);
-    });
-    return data;
-  }catch(e){
-    document.getElementById(selectId).innerHTML = '<option value="">(vacío)</option>';
-    return [];
+  async function safeFetch(url, opts) {
+    const res = await fetch(url, opts);
+    if (!res.ok) throw new Error(await res.text().catch(()=>res.statusText));
+    return res.json().catch(()=>null);
   }
-}
-
-// listado
-async function cargarUsuarios(){
-  try{
-    const data = await safeFetch(`${API}/usuario/listar`, {headers:H_USR});
-    const tb = document.querySelector('#tabla tbody');
-    tb.innerHTML = '';
-
-    (data||[]).forEach(u=>{
-      const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td>${u.idUsuario ?? ''}</td>
-        <td>${u.nombre ?? ''}</td>
-        <td>${u.apellido ?? ''}</td>
-        <td>${u.correoElectronico ?? ''}</td>
-        <td>${nombreEstatus(u.idStatusUsuario)}</td>
-        <td>${nombreRol(u.idRole)}</td>
-        <td class="cell-actions">
-          <div class="right">
-            <!-- 🔹 idUsuario ahora va entre comillas -->
-            <button class="btn warn" onclick='editar("${u.idUsuario}")'>Editar</button>
-            <button class="btn danger" onclick='borrar("${u.idUsuario}")'>Eliminar</button>
-          </div>
-        </td>`;
-      tb.appendChild(tr);
-    });
-  }catch(e){ 
-    showMsg(`Error al listar: ${e.message}`, false); 
+  function toDateInput(value){ return value ? (''+value).substring(0,10) : ''; }
+  function showMsg(id, txt, ok=true){
+    const el = document.getElementById(id);
+    if(!el) return;
+    el.className = ok ? 'ok' : 'error';
+    el.textContent = txt;
+    clearTimeout(showMsg.timers?.[id]);
+    showMsg.timers = showMsg.timers || {};
+    showMsg.timers[id] = setTimeout(()=>{ el.textContent=''; el.className=''; }, 3500);
   }
-}
+  function getId(u){
+    // ID técnico usado para acciones
+    return u.idUsuario ?? u.id ?? u.uuid ?? u.codigo ?? '';
+  }
 
+  // ================== CATÁLOGOS ==================
+  async function cargarCatalogo(url, selectId, valueField='id', labelField='nombre') {
+    try{
+      const data = await safeFetch(url, {headers:H_USR});
+      const sel = document.getElementById(selectId);
+      if (sel) {
+        sel.innerHTML = '<option value="">-- Seleccione --</option>';
+        (data||[]).forEach(it=>{
+          const opt = document.createElement('option');
+          opt.value = it[valueField] ?? it['id'];
+          opt.textContent = it[labelField] ?? '';
+          sel.appendChild(opt);
+        });
+      }
+      return data || [];
+    }catch(e){
+      const sel = document.getElementById(selectId);
+      if (sel) sel.innerHTML = '<option value="">(vacío)</option>';
+      return [];
+    }
+  }
 
-// edición
-async function editar(id){
-  try{
-    const u = await safeFetch(`${API}/usuario/obtener/${id}`, {headers:H_USR});
-    document.getElementById('idUsuario').value = u.idUsuario ?? '';
-    document.getElementById('nombre').value = u.nombre ?? '';
-    document.getElementById('apellido').value = u.apellido ?? '';
-    document.getElementById('fechaNacimiento').value = toDateInput(u.fechaNacimiento);
-    document.getElementById('correoElectronico').value = u.correoElectronico ?? '';
-    document.getElementById('telefonoMovil').value = u.telefonoMovil ?? '';
-    document.getElementById('password').value = u.password ?? '';
-    document.getElementById('intentosDeAcceso').value = u.intentosDeAcceso ?? 0;
-    document.getElementById('requiereCambiarPassword').value = String(u.requiereCambiarPassword ?? false);
-    document.getElementById('pregunta').value = u.pregunta ?? '';
-    document.getElementById('respuesta').value = u.respuesta ?? '';
-    document.getElementById('idGenero').value = u.idGenero ?? '';
-    document.getElementById('idStatusUsuario').value = u.idStatusUsuario ?? '';
-    document.getElementById('idRole').value = u.idRole ?? '';
-    document.getElementById('idSucursal').value = u.idSucursal ?? '';
-    document.getElementById('fotografia').value = u.fotografia ?? '';
-    document.getElementById('usuarioCreacion').value = u.usuarioCreacion ?? '';
-    window.scrollTo({top:0, behavior:'smooth'});
-  }catch(e){ showMsg(`Error al obtener: ${e.message}`, false); }
-}
+  // ================== LISTADO ==================
+  async function cargarUsuarios(){
+    try{
+      const data = await safeFetch(`${API}/usuario/listar`, {headers:H_USR});
+      const tb = document.querySelector('#tabla tbody');
+      tb.innerHTML = '';
 
-// borrar
-async function borrar(id){
-  if(!confirm(`¿Eliminar usuario ${id}?`)) return;
-  try{
-    await fetch(`${API}/usuario/eliminar/${id}`, {method:'DELETE', headers:H_USR});
-    showMsg('Usuario eliminado');
-    cargarUsuarios();
-    limpiar();
-  }catch(e){ showMsg(`Error al eliminar: ${e.message}`, false); }
-}
+      (data||[]).forEach(u=>{
+        const id = getId(u);
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${id}</td>
+          <td>${u.nombre ?? ''}</td>
+          <td>${u.apellido ?? ''}</td>
+          <td>${u.correoElectronico ?? ''}</td>
+          <td>${nombreEstatus(u.idStatusUsuario)}</td>
+          <td>${nombreRol(u.idRole)}</td>
+          <td class="cell-actions">
+            <div class="right">
+              <button class="btn warn"   onclick='editar(${JSON.stringify(id)})'>Editar</button>
+              <button class="btn danger" onclick='borrar(${JSON.stringify(id)})'>Eliminar</button>
+            </div>
+          </td>`;
+        tb.appendChild(tr);
+      });
+    }catch(e){
+      showMsg('msgTabla', `Error al listar: ${e.message}`, false);
+    }
+  }
 
-// Guardar
-document.getElementById('formUsuario').addEventListener('submit', async (ev)=>{
-  ev.preventDefault();
+  function nombreRol(id){ return rolesById[String(id ?? '')] ?? (id ?? ''); }
+  function nombreEstatus(id){ return estatusById[String(id ?? '')] ?? (id ?? ''); }
 
-  const idRaw = document.getElementById('idUsuario').value?.trim();
-  const body = {
-    idUsuario: idRaw ? idRaw : null,           
-    nombre: document.getElementById('nombre').value || null,
-    apellido: document.getElementById('apellido').value || null,
-    fechaNacimiento: document.getElementById('fechaNacimiento').value || null,
-    idStatusUsuario: document.getElementById('idStatusUsuario').value ? Number(document.getElementById('idStatusUsuario').value) : null,
-    idGenero: document.getElementById('idGenero').value ? Number(document.getElementById('idGenero').value) : null,
-    password: document.getElementById('password').value || null,
-    correoElectronico: document.getElementById('correoElectronico').value || null,
-    telefonoMovil: document.getElementById('telefonoMovil').value || null,
-    fotografia: document.getElementById('fotografia').value || null,
-    idSucursal: document.getElementById('idSucursal').value ? Number(document.getElementById('idSucursal').value) : null,
-    idRole: document.getElementById('idRole').value ? Number(document.getElementById('idRole').value) : null,
-    intentosDeAcceso: document.getElementById('intentosDeAcceso').value ? Number(document.getElementById('intentosDeAcceso').value) : 0,
-    requiereCambiarPassword: document.getElementById('requiereCambiarPassword').value === 'true',
-    pregunta: document.getElementById('pregunta').value || null,
-    respuesta: document.getElementById('respuesta').value || null
-  };
+  // ================== EDICIÓN ==================
+  async function editar(id){
+    try{
+      const u = await safeFetch(`${API}/usuario/obtener/${encodeURIComponent(id)}`, {headers:H_USR});
 
-  await safeFetch(`${API}/usuario/guardar`, {
-    method:'POST',
-    headers:{'Content-Type':'application/json', ...H_USR}, // H_USR tiene X-User
-    body: JSON.stringify(body)
+      // ID visible solo en lectura
+      document.getElementById('idUsuario').value = getId(u) ?? '';
+      document.getElementById('nombre').value = u.nombre ?? '';
+      document.getElementById('apellido').value = u.apellido ?? '';
+      document.getElementById('fechaNacimiento').value = toDateInput(u.fechaNacimiento);
+      document.getElementById('correoElectronico').value = u.correoElectronico ?? '';
+      document.getElementById('telefonoMovil').value = u.telefonoMovil ?? '';
+
+      // Nunca prellenar password con hash
+      document.getElementById('password').value = '';
+
+      document.getElementById('intentosDeAcceso').value = u.intentosDeAcceso ?? 0;
+      document.getElementById('requiereCambiarPassword').value = String(u.requiereCambiarPassword ?? false);
+      document.getElementById('pregunta').value = u.pregunta ?? '';
+      document.getElementById('respuesta').value = u.respuesta ?? '';
+      document.getElementById('idGenero').value = u.idGenero ?? '';
+      document.getElementById('idStatusUsuario').value = u.idStatusUsuario ?? '';
+      document.getElementById('idRole').value = u.idRole ?? '';
+      document.getElementById('idSucursal').value = u.idSucursal ?? '';
+      document.getElementById('fotografia').value = u.fotografia ?? '';
+      document.getElementById('usuarioCreacion').value = u.usuarioCreacion ?? '';
+      window.scrollTo({top:0, behavior:'smooth'});
+    }catch(e){ showMsg('msg', `Error al obtener: ${e.message}`, false); }
+  }
+
+  // ================== BORRAR ==================
+  async function borrar(id){
+    if(!confirm(`¿Eliminar usuario ${id}?`)) return;
+    try{
+      await fetch(`${API}/usuario/eliminar/${encodeURIComponent(id)}`, {method:'DELETE', headers:H_USR});
+      showMsg('msgTabla', 'Usuario eliminado');
+      cargarUsuarios();
+      limpiar();
+    }catch(e){ showMsg('msgTabla', `Error al eliminar: ${e.message}`, false); }
+  }
+
+  // ================== GUARDAR ==================
+  document.getElementById('formUsuario').addEventListener('submit', async (ev)=>{
+    ev.preventDefault();
+
+    const idRaw = document.getElementById('idUsuario').value?.trim();
+    const body = {
+      idUsuario: idRaw ? idRaw : null,
+      nombre: document.getElementById('nombre').value || null,
+      apellido: document.getElementById('apellido').value || null,
+      fechaNacimiento: document.getElementById('fechaNacimiento').value || null,
+      idStatusUsuario: document.getElementById('idStatusUsuario').value ? Number(document.getElementById('idStatusUsuario').value) : null,
+      idGenero: document.getElementById('idGenero').value ? Number(document.getElementById('idGenero').value) : null,
+      correoElectronico: document.getElementById('correoElectronico').value || null,
+      telefonoMovil: document.getElementById('telefonoMovil').value || null,
+      fotografia: document.getElementById('fotografia').value || null,
+      idSucursal: document.getElementById('idSucursal').value ? Number(document.getElementById('idSucursal').value) : null,
+      idRole: document.getElementById('idRole').value ? Number(document.getElementById('idRole').value) : null,
+      intentosDeAcceso: document.getElementById('intentosDeAcceso').value ? Number(document.getElementById('intentosDeAcceso').value) : 0,
+      requiereCambiarPassword: document.getElementById('requiereCambiarPassword').value === 'true',
+      pregunta: document.getElementById('pregunta').value || null,
+      respuesta: document.getElementById('respuesta').value || null
+    };
+    const pwd = document.getElementById('password').value.trim();
+    if (pwd) body.password = pwd; 
+
+    try{
+      await safeFetch(`${API}/usuario/guardar`, {
+        method:'POST',
+        headers:{'Content-Type':'application/json', ...H_USR},
+        body: JSON.stringify(body)
+      });
+      showMsg('msg', 'Guardado con éxito');
+      cargarUsuarios();
+      limpiar();
+    }catch(e){
+      showMsg('msg', `Error al guardar: ${e.message}`, false);
+    }
   });
-  showMsg('Guardado con éxito');
-  cargarUsuarios();
-  limpiar();
-});
 
-// carga catálogos y mapea nombres para la tabla
-(async function init(){
-  const [est, gen, rol, suc] = await Promise.all([
-    cargarCatalogo(`${API}/status_usuario/listar`, 'idStatusUsuario', 'idStatusUsuario', 'nombre'),
-    cargarCatalogo(`${API}/genero/listar`, 'idGenero', 'idGenero', 'nombre'),
-    cargarCatalogo(`${API}/role/getRoles`, 'idRole', 'idRole', 'nombre'),
-    cargarCatalogo(`${API}/sucursal`, 'idSucursal', 'idSucursal', 'nombre'),
-  ]);
-  _estatus = est; _generos = gen; _roles = rol; _sucursales = suc;
-  rolesById = mapBy(_roles, 'idRole', 'nombre');
-  estatusById = mapBy(_estatus, 'idStatusUsuario', 'nombre');
+  function limpiar(){
+    document.getElementById('formUsuario').reset();
+    document.getElementById('idUsuario').value = '';
+    document.getElementById('password').value = '';
+  }
 
-  cargarUsuarios();
-})();
-</script>
+  // ================== INIT ==================
+  (async function init(){
+    const [est, gen, rol, suc] = await Promise.all([
+      cargarCatalogo(`${API}/status_usuario/listar`, 'idStatusUsuario', 'idStatusUsuario', 'nombre'),
+      cargarCatalogo(`${API}/genero/listar`,          'idGenero',        'idGenero',        'nombre'),
+      cargarCatalogo(`${API}/role/getRoles`,          'idRole',          'idRole',          'nombre'),
+      cargarCatalogo(`${API}/sucursal`,               'idSucursal',      'idSucursal',      'nombre'),
+    ]);
+
+    // Mapas para mostrar nombres en la tabla
+    estatusById = mapBy(est, 'idStatusUsuario', 'nombre');
+    rolesById   = mapBy(rol, 'idRole',          'nombre');
+
+    cargarUsuarios();
+  })();
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
-
-
