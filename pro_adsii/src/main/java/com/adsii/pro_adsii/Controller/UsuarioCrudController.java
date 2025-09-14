@@ -45,5 +45,39 @@ public class UsuarioCrudController {
         service.eliminar(id);
         return ResponseEntity.noContent().build();
     }
-    
+      // LOGIN 🔒
+    @PostMapping("/login")
+    public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest request) {
+        Usuario user = service.obtener(request.getIdUsuario());
+        if (user == null) {
+            return ResponseEntity.badRequest()
+                    .body(new LoginResponse(false, "Usuario no encontrado", null));
+        }
+
+        // Hasheamos el password que viene del request en texto plano
+        String hashEntrada = sha256(request.getPassword());
+
+        // Comparamos contra lo guardado en BD
+        if (!hashEntrada.equalsIgnoreCase(user.getPassword())) {
+            return ResponseEntity.badRequest()
+                    .body(new LoginResponse(false, "Contraseña incorrecta", user.getIdUsuario()));
+        }
+
+        return ResponseEntity.ok(
+                new LoginResponse(true, "Login exitoso", user.getIdUsuario())
+        );
+    }
+
+    // Helper privado para hash SHA-256 (puedes moverlo a tu service si prefieres)
+    private static String sha256(String input) {
+        try {
+            java.security.MessageDigest md = java.security.MessageDigest.getInstance("SHA-256");
+            byte[] dig = md.digest(input.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+            StringBuilder sb = new StringBuilder(dig.length * 2);
+            for (byte b : dig) sb.append(String.format("%02x", b));
+            return sb.toString();
+        } catch (Exception e) {
+            throw new RuntimeException("Error generando hash SHA-256", e);
+        }
+    }
 }

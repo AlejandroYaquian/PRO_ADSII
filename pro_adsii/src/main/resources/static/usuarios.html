@@ -84,8 +84,9 @@
       <form id="formUsuario">
         <div class="row row-2">
           <div>
-            <label>ID (solo edición)</label>
-            <input id="idUsuario" type="text" placeholder="(auto)" readonly/>
+            <!-- ID editable al crear; se bloqueará al editar -->
+            <label>ID de usuario (requerido al crear)</label>
+            <input id="idUsuario" type="text" placeholder="ej. alejandro" />
           </div>
           <div>
             <label>Fotografía (URL/base64)</label>
@@ -104,7 +105,7 @@
           </div>
           <div>
             <label>Fecha Nacimiento</label>
-            <input id="fechaNacimiento" type="date"/>
+            <input id="fechaNacimiento" type="date" required />
           </div>
           <div>
             <label>Correo Electrónico</label>
@@ -208,7 +209,7 @@
 
   <script>
   // ================== CONFIG ==================
-  const API = '';                           // ← pon aquí tu base URL
+  const API = '';                           // ← pon aquí tu base URL (p.ej. "http://localhost:8080")
   const H_USR = {'X-User':'admin'};         // ← header que usas
 
   // ================== HELPERS ==================
@@ -297,8 +298,11 @@
     try{
       const u = await safeFetch(`${API}/usuario/obtener/${encodeURIComponent(id)}`, {headers:H_USR});
 
-      // ID visible solo en lectura
-      document.getElementById('idUsuario').value = getId(u) ?? '';
+      // Bloquea ID en edición
+      const idEl = document.getElementById('idUsuario');
+      idEl.value = getId(u) ?? '';
+      idEl.readOnly = true;
+
       document.getElementById('nombre').value = u.nombre ?? '';
       document.getElementById('apellido').value = u.apellido ?? '';
       document.getElementById('fechaNacimiento').value = toDateInput(u.fechaNacimiento);
@@ -337,9 +341,23 @@
   document.getElementById('formUsuario').addEventListener('submit', async (ev)=>{
     ev.preventDefault();
 
-    const idRaw = document.getElementById('idUsuario').value?.trim();
+    const idEl = document.getElementById('idUsuario');
+    const idRaw = idEl.value?.trim();
+    const esAlta = !idEl.readOnly; // si está editable, es alta
+
+    // Validaciones de alta
+    if (esAlta && !idRaw) {
+      showMsg('msg', 'El ID de usuario es obligatorio al crear', false);
+      idEl.focus();
+      return;
+    }
+    if (!document.getElementById('fechaNacimiento').value) {
+      showMsg('msg', 'La fecha de nacimiento es obligatoria', false);
+      return;
+    }
+
     const body = {
-      idUsuario: idRaw ? idRaw : null,
+      idUsuario: idRaw || null,
       nombre: document.getElementById('nombre').value || null,
       apellido: document.getElementById('apellido').value || null,
       fechaNacimiento: document.getElementById('fechaNacimiento').value || null,
@@ -355,8 +373,9 @@
       pregunta: document.getElementById('pregunta').value || null,
       respuesta: document.getElementById('respuesta').value || null
     };
+
     const pwd = document.getElementById('password').value.trim();
-    if (pwd) body.password = pwd; 
+    if (pwd) body.password = pwd; // solo enviar si se escribió
 
     try{
       await safeFetch(`${API}/usuario/guardar`, {
@@ -374,7 +393,9 @@
 
   function limpiar(){
     document.getElementById('formUsuario').reset();
-    document.getElementById('idUsuario').value = '';
+    const idEl = document.getElementById('idUsuario');
+    idEl.value = '';
+    idEl.readOnly = false; // habilitar para nuevas altas
     document.getElementById('password').value = '';
   }
 
