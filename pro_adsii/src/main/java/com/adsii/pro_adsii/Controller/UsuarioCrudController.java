@@ -7,6 +7,13 @@ import com.adsii.pro_adsii.Service.UsuarioCrudService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import com.adsii.pro_adsii.DTO.RecoveryStartRequest;
+import com.adsii.pro_adsii.DTO.RecoveryStartResponse;
+import com.adsii.pro_adsii.DTO.RecoveryFinishRequest;
+import com.adsii.pro_adsii.DTO.SimpleResponse;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.time.LocalDateTime;
 
 import java.util.List;
 
@@ -80,4 +87,54 @@ public class UsuarioCrudController {
             throw new RuntimeException("Error generando hash SHA-256", e);
         }
     }
+
+
+    
+    // ====== RECUPERAR: INICIO (regresa la pregunta de seguridad) ======
+@PostMapping("/recuperar/inicio")
+public ResponseEntity<RecoveryStartResponse> recuperarInicio(@RequestBody RecoveryStartRequest req) {
+    String id = nz(req!=null ? req.getIdUsuario() : null);
+    if (id == null) {
+        return ResponseEntity.badRequest().body(new RecoveryStartResponse(false, null));
+    }
+    Usuario u = service.obtener(id);
+    if (u == null || nz(u.getPregunta()) == null) {
+        // No exponemos detalle por seguridad
+        return ResponseEntity.ok(new RecoveryStartResponse(false, null));
+    }
+    return ResponseEntity.ok(new RecoveryStartResponse(true, u.getPregunta()));
+}
+
+// ====== RECUPERAR: VALIDAR RESPUESTA Y CAMBIAR PASSWORD ======
+@PostMapping("/recuperar/validar")
+public ResponseEntity<SimpleResponse> recuperarValidar(@RequestBody RecoveryFinishRequest req) {
+    String id = nz(req!=null ? req.getIdUsuario() : null);
+    String respIn = nz(req!=null ? req.getRespuesta() : null);
+    String nueva = nz(req!=null ? req.getNuevaPassword() : null);
+
+    if (id == null || respIn == null || nueva == null) {
+        return ResponseEntity.badRequest().body(new SimpleResponse(false, "Datos incompletos"));
+    }
+
+    Usuario u = service.obtener(id);
+    if (u == null || nz(u.getPregunta()) == null || nz(u.getRespuesta()) == null) {
+        return ResponseEntity.badRequest().body(new SimpleResponse(false,
+                "Tu pregunta y/o respuesta es invalida, revisa tus datos"));
+    }
+
+    // Comparación case-insensitive, con trim
+    String rBD = nz(u.getRespuesta()).toLowerCase();
+    String rIn = respIn.toLowerCase();
+    if (!rBD.equals(rIn)) {
+        return ResponseEntity.badRequest().body(new SimpleResponse(false,
+                "Tu pregunta y/o respuesta es invalida, revisa tus datos"));
+    }
+
+    // Respuesta correcta → cambiar password (SHA-256)
+    service.actualizarPasswordRecuperacion(u.getIdUsuario(), nueva, "recuperacion");
+    return ResponseEntity.ok(new SimpleResponse(true, "Contraseña actualizada"));
+}
+
+// ===== helpers locales =====
+private static String nz(String s){ return (s==null || s.isBlank()) ? null : s.trim(); }
 }

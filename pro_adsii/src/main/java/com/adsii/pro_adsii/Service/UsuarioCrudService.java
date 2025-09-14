@@ -11,6 +11,8 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
 
 @Service
 public class UsuarioCrudService {
@@ -128,4 +130,30 @@ public class UsuarioCrudService {
     private static void throwIfBlank(String val, String msg) {
         if (val == null || val.isBlank()) throw new IllegalArgumentException(msg);
     }
+
+
+
+
+    /** Cambia password tras recuperación (hashea en SHA-256 y persiste) */
+@Transactional
+public void actualizarPasswordRecuperacion(String idUsuario, String nuevaPasswordPlana, String usuarioAccion) {
+    Usuario u = usuarioRepository.findByIdUsuario(idUsuario);
+    if (u == null) throw new IllegalArgumentException("Usuario no existe: " + idUsuario);
+
+    if (nuevaPasswordPlana == null || nuevaPasswordPlana.isBlank()) {
+        throw new IllegalArgumentException("Nueva contraseña requerida");
+    }
+
+    u.setPassword(sha256(nuevaPasswordPlana));   // ← SHA-256
+    u.setRequiereCambiarPassword(false);
+    // si tienes este campo:
+    u.setUltimaFechaCambioPassword(LocalDateTime.now());
+
+    u.setFechaModificacion(LocalDateTime.now());
+    u.setUsuarioModificacion((usuarioAccion==null || usuarioAccion.isBlank()) ? "system" : usuarioAccion);
+
+    usuarioRepository.save(u);
+}
+
+
 }
