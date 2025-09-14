@@ -2,13 +2,10 @@ package com.adsii.pro_adsii.Controller;
 
 import com.adsii.pro_adsii.Entity.Empresa;
 import com.adsii.pro_adsii.Service.EmpresaService;
-import java.util.Optional;
-
 
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
