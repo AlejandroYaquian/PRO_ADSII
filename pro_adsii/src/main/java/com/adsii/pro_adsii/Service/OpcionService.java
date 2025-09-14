@@ -25,19 +25,23 @@ public class OpcionService {
 		return opcionRepository.findById(id);
 	}
 
-	public Opcion guardar(Opcion opcion, String usuarioActual) {
+	public Opcion guardar(Opcion opcion) {
 		if (opcion.getIdOpcion() == null) {
             opcion.setFechaCreacion(LocalDateTime.now());
-            opcion.setUsuarioCreacion(usuarioActual);
+            opcion.setUsuarioCreacion(opcion.getUsuarioCreacion());
+			return opcionRepository.save(opcion);
         } else {
             Opcion existente = opcionRepository.findById(opcion.getIdOpcion())
                     .orElseThrow(() -> new RuntimeException("Opcion no encontrada"));
-            opcion.setFechaCreacion(existente.getFechaCreacion());
-            opcion.setUsuarioCreacion(existente.getUsuarioCreacion());
-            opcion.setFechaModificacion(LocalDateTime.now());
-            opcion.setUsuarioModificacion(usuarioActual);
+
+			existente.setNombre(opcion.getNombre());
+			existente.setPagina(opcion.getPagina());
+			existente.setOrdenMenu(opcion.getOrdenMenu());
+			existente.setIdMenu(opcion.getIdMenu());		
+            existente.setFechaModificacion(LocalDateTime.now());
+            existente.setUsuarioModificacion(opcion.getUsuarioModificacion());
+			return opcionRepository.save(existente); 
         }
-		return opcionRepository.save(opcion);
 	}	
 
 	public void eliminar(Integer id) {

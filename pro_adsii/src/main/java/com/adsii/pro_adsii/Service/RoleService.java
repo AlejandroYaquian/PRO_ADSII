@@ -24,7 +24,7 @@ public class RoleService {
         Date fecha = new Date(); // fecha actual
         rol.setNombre(rolNuevo.getNombre());
         rol.setFechaCreacion(fecha);
-        rol.setUsuarioCreacion("admin01"); // o tomarlo de sesión si tienes auth
+        rol.setUsuarioCreacion(rolNuevo.getUsuario()); // o tomarlo de sesión si tienes auth
         rol.setUsuarioModificacion(null);
         rol.setFechaModificacion(null);
         return roleRepository.save(rol);
@@ -48,7 +48,7 @@ public class RoleService {
             Role rol = roMod.get();
             rol.setNombre(roleDTO.getNombre());
             rol.setFechaModificacion(fecha);
-            rol.setUsuarioModificacion("admin01");
+            rol.setUsuarioModificacion(roleDTO.getUsuario());
             roleRepository.save(rol);
     
     }
