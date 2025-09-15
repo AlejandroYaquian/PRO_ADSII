@@ -90,10 +90,10 @@ public class UsuarioCrudController {
 
 
     
-    // ====== RECUPERAR: INICIO (regresa la pregunta de seguridad) ======
-@PostMapping("/recuperar/inicio")
+   /*/ */ // ====== RECUPERAR: INICIO (regresa la pregunta de seguridad) ======
+/*@PostMapping("/recuperar/inicio")
 public ResponseEntity<RecoveryStartResponse> recuperarInicio(@RequestBody RecoveryStartRequest req) {
-    String id = nz(req!=null ? req.getIdUsuario() : null);
+   String id = nz(req!=null ? req.getIdUsuario() : null);
     if (id == null) {
         return ResponseEntity.badRequest().body(new RecoveryStartResponse(false, null));
     }
@@ -103,8 +103,8 @@ public ResponseEntity<RecoveryStartResponse> recuperarInicio(@RequestBody Recove
         return ResponseEntity.ok(new RecoveryStartResponse(false, null));
     }
     return ResponseEntity.ok(new RecoveryStartResponse(true, u.getPregunta()));
-}
-
+}*/
+ 
 // ====== RECUPERAR: VALIDAR RESPUESTA Y CAMBIAR PASSWORD ======
 @PostMapping("/recuperar/validar")
 public ResponseEntity<SimpleResponse> recuperarValidar(@RequestBody RecoveryFinishRequest req) {
