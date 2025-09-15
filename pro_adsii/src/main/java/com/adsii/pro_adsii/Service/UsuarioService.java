@@ -42,7 +42,6 @@ public class UsuarioService {
         return new LoginResponse(false, "Usuario no activo", null);
     }
 
-    // Login exitoso, mandamos idUsuario para front
     bitacoraService.registrarAcceso(user, 1, request, "Login exitoso");
     return new LoginResponse(true, "Bienvenido " + usuario.getNombre(), usuario.getIdUsuario());
 }
@@ -59,7 +58,7 @@ public class UsuarioService {
             }
             return sb.toString();
         } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException("Error generando hash MD5", e);
+            throw new RuntimeException("Error generando", e);
         }
     }
 
