@@ -14,7 +14,7 @@ import lombok.Data;
 @Data
 public class Usuario {
     @Id
-    @Column(name = "IdUsuario")
+    @Column(name = "IdUsuario", length = 36, nullable = false)
     private String idUsuario;
 
     @Column(name = "Nombre")
