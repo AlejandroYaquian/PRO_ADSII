@@ -43,14 +43,14 @@ public class UsuarioCrudController {
         return ResponseEntity.ok(saved);
     }
 
-    // ================== ELIMINAR ==================
+    // ELIMINAR 
     @DeleteMapping("/eliminar/{id}")
     public ResponseEntity<Void> eliminar(@PathVariable String id) {
         service.eliminar(id);
         return ResponseEntity.noContent().build();
     }
 
-    // ================== LOGIN (MD5) ==================
+    // LOGIN (MD5) 
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest request) {
         Usuario user = service.obtener(request.getIdUsuario());
@@ -58,17 +58,13 @@ public class UsuarioCrudController {
             return ResponseEntity.badRequest()
                     .body(new LoginResponse(false, "Usuario no encontrado", null));
         }
-
-        // MD5 (32 hex)
         String hashEntrada = md5(request.getPassword());
 
         if (!hashEntrada.equalsIgnoreCase(user.getPassword())) {
-            // ---------- Fallback OPCIONAL por si tienes usuarios viejos con SHA-256 (64 hex) ----------
-            // Si no lo quieres, elimina este bloque y deja solo el "Contraseña incorrecta".
+           
             if (user.getPassword() != null && user.getPassword().length() == 64) {
                 String sha = sha256(request.getPassword());
                 if (sha.equalsIgnoreCase(user.getPassword())) {
-                    // Migración automática a MD5
                     service.actualizarPasswordRecuperacion(user.getIdUsuario(), request.getPassword(),
                             "autoconvert_sha256_to_md5");
                     return ResponseEntity.ok(
@@ -76,7 +72,6 @@ public class UsuarioCrudController {
                     );
                 }
             }
-            // -------------------------------------------------------------------------------------------
             return ResponseEntity.badRequest()
                     .body(new LoginResponse(false, "Contraseña incorrecta", user.getIdUsuario()));
         }
@@ -86,14 +81,14 @@ public class UsuarioCrudController {
         );
     }
 
-    // ================== RECUPERAR: INICIO (pregunta) ==================
+    // RECUPERAR: INICIO (pregunta) 
     @PostMapping("/recuperar/inicio")
     public ResponseEntity<RecoveryStartResponse> recuperarInicio(@RequestBody Map<String, Object> req) {
         String id = null;
         if (req != null) {
             Object v = req.get("idUsuario");
-            if (v == null) v = req.get("usuario");     // lo que manda tu modal
-            if (v == null) v = req.get("usuarioId");   // si viniera como número
+            if (v == null) v = req.get("usuario");     
+            if (v == null) v = req.get("usuarioId");  
             if (v != null) id = v.toString();
         }
 
@@ -109,7 +104,7 @@ public class UsuarioCrudController {
         return ResponseEntity.ok(new RecoveryStartResponse(true, u.getPregunta()));
     }
 
-    // ================== RECUPERAR: VALIDAR y CAMBIAR ==================
+    // RECUPERAR: VALIDAR y CAMBIAR
     @PostMapping("/recuperar/validar")
     public ResponseEntity<SimpleResponse> recuperarValidar(@RequestBody Map<String, Object> req) {
         // 1) Tomar id
@@ -121,7 +116,7 @@ public class UsuarioCrudController {
             if (v != null) id = v.toString();
         }
 
-        // 2) Tomar respuesta y nueva password (aceptamos alias)
+        // 2) Tomar respuesta y nueva password 
         String respIn = null;
         String nueva  = null;
         if (req != null) {
@@ -153,12 +148,12 @@ public class UsuarioCrudController {
                     .body(new SimpleResponse(false, "Tu pregunta y/o respuesta es invalida, revisa tus datos"));
         }
 
-        // OK → cambiar password (el service guarda en MD5)
+        // OK: cambiar password 
         service.actualizarPasswordRecuperacion(u.getIdUsuario(), nueva, "recuperacion");
         return ResponseEntity.ok(new SimpleResponse(true, "Contraseña actualizada"));
     }
 
-    // ================== helpers locales ==================
+    // helpers locales 
     private static String nz(String s) { return (s == null || s.isBlank()) ? null : s.trim(); }
 
     private static String md5(String input) {
@@ -172,8 +167,7 @@ public class UsuarioCrudController {
             throw new RuntimeException("Error generando hash MD5", e);
         }
     }
-
-    // Solo para el fallback opcional (puedes borrarlo si no lo usas)
+    //no olvidar que debo quitarlo 
     private static String sha256(String input) {
         try {
             java.security.MessageDigest md = java.security.MessageDigest.getInstance("SHA-256");
