@@ -72,6 +72,7 @@
                                 placeholder="Ingrese su usuario" required>
                         </div>
                         <div id="alertRecuperar"></div>
+                        <div id="recuperarPaso2" class="mt-2"></div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
@@ -140,6 +141,84 @@
                 .then(data => {
                     const alertClass = data.success ? 'alert-success' : 'alert-danger';
                     alertRecuperar.innerHTML = `<div class="alert ${alertClass}" role="alert">${data.mensaje}</div>`;
+                // Si el endpoint viejo no manda "mensaje", usamos el nuevo flujo
+if (typeof data.mensaje === 'undefined') {
+    const usuario = document.getElementById('usuarioRecuperar').value?.trim();
+    fetch('http://localhost:8080/usuario/recuperar/inicio', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ usuario })
+    })
+    .then(r => r.json())
+    .then(start => {
+        if (!start || !start.success || !start.pregunta) {
+            alertRecuperar.innerHTML = `
+              <div class="alert alert-danger" role="alert">
+                No fue posible iniciar la recuperación. Verifique su usuario.
+              </div>`;
+            document.getElementById('recuperarPaso2').innerHTML = '';
+            return;
+        }
+
+        // Mostramos inputs del paso 2
+        document.getElementById('recuperarPaso2').innerHTML = `
+          <div class="mb-3">
+            <label class="form-label">Pregunta de seguridad</label>
+            <input type="text" class="form-control" value="${start.pregunta}" readonly>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Respuesta</label>
+            <input type="password" class="form-control" id="respuestaRecuperar" placeholder="Escriba su respuesta" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Nueva contraseña</label>
+            <input type="password" class="form-control" id="nuevaPassRecuperar" placeholder="Nueva contraseña" required>
+          </div>
+          <button type="button" class="btn btn-success w-100" id="btnEnviarPaso2">Cambiar contraseña</button>
+        `;
+
+        // Listener para enviar el paso 2
+        document.getElementById('btnEnviarPaso2').addEventListener('click', () => {
+            const respuesta = document.getElementById('respuestaRecuperar').value?.trim();
+            const nuevaPassword = document.getElementById('nuevaPassRecuperar').value?.trim();
+
+            fetch('http://localhost:8080/usuario/recuperar/validar', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    idUsuario: usuario,
+                    respuesta: respuesta,
+                    nuevaPassword: nuevaPassword
+                })
+            })
+            .then(r => r.json())
+            .then(fin => {
+                const ok = !!(fin && fin.success);
+                alertRecuperar.innerHTML = `
+                  <div class="alert ${ok ? 'alert-success' : 'alert-danger'}" role="alert">
+                    ${fin?.mensaje ?? (ok ? 'Contraseña actualizada' : 'No se pudo actualizar')}
+                  </div>`;
+                if (ok) {
+                    document.getElementById('recuperarPaso2').innerHTML = '';
+                    recuperarForm.reset();
+                }
+            })
+            .catch(() => {
+                alertRecuperar.innerHTML = `
+                  <div class="alert alert-danger" role="alert">
+                    Error de conexión al validar respuesta
+                  </div>`;
+            });
+        });
+    })
+    .catch(() => {
+        alertRecuperar.innerHTML = `
+          <div class="alert alert-danger" role="alert">
+            Error de conexión al iniciar recuperación
+          </div>`;
+    });
+}
+
                 })
                 .catch(err => {
                     alertRecuperar.innerHTML = `<div class="alert alert-danger" role="alert">Error de conexión al servidor</div>`;
