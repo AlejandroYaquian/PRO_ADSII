@@ -56,7 +56,7 @@ public class UsuarioCrudController {
         Usuario user = service.obtener(request.getIdUsuario());
         if (user == null) {
             return ResponseEntity.badRequest()
-                    .body(new LoginResponse(false, "Usuario no encontrado", null, null));
+                    .body(new LoginResponse(false, "Usuario no encontrado", null,0));
         }
         String hashEntrada = md5(request.getPassword());
 
@@ -68,16 +68,16 @@ public class UsuarioCrudController {
                     service.actualizarPasswordRecuperacion(user.getIdUsuario(), request.getPassword(),
                             "autoconvert_sha256_to_md5");
                     return ResponseEntity.ok(
-                            new LoginResponse(true, "Login exitoso", user.getIdUsuario())
+                            new LoginResponse(true, "Login exitoso", user.getIdUsuario(), user.getIdRole())
                     );
                 }
             }
             return ResponseEntity.badRequest()
-                    .body(new LoginResponse(false, "Contraseña incorrecta", user.getIdUsuario(), null));
+                    .body(new LoginResponse(false, "Contraseña incorrecta", user.getIdUsuario(),user.getIdRole()));
         }
 
         return ResponseEntity.ok(
-                new LoginResponse(true, "Login exitoso", user.getIdUsuario(), null)
+                new LoginResponse(true, "Login exitoso", user.getIdUsuario(),user.getIdRole())
         );
     }
 
