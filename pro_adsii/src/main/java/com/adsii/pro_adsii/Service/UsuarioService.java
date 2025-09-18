@@ -27,24 +27,29 @@ public class UsuarioService {
 
     if (usuario == null) {
         bitacoraService.registrarAcceso(user, 4, request, "Usuario no existe");
-        return new LoginResponse(false, "Usuario no existe", null);
+        return new LoginResponse(false, "Usuario no existe", null, null);
     }
 
     String hashedPassword = generarMD5(password);
 
     if (!usuario.getPassword().equalsIgnoreCase(hashedPassword)) {
         bitacoraService.registrarAcceso(user, 2, request, "Contraseña incorrecta");
-        return new LoginResponse(false, "Contraseña incorrecta", null);
+        return new LoginResponse(false, "Contraseña incorrecta", null, null);
     }
 
     if (usuario.getIdStatusUsuario() != 1) {
         bitacoraService.registrarAcceso(user, 3, request, "Usuario inactivo");
-        return new LoginResponse(false, "Usuario no activo", null);
+        return new LoginResponse(false, "Usuario no activo", null, null);
     }
 
-    bitacoraService.registrarAcceso(user, 1, request, "Login exitoso");
-    return new LoginResponse(true, "Bienvenido " + usuario.getNombre(), usuario.getIdUsuario());
-}
+bitacoraService.registrarAcceso(user, 1, request, "Login exitoso");
+
+return new LoginResponse(
+    true,
+    "Bienvenido " + usuario.getNombre(),
+    usuario.getIdUsuario(),
+    usuario.getIdRole()   // aquí solo enviamos el ID del rol
+);}
 
 
     private String generarMD5(String input) {

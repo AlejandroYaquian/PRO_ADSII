@@ -30,20 +30,25 @@ public class MenuService {
         return menuRepository.findById(id);
     }
 
-	public Menu guardar(Menu menu, String usuarioActual) {
-		if (menu.getIdModulo() == null) {
-            menu.setFechaCreacion(LocalDateTime.now());
-            menu.setUsuarioCreacion(usuarioActual);
-        } else {
-            Menu existente = menuRepository.findById(menu.getIdModulo())
-                    .orElseThrow(() -> new RuntimeException("Menu no encontrado"));
-            menu.setFechaCreacion(existente.getFechaCreacion());
-            menu.setUsuarioCreacion(existente.getUsuarioCreacion());
-            menu.setFechaModificacion(LocalDateTime.now());
-            menu.setUsuarioModificacion(usuarioActual);
-        }
-		return menuRepository.save(menu);
-	}	
+public Menu guardar(Menu menu, String usuarioActual) {
+    if (menu.getIdMenu() == null) {
+        menu.setFechaCreacion(LocalDateTime.now());
+        menu.setUsuarioCreacion(usuarioActual);
+        menu.setFechaModificacion(null);
+        menu.setUsuarioModificacion(null);
+    } else {
+        Menu existente = menuRepository.findById(menu.getIdMenu())
+                .orElseThrow(() -> new RuntimeException("Menu no encontrado"));
+
+        menu.setFechaCreacion(existente.getFechaCreacion());
+        menu.setUsuarioCreacion(existente.getUsuarioCreacion());
+        menu.setFechaModificacion(LocalDateTime.now());
+        menu.setUsuarioModificacion(usuarioActual);
+    }
+
+    return menuRepository.save(menu);
+}
+
 
 	public void eliminar(Integer id) {
         menuRepository.deleteById(id);

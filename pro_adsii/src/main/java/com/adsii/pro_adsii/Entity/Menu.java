@@ -40,19 +40,4 @@ public class Menu {
     @Column(name = "UsuarioModificacion", length = 100)
     private String usuarioModificacion;
     
-    public String getNombre() {
-		return nombre;
-	}
-
-	public void setNombre(String nombre) {
-		this.nombre = nombre;
-	}
-
-    public Integer getIdModulo() {
-		return idModulo;
-	}
-
-	public void setIdModulo(Integer idModulo) {
-		this.idModulo = idModulo;
-	}
 }

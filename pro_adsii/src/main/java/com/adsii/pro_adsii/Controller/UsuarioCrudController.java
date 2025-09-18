@@ -58,7 +58,7 @@ public class UsuarioCrudController {
         Usuario user = service.obtener(request.getIdUsuario());
         if (user == null) {
             return ResponseEntity.badRequest()
-                    .body(new LoginResponse(false, "Usuario no encontrado", null));
+                    .body(new LoginResponse(false, "Usuario no encontrado", null, null));
         }
 
         // Hasheamos el password que viene del request en texto plano
@@ -67,11 +67,11 @@ public class UsuarioCrudController {
         // Comparamos contra lo guardado en BD
         if (!hashEntrada.equalsIgnoreCase(user.getPassword())) {
             return ResponseEntity.badRequest()
-                    .body(new LoginResponse(false, "Contraseña incorrecta", user.getIdUsuario()));
+                    .body(new LoginResponse(false, "Contraseña incorrecta", user.getIdUsuario(), null));
         }
 
         return ResponseEntity.ok(
-                new LoginResponse(true, "Login exitoso", user.getIdUsuario())
+                new LoginResponse(true, "Login exitoso", user.getIdUsuario(), null)
         );
     }
 

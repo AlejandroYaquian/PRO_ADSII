@@ -108,18 +108,21 @@
                     alertContainer.innerHTML = `<div class="alert ${alertClass}" role="alert">${data.mensaje}</div>`;
 
                     if (data.success) {
-    sessionStorage.setItem('usuarioActual', data.idUsuario);
-    setTimeout(() => {
-        window.location.href = 'index.html';
-    }, 1000);
-}
+                        // Guardamos usuario y rol en sessionStorage
+                        sessionStorage.setItem('usuarioActual', data.idUsuario);
+                        sessionStorage.setItem('idRole', data.idRole); // <-- nuevo
 
+                        setTimeout(() => {
+                            window.location.href = 'index.html';
+                        }, 1000);
+                    }
                 })
                 .catch(err => {
                     alertContainer.innerHTML = `<div class="alert alert-danger" role="alert">Error de conexión al servidor</div>`;
                 });
         });
 
+        // Recuperar contraseña
         const recuperarForm = document.getElementById('recuperarForm');
         const alertRecuperar = document.getElementById('alertRecuperar');
 
@@ -146,6 +149,7 @@
                 });
         });
     </script>
-</body>
-</html>
 
+</body>
+
+</html>

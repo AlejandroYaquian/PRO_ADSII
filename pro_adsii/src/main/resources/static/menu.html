@@ -6,32 +6,22 @@
     <title>CRUD Menú</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
 </head>
-<style>
-    #btnCerrarSesion {
-        background-color: transparent;
-        border: 1px solid #fff;
-        color: #fff;
-    }
-    #btnCerrarSesion:hover {
-        background-color: rgba(255, 255, 255, 0.2);
-    }
-</style>
 
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container-fluid">
             <a class="navbar-brand" href="index.html">Inicio</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMenu">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarMenu">
-                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                </ul>
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0"></ul>
                 <span class="navbar-text me-3" id="navUsuario"></span>
-                <button class="btn ms-2" id="btnCerrarSesion">Cerrar Sesión</button>
+                <button class="btn btn-outline-light" id="btnCerrarSesion">Cerrar Sesión</button>
             </div>
         </div>
     </nav>
+
     <div class="container mt-4">
         <h2 class="mb-4">Gestión de Menús</h2>
 
@@ -56,9 +46,12 @@
                 <input type="number" class="form-control" id="ordenMenu">
             </div>
 
-            <button type="submit" class="btn btn-primary">Guardar</button>
-            <button type="reset" class="btn btn-secondary">Limpiar</button>
+            <button type="submit" class="btn btn-primary" id="btnGuardar">Guardar</button>
+            <button type="button" class="btn btn-success" id="btnGuardarCambios" style="display:none;">Guardar
+                Cambios</button>
+            <button type="button" class="btn btn-secondary" id="btnCancelar" style="display:none;">Cancelar</button>
         </form>
+
 
         <!-- Tabla -->
         <table class="table table-striped">
@@ -75,121 +68,174 @@
                     <th>Acciones</th>
                 </tr>
             </thead>
-            <tbody id="menuTableBody">
-            </tbody>
+            <tbody id="menuTableBody"></tbody>
         </table>
-
-        <script>
-            
-            const API_URL_MENU = "http://localhost:8080/menu";
-            const API_URL_MODULO = "http://localhost:8080/modulo";
-            const usuario = sessionStorage.getItem("usuarioActual");
-
-            if (!usuario) {
-                window.location.href = 'login.html';
-            } else {
-                document.getElementById('navUsuario').textContent = usuario;
-            }
-
-            document.getElementById('btnCerrarSesion').addEventListener('click', () => {
-                sessionStorage.removeItem('usuarioActual');
-                window.location.href = 'login.html';
-            });
-            // Guardar lista de módulos cargados
-            let modulos = [];
-
-            // Listar módulos en el select
-            async function cargarModulos() {
-                const res = await fetch(`${API_URL_MODULO}/listar`);
-                modulos = await res.json();
-
-                const select = document.getElementById("idModulo");
-                select.innerHTML = `<option value="">-- Selecciona un módulo --</option>`;
-                modulos.forEach(m => {
-                    select.innerHTML += `<option value="${m.idModulo}">${m.nombre}</option>`;
-                });
-            }
-
-            // Listar menús
-            async function listarMenus() {
-                const res = await fetch(`${API_URL_MENU}/listar`);
-                const data = await res.json();
-
-                const tbody = document.getElementById("menuTableBody");
-                tbody.innerHTML = "";
-
-                data.forEach(m => {
-                    const moduloNombre = modulos.find(mod => mod.idModulo === m.idModulo)?.nombre || m.idModulo;
-                    tbody.innerHTML += `
-                    <tr>
-                        <td>${m.idMenu}</td>
-                        <td>${moduloNombre}</td>
-                        <td>${m.nombre}</td>
-                        <td>${m.ordenMenu ?? ""}</td>
-                        <td>${m.usuarioCreacion ?? ""}</td>
-                        <td>${m.fechaCreacion ?? ""}</td>
-                        <td>${m.usuarioModificacion ?? ""}</td>
-                        <td>${m.fechaModificacion ?? ""}</td>
-                        <td>
-                            <button class="btn btn-sm btn-warning" onclick="editarMenu(${m.idMenu})">Editar</button>
-                            <button class="btn btn-sm btn-danger" onclick="eliminarMenu(${m.idMenu})">Eliminar</button>
-                        </td>
-                    </tr>
-                `;
-                });
-            }
-
-            // Guardar o actualizar
-            document.getElementById("menuForm").addEventListener("submit", async (e) => {
-                e.preventDefault();
-
-                const idMenu = document.getElementById("idMenu").value;
-                const menu = {
-                    idMenu: idMenu ? parseInt(idMenu) : null,
-                    idModulo: parseInt(document.getElementById("idModulo").value),
-                    nombre: document.getElementById("nombre").value,
-                    ordenMenu: document.getElementById("ordenMenu").value ? parseInt(document.getElementById("ordenMenu").value) : null
-                };
-
-                await fetch(`${API_URL_MENU}/guardar`, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "usuario": usuario
-                    },
-                    body: JSON.stringify(menu)
-                });
-
-                e.target.reset();
-                listarMenus();
-            });
-
-            // Editar
-            async function editarMenu(id) {
-                const res = await fetch(`${API_URL_MENU}/${id}`);
-                const m = await res.json();
-
-                document.getElementById("idMenu").value = m.idMenu;
-                document.getElementById("idModulo").value = m.idModulo;
-                document.getElementById("nombre").value = m.nombre;
-                document.getElementById("ordenMenu").value = m.ordenMenu ?? "";
-            }
-
-            // Eliminar
-            async function eliminarMenu(id) {
-                if (confirm("¿Seguro que deseas eliminar este menú?")) {
-                    await fetch(`${API_URL_MENU}/eliminar/${id}`, { method: "DELETE" });
-                    listarMenus();
-                }
-            }
-
-            // Inicialización
-            (async () => {
-                await cargarModulos();
-                listarMenus();
-            })();
-        </script>
     </div>
+
+    <script>
+        const API_URL_MENU = "http://localhost:8080/menu";
+        const API_URL_MODULO = "http://localhost:8080/modulo";
+        const API_URL_ROLEOPCION = "http://localhost:8080/RoleOpcion";
+        const usuario = sessionStorage.getItem("usuarioActual");
+        const idRole = sessionStorage.getItem("idRole");
+
+        if (!usuario || !idRole) window.location.href = 'login.html';
+        else document.getElementById('navUsuario').textContent = usuario;
+
+        document.getElementById('btnCerrarSesion').addEventListener('click', () => {
+            sessionStorage.clear();
+            window.location.href = 'login.html';
+        });
+
+        let modulos = [];
+        let permisosUsuario = [];
+
+        async function cargarModulos() {
+            const res = await fetch(`${API_URL_MODULO}/listar`);
+            modulos = await res.json();
+            const select = document.getElementById("idModulo");
+            select.innerHTML = `<option value="">-- Selecciona un módulo --</option>`;
+            modulos.forEach(m => select.innerHTML += `<option value="${m.idModulo}">${m.nombre}</option>`);
+        }
+
+        // Carga los permisos que tiene el rol actual (idRole) sobre las opciones.
+        // Ejemplo de respuesta esperada: Menus -> { alta: true, baja: false, cambio: true }
+        async function cargarPermisos() {
+            const res = await fetch(`${API_URL_ROLEOPCION}/opcionesRol/${idRole}`);
+            permisosUsuario = await res.json();
+            aplicarPermisosUI();
+        }
+
+        // Revisa si en la lista de permisos cargados existe la opción y si tiene permitido cierto permiso (alta, baja, cambio).
+        function tienePermiso(nombreOpcion, permiso) {
+            const op = permisosUsuario.find(o => o.nombre.toLowerCase() === nombreOpcion.toLowerCase());
+            return op ? op[permiso.toLowerCase()] === true : false;
+        }
+
+        // Aplica los permisos al UI.
+        // Aquí, por ejemplo, si el rol no tiene permiso de "alta" en Menus, se deshabilita el botón Guardar.
+        function aplicarPermisosUI() {
+            document.getElementById("btnGuardar").disabled = !tienePermiso("Menus", "alta");
+        }
+
+        async function listarMenus() {
+            const res = await fetch(`${API_URL_MENU}/listar`);
+            const data = await res.json();
+            const tbody = document.getElementById("menuTableBody");
+            tbody.innerHTML = "";
+
+            data.forEach(m => {
+                const moduloNombre = modulos.find(mod => mod.idModulo === m.idModulo)?.nombre || m.idModulo;
+                const puedeEditar = tienePermiso("Menus", "cambio"); // Permiso de edición
+                const puedeEliminar = tienePermiso("Menus", "baja");  // Permiso de eliminación
+
+                tbody.innerHTML += `
+            <tr>
+                <td>${m.idMenu}</td>
+                <td>${moduloNombre}</td>
+                <td>${m.nombre}</td>
+                <td>${m.ordenMenu ?? ""}</td>
+                <td>${m.usuarioCreacion ?? ""}</td>
+                <td>${m.fechaCreacion ? new Date(m.fechaCreacion).toLocaleString() : ""}</td>
+                <td>${m.usuarioModificacion ?? ""}</td>
+                <td>${m.fechaModificacion ? new Date(m.fechaModificacion).toLocaleString() : ""}</td>
+                <td>
+                    <!-- Si no tiene permiso, los botones quedan deshabilitados -->
+                    <button class="btn btn-sm btn-warning" onclick="editarMenu(${m.idMenu})" ${!puedeEditar ? 'disabled' : ''}>Editar</button>
+                    <button class="btn btn-sm btn-danger" onclick="eliminarMenu(${m.idMenu})" ${!puedeEliminar ? 'disabled' : ''}>Eliminar</button>
+                </td>
+            </tr>
+        `;
+            });
+        }
+
+        // Guardar nuevo menú
+        document.getElementById("btnGuardar").addEventListener("click", async (e) => {
+            e.preventDefault();
+            if (!tienePermiso("Menus", "alta")) return; // Si no tiene permiso de alta, no hace nada.
+
+            const menu = {
+                idMenu: null,
+                idModulo: parseInt(document.getElementById("idModulo").value),
+                nombre: document.getElementById("nombre").value,
+                ordenMenu: document.getElementById("ordenMenu").value ? parseInt(document.getElementById("ordenMenu").value) : null
+            };
+
+            await fetch(`${API_URL_MENU}/guardar`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json", "usuario": usuario },
+                body: JSON.stringify(menu)
+            });
+
+            menuFormReset();
+            listarMenus();
+        });
+
+        // Guardar cambios (editar)
+        document.getElementById("btnGuardarCambios").addEventListener("click", async () => {
+            const idMenu = document.getElementById("idMenu").value;
+            if (!idMenu) return;
+
+            const menu = {
+                idMenu: parseInt(idMenu),
+                idModulo: parseInt(document.getElementById("idModulo").value),
+                nombre: document.getElementById("nombre").value,
+                ordenMenu: document.getElementById("ordenMenu").value ? parseInt(document.getElementById("ordenMenu").value) : null
+            };
+
+            await fetch(`${API_URL_MENU}/guardar`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json", "usuario": usuario },
+                body: JSON.stringify(menu)
+            });
+
+            menuFormReset();
+            listarMenus();
+        });
+
+        // Editar registro
+        async function editarMenu(id) {
+            const res = await fetch(`${API_URL_MENU}/${id}`);
+            const m = await res.json();
+
+            document.getElementById("idMenu").value = m.idMenu;
+            document.getElementById("idModulo").value = m.idModulo;
+            document.getElementById("nombre").value = m.nombre;
+            document.getElementById("ordenMenu").value = m.ordenMenu ?? "";
+
+            document.getElementById("btnGuardar").style.display = "none";
+            document.getElementById("btnGuardarCambios").style.display = "inline-block";
+            document.getElementById("btnCancelar").style.display = "inline-block";
+        }
+
+        // Cancelar edición
+        function menuFormReset() {
+            document.getElementById("menuForm").reset();
+            document.getElementById("idMenu").value = "";
+            document.getElementById("btnGuardar").style.display = "inline-block";
+            document.getElementById("btnGuardarCambios").style.display = "none";
+            document.getElementById("btnCancelar").style.display = "none";
+        }
+
+        document.getElementById("btnCancelar").addEventListener("click", menuFormReset);
+
+        // Eliminar registro
+        async function eliminarMenu(id) {
+            if (!tienePermiso("Menus", "baja")) return; // Si no tiene permiso no elimina
+            if (confirm("¿Seguro que deseas eliminar este menú?")) {
+                await fetch(`${API_URL_MENU}/eliminar/${id}`, { method: "DELETE" });
+                listarMenus();
+            }
+        }
+
+        // Al iniciar la página: cargamos módulos, permisos y la lista de menús
+        (async () => {
+            await cargarModulos();
+            await cargarPermisos();
+            await listarMenus();
+        })();
+    </script>
+
 </body>
 
 </html>
