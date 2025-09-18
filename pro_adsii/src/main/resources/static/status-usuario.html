@@ -1,122 +1,157 @@
 <!doctype html>
 <html lang="es">
+
 <head>
-  <meta charset="utf-8"/>
+  <meta charset="utf-8" />
   <title>Status Usuario · CRUD</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <style>
-    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin:24px;line-height:1.4;}
-    table{width:100%;border-collapse:collapse;margin-top:16px}
-    th,td{border:1px solid #ddd;padding:8px;font-size:14px}
-    th{background:#f7f7f7;text-align:left}
-    .card{border:1px solid #e5e5e5;border-radius:12px;padding:16px;margin-top:16px;box-shadow:0 1px 6px rgba(0,0,0,0.05)}
-    input,button{padding:8px;border:1px solid #ccc;border-radius:8px;font-size:14px}
-    label{font-weight:600;font-size:12px}
-    .actions{display:flex;gap:8px}
-    .btn{cursor:pointer}
-    .btn.primary{background:#111;color:#fff;border-color:#111}
-    .btn.danger{background:#b00020;color:#fff;border-color:#b00020}
-    .right{display:flex;justify-content:flex-end;gap:8px}
-    .error{color:#b00020;font-weight:600}
-    .ok{color:#0a7c2f;font-weight:600}
-    .row{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
-  </style>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <!-- Bootstrap 5 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
-<body>
-  <h1>Status Usuario</h1>
-  <div class="card">
-    <h3>Formulario</h3>
-    <div id="msg"></div>
-    <form id="form">
-      <div class="row">
-        <div>
-          <label>ID (solo edición)</label>
-          <input id="idStatusUsuario" type="number" readonly/>
+
+<body class="bg-light">
+
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="index.html">Inicio</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMenu">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarMenu">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0"></ul>
+        <span class="navbar-text me-3 fw-semibold" id="navUsuario"></span>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container">
+    <h1 class="mb-4">Status Usuario</h1>
+
+    <!-- Formulario -->
+    <div class="card shadow-sm mb-4">
+      <div class="card-body">
+        <h5 class="card-title">Formulario</h5>
+        <div id="msg" class="mb-3"></div>
+        <form id="form">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label for="idStatusUsuario" class="form-label">ID (solo edición)</label>
+              <input id="idStatusUsuario" type="number" class="form-control" readonly />
+            </div>
+            <div class="col-md-6">
+              <label for="nombre" class="form-label">Nombre</label>
+              <input id="nombre" class="form-control" required />
+            </div>
+          </div>
+          <div class="d-flex justify-content-end gap-2 mt-3">
+            <button type="button" class="btn btn-secondary" onclick="limpiar()">Limpiar</button>
+            <button type="submit" class="btn btn-primary">Guardar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Tabla -->
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <div class="d-flex justify-content-end mb-3">
+          <button class="btn btn-outline-primary btn-sm" onclick="cargar()">Refrescar</button>
         </div>
-        <div>
-          <label>Nombre</label>
-          <input id="nombre" required/>
+        <div class="table-responsive">
+          <table id="tabla" class="table table-striped table-hover align-middle">
+            <thead class="table-dark">
+              <tr>
+                <th>ID</th>
+                <th>Nombre</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
         </div>
       </div>
-      <div class="right" style="margin-top:12px">
-        <button type="button" class="btn" onclick="limpiar()">Limpiar</button>
-        <button type="submit" class="btn primary">Guardar</button>
-      </div>
-    </form>
+    </div>
   </div>
 
-  <div class="card">
-    <div class="right"><button class="btn" onclick="cargar()">Refrescar</button></div>
-    <table id="tabla">
-      <thead><tr><th>ID</th><th>Nombre</th><th>Acciones</th></tr></thead>
-      <tbody></tbody>
-    </table>
-  </div>
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>
+
 
 <script>
-const API=''; const H={'X-User':'admin'};
+  const usuario = sessionStorage.getItem('usuarioActual');
+  if (!usuario) {
+    window.location.href = 'login.html';
+  } else {
+    document.getElementById('navUsuario').textContent = usuario;
+  }
+  const API = ''; const H = { 'X-User': 'admin' };
 
-async function safeFetch(url, opts) {
-  const res = await fetch(url, opts);
-  if (!res.ok) throw new Error(await res.text().catch(()=>res.statusText));
-  return res.json().catch(()=>null);
-}
-function showMsg(txt, ok=true){
-  const el = document.getElementById('msg');
-  el.className = ok ? 'ok' : 'error';
-  el.textContent = txt;
-  setTimeout(()=>{ el.textContent=''; el.className=''; }, 3000);
-}
-async function cargar(){
-  try{
-    const data = await safeFetch(`${API}/status_usuario/listar`, {headers:H});
-    const tb = document.querySelector('#tabla tbody'); tb.innerHTML='';
-    (data||[]).forEach(s=>{
-      const tr=document.createElement('tr');
-      tr.innerHTML = `
+  async function safeFetch(url, opts) {
+    const res = await fetch(url, opts);
+    if (!res.ok) throw new Error(await res.text().catch(() => res.statusText));
+    return res.json().catch(() => null);
+  }
+  function showMsg(txt, ok = true) {
+    const el = document.getElementById('msg');
+    el.className = ok ? 'ok' : 'error';
+    el.textContent = txt;
+    setTimeout(() => { el.textContent = ''; el.className = ''; }, 3000);
+  }
+  async function cargar() {
+    try {
+      const data = await safeFetch(`${API}/status_usuario/listar`, { headers: H });
+      const tb = document.querySelector('#tabla tbody'); tb.innerHTML = '';
+      (data || []).forEach(s => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
         <td>${s.idStatusUsuario ?? ''}</td>
         <td>${s.nombre ?? ''}</td>
         <td class="actions">
-          <button class="btn" onclick='editar(${s.idStatusUsuario})'>Editar</button>
-          <button class="btn danger" onclick='borrar(${s.idStatusUsuario})'>Eliminar</button>
+          <button class="btn btn btn-warning" onclick='editar(${s.idStatusUsuario})'>Editar</button>
+          <button class="btn danger btn btn-danger" onclick='borrar(${s.idStatusUsuario})'>Eliminar</button>
         </td>`;
-      tb.appendChild(tr);
-    });
-  }catch(e){ showMsg('Error al listar: '+e.message,false); }
-}
-async function editar(id){
-  try{
-    const s = await safeFetch(`${API}/status_usuario/obtener/${id}`, {headers:H});
-    document.getElementById('idStatusUsuario').value = s.idStatusUsuario ?? '';
-    document.getElementById('nombre').value = s.nombre ?? '';
-  }catch(e){ showMsg('Error al obtener: '+e.message,false); }
-}
-async function borrar(id){
-  if(!confirm(`¿Eliminar estatus ${id}?`)) return;
-  try{
-    await fetch(`${API}/status_usuario/eliminar/${id}`, {method:'DELETE', headers:H});
-    showMsg('Eliminado');
-    cargar(); limpiar();
-  }catch(e){ showMsg('Error al eliminar: '+e.message,false); }
-}
-function limpiar(){
-  document.getElementById('form').reset();
-  document.getElementById('idStatusUsuario').value='';
-}
-document.getElementById('form').addEventListener('submit', async ev=>{
-  ev.preventDefault();
-  const body = {
-    idStatusUsuario: document.getElementById('idStatusUsuario').value ? Number(document.getElementById('idStatusUsuario').value) : null,
-    nombre: document.getElementById('nombre').value
-  };
-  try{
-    await safeFetch(`${API}/status_usuario/guardar`, {
-      method:'POST', headers:{'Content-Type':'application/json', ...H}, body: JSON.stringify(body)
-    });
-    showMsg('Guardado'); cargar(); limpiar();
-  }catch(e){ showMsg('Error al guardar: '+e.message,false); }
-});
-cargar();
+        tb.appendChild(tr);
+      });
+    } catch (e) { showMsg('Error al listar: ' + e.message, false); }
+  }
+  async function editar(id) {
+    try {
+      const s = await safeFetch(`${API}/status_usuario/obtener/${id}`, { headers: H });
+      document.getElementById('idStatusUsuario').value = s.idStatusUsuario ?? '';
+      document.getElementById('nombre').value = s.nombre ?? '';
+    } catch (e) { showMsg('Error al obtener: ' + e.message, false); }
+  }
+  async function borrar(id) {
+    if (!confirm(`¿Eliminar estatus ${id}?`)) return;
+    try {
+      await fetch(`${API}/status_usuario/eliminar/${id}`, { method: 'DELETE', headers: H });
+      showMsg('Eliminado');
+      cargar(); limpiar();
+    } catch (e) { showMsg('Error al eliminar: ' + e.message, false); }
+  }
+  function limpiar() {
+    document.getElementById('form').reset();
+    document.getElementById('idStatusUsuario').value = '';
+  }
+  document.getElementById('form').addEventListener('submit', async ev => {
+    ev.preventDefault();
+    const body = {
+      idStatusUsuario: document.getElementById('idStatusUsuario').value ? Number(document.getElementById('idStatusUsuario').value) : null,
+      nombre: document.getElementById('nombre').value
+    };
+    try {
+      await safeFetch(`${API}/status_usuario/guardar`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json', ...H }, body: JSON.stringify(body)
+      });
+      showMsg('Guardado'); cargar(); limpiar();
+    } catch (e) { showMsg('Error al guardar: ' + e.message, false); }
+  });
+  cargar();
 </script>
 </body>
+
 </html>

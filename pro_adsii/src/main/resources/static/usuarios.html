@@ -52,25 +52,18 @@
   </style>
 </head>
 <body>
-  <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-    <div class="container-fluid">
-      <a class="navbar-brand" href="index.html">Inicio</a>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMenu">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <div class="collapse navbar-collapse" id="navbarMenu">
-        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-          <li class="nav-item"><a class="nav-link" href="genero.html">Género</a></li>
-          <li class="nav-item"><a class="nav-link" href="modulo.html">Módulo</a></li>
-          <li class="nav-item"><a class="nav-link" href="role.html">Rol</a></li>
-          <li class="nav-item"><a class="nav-link" href="bitacora.html">Bitácora</a></li>
-          <li class="nav-item"><a class="nav-link" href="tipoacceso.html">Tipo Acceso</a></li>
-        </ul>
-        <span class="navbar-text me-3" id="navUsuario"></span>
-        <button class="btn ms-2" id="btnCerrarSesion">Cerrar Sesión</button>
-      </div>
-    </div>
-  </nav>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="index.html">Inicio</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMenu">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarMenu">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0"></ul>
+                <span class="navbar-text me-3" id="navUsuario"></span>
+            </div>
+        </div>
+    </nav>
 
   <div class="wrapper">
     <h1>Gestión de Usuarios</h1>
@@ -208,6 +201,12 @@
   </div> <!-- /.wrapper -->
 
   <script>
+        const usuario = sessionStorage.getItem('usuarioActual');
+        if (!usuario) {
+            window.location.href = 'login.html';
+        } else {
+            document.getElementById('navUsuario').textContent = usuario;
+        }
   // ================== CONFIG ==================
   const API = '';                           // ← pon aquí tu base URL (p.ej. "http://localhost:8080")
   const H_USR = {'X-User':'admin'};         // ← header que usas

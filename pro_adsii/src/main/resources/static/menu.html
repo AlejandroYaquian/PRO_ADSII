@@ -1,77 +1,89 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
-
 <head>
-    <meta charset="UTF-8">
-    <title>CRUD Menú</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <meta charset="utf-8"/>
+  <title>Gestión de Menús</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <!-- Bootstrap 5 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
+<body class="bg-light">
+  
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="index.html">Inicio</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMenu">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarMenu">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0"></ul>
+        <span class="navbar-text me-3 fw-semibold" id="navUsuario"></span>
+      </div>
+    </div>
+  </nav>
 
-<body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="index.html">Inicio</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMenu">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarMenu">
-                <ul class="navbar-nav me-auto mb-2 mb-lg-0"></ul>
-                <span class="navbar-text me-3" id="navUsuario"></span>
-                <button class="btn btn-outline-light" id="btnCerrarSesion">Cerrar Sesión</button>
-            </div>
-        </div>
-    </nav>
+  <div class="container my-4">
+    <h2 class="mb-4">Gestión de Menús</h2>
 
-    <div class="container mt-4">
-        <h2 class="mb-4">Gestión de Menús</h2>
+    <!-- Formulario -->
+    <div class="card shadow-sm mb-4">
+      <div class="card-body">
+        <h5 class="card-title">Formulario</h5>
+        <form id="menuForm">
+          <input type="hidden" id="idMenu">
 
-        <!-- Formulario -->
-        <form id="menuForm" class="mb-4">
-            <input type="hidden" id="idMenu">
+          <div class="mb-3">
+            <label for="idModulo" class="form-label">Módulo</label>
+            <select id="idModulo" class="form-select" required>
+              <option value="">-- Selecciona un módulo --</option>
+            </select>
+          </div>
 
-            <div class="mb-3">
-                <label for="idModulo" class="form-label">Módulo</label>
-                <select id="idModulo" class="form-select" required>
-                    <option value="">-- Selecciona un módulo --</option>
-                </select>
-            </div>
+          <div class="mb-3">
+            <label for="nombre" class="form-label">Nombre del Menú</label>
+            <input type="text" class="form-control" id="nombre" required>
+          </div>
 
-            <div class="mb-3">
-                <label for="nombre" class="form-label">Nombre del Menú</label>
-                <input type="text" class="form-control" id="nombre" required>
-            </div>
+          <div class="mb-3">
+            <label for="ordenMenu" class="form-label">Orden Menú</label>
+            <input type="number" class="form-control" id="ordenMenu" required>
+          </div>
 
-            <div class="mb-3">
-                <label for="ordenMenu" class="form-label">Orden Menú</label>
-                <input type="number" class="form-control" id="ordenMenu">
-            </div>
-
+          <div class="d-flex gap-2">
             <button type="submit" class="btn btn-primary" id="btnGuardar">Guardar</button>
-            <button type="button" class="btn btn-success" id="btnGuardarCambios" style="display:none;">Guardar
-                Cambios</button>
+            <button type="button" class="btn btn-success" id="btnGuardarCambios" style="display:none;">Guardar Cambios</button>
             <button type="button" class="btn btn-secondary" id="btnCancelar" style="display:none;">Cancelar</button>
+          </div>
         </form>
-
-
-        <!-- Tabla -->
-        <table class="table table-striped">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Módulo</th>
-                    <th>Nombre</th>
-                    <th>Orden</th>
-                    <th>Usuario Creación</th>
-                    <th>Fecha Creación</th>
-                    <th>Usuario Modificación</th>
-                    <th>Fecha Modificación</th>
-                    <th>Acciones</th>
-                </tr>
-            </thead>
-            <tbody id="menuTableBody"></tbody>
-        </table>
+      </div>
     </div>
 
+    <!-- Tabla -->
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <h5 class="card-title">Listado de Menús</h5>
+        <div class="table-responsive">
+          <table class="table table-striped table-hover align-middle">
+            <thead class="table-dark">
+              <tr>
+                <th>ID</th>
+                <th>Módulo</th>
+                <th>Nombre</th>
+                <th>Orden</th>
+                <th>Usuario Creación</th>
+                <th>Fecha Creación</th>
+                <th>Usuario Modificación</th>
+                <th>Fecha Modificación</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="menuTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
     <script>
         const API_URL_MENU = "http://localhost:8080/menu";
         const API_URL_MODULO = "http://localhost:8080/modulo";
@@ -79,13 +91,11 @@
         const usuario = sessionStorage.getItem("usuarioActual");
         const idRole = sessionStorage.getItem("idRole");
 
-        if (!usuario || !idRole) window.location.href = 'login.html';
-        else document.getElementById('navUsuario').textContent = usuario;
-
-        document.getElementById('btnCerrarSesion').addEventListener('click', () => {
-            sessionStorage.clear();
+        if (!usuario) {
             window.location.href = 'login.html';
-        });
+        } else {
+            document.getElementById('navUsuario').textContent = usuario;
+        }
 
         let modulos = [];
         let permisosUsuario = [];
