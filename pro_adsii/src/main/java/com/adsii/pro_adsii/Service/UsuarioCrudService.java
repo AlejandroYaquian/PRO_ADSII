@@ -11,8 +11,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
+import java.util.regex.Pattern;
 
 @Service
 public class UsuarioCrudService {
@@ -31,19 +30,22 @@ public class UsuarioCrudService {
         return usuarioRepository.findByIdUsuario(idUsuario);
     }
 
-    // ======= Helpers =======
+    // Helpers 
     private static String nz(String s) { return (s == null || s.isBlank()) ? null : s.trim(); }
 
-    /** Hash SHA-256 en hex (minúsculas), sin dependencias externas */
-    private static String sha256(String input) {
+    /** Patrón para detectar hash MD5*/
+    private static final Pattern MD5_HEX = Pattern.compile("^[a-fA-F0-9]{32}$");
+
+    /** Hash MD5 en hex minúsculas (32 chars) */
+    private static String md5(String input) {
         try {
-            MessageDigest md = MessageDigest.getInstance("SHA-256");
+            MessageDigest md = MessageDigest.getInstance("MD5");
             byte[] dig = md.digest(input.getBytes(StandardCharsets.UTF_8));
-            StringBuilder sb = new StringBuilder(dig.length * 2);
+            StringBuilder sb = new StringBuilder(32);
             for (byte b : dig) sb.append(String.format("%02x", b));
             return sb.toString();
         } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException("SHA-256 no disponible en la JVM", e);
+            throw new RuntimeException("MD5 no disponible en la JVM", e);
         }
     }
 
@@ -52,12 +54,12 @@ public class UsuarioCrudService {
         final LocalDateTime ahora = LocalDateTime.now();
         final String actor = (usuarioAccion == null || usuarioAccion.isBlank()) ? "system" : usuarioAccion;
 
-        // Normalizaciones básicas (strings vacíos -> null)
+        // Normalizaciones básicas
         input.setNombre(nz(input.getNombre()));
         input.setApellido(nz(input.getApellido()));
         input.setCorreoElectronico(nz(input.getCorreoElectronico()));
-        input.setPassword(nz(input.getPassword()));          // sólo texto plano cuando venga
-        input.setFotografia(nz(input.getFotografia()));      // URL/base64
+        input.setPassword(nz(input.getPassword()));         
+        input.setFotografia(nz(input.getFotografia()));    
         input.setTelefonoMovil(nz(input.getTelefonoMovil()));
         input.setPregunta(nz(input.getPregunta()));
         input.setRespuesta(nz(input.getRespuesta()));
@@ -66,21 +68,26 @@ public class UsuarioCrudService {
         if (input.getIntentosDeAcceso() == null) input.setIntentosDeAcceso(0);
         if (input.getRequiereCambiarPassword() == null) input.setRequiereCambiarPassword(false);
         if (input.getSesionActual() == null) input.setSesionActual(false);
-        if (input.getIdStatusUsuario() == null) input.setIdStatusUsuario(1); // Activo por defecto (ajústalo si aplica)
+        if (input.getIdStatusUsuario() == null) input.setIdStatusUsuario(1); 
 
         final boolean esAlta = (input.getIdUsuario() == null || input.getIdUsuario().isBlank());
 
         if (esAlta) {
-            // 🔒 Alta: idUsuario debe venir definido por el formulario (NO generar UUID)
+            // Alta
             throwIfBlank(input.getIdUsuario(), "idUsuario es requerido");
-            // 🔒 Password obligatoria y en hash
+            // Password obligatoria 
             throwIfBlank(input.getPassword(), "Password requerida");
-            input.setPassword(sha256(input.getPassword()));
+
+            // Si NO parece hash MD5, convertirla
+            if (!MD5_HEX.matcher(input.getPassword()).matches()) {
+                input.setPassword(md5(input.getPassword()));
+            }
 
             input.setFechaCreacion(ahora);
             input.setUsuarioCreacion(actor);
+
         } else {
-            // ✏️ Edición: cargar actual para preservar campos de creación y decidir qué actualizar
+            // Edición: cargar actual para preservar campos de creación y decidir qué actualizar
             Usuario actual = usuarioRepository.findByIdUsuario(input.getIdUsuario());
 
             if (actual != null) {
@@ -92,15 +99,19 @@ public class UsuarioCrudService {
                 if (input.getPassword() == null) {
                     input.setPassword(actual.getPassword());
                 } else {
-                    // Vino una nueva en texto plano -> hashear
-                    input.setPassword(sha256(input.getPassword()));
+                    // Vino una nueva; si NO parece MD5, convertirla
+                    if (!MD5_HEX.matcher(input.getPassword()).matches()) {
+                        input.setPassword(md5(input.getPassword()));
+                    }
                     input.setUltimaFechaCambioPassword(ahora);
                     input.setRequiereCambiarPassword(false);
                 }
             } else {
                 // Si no existía, se trata como "alta" de facto con el ID provisto
                 throwIfBlank(input.getPassword(), "Password requerida");
-                input.setPassword(sha256(input.getPassword()));
+                if (!MD5_HEX.matcher(input.getPassword()).matches()) {
+                    input.setPassword(md5(input.getPassword()));
+                }
                 input.setFechaCreacion(ahora);
                 input.setUsuarioCreacion(actor);
             }
@@ -126,34 +137,28 @@ public class UsuarioCrudService {
         usuarioRepository.delete(u);
     }
 
-    // ===== util =====
+    // util
     private static void throwIfBlank(String val, String msg) {
         if (val == null || val.isBlank()) throw new IllegalArgumentException(msg);
     }
 
+    // Cambia password tras recuperación 
+    @Transactional
+    public void actualizarPasswordRecuperacion(String idUsuario, String nuevaPasswordPlana, String usuarioAccion) {
+        Usuario u = usuarioRepository.findByIdUsuario(idUsuario);
+        if (u == null) throw new IllegalArgumentException("Usuario no existe: " + idUsuario);
 
+        if (nuevaPasswordPlana == null || nuevaPasswordPlana.isBlank()) {
+            throw new IllegalArgumentException("Nueva contraseña requerida");
+        }
+        u.setPassword(md5(nuevaPasswordPlana));
+        u.setRequiereCambiarPassword(false);
 
+        u.setUltimaFechaCambioPassword(LocalDateTime.now());
 
-    /** Cambia password tras recuperación (hashea en SHA-256 y persiste) */
-@Transactional
-public void actualizarPasswordRecuperacion(String idUsuario, String nuevaPasswordPlana, String usuarioAccion) {
-    Usuario u = usuarioRepository.findByIdUsuario(idUsuario);
-    if (u == null) throw new IllegalArgumentException("Usuario no existe: " + idUsuario);
+        u.setFechaModificacion(LocalDateTime.now());
+        u.setUsuarioModificacion((usuarioAccion == null || usuarioAccion.isBlank()) ? "system" : usuarioAccion);
 
-    if (nuevaPasswordPlana == null || nuevaPasswordPlana.isBlank()) {
-        throw new IllegalArgumentException("Nueva contraseña requerida");
+        usuarioRepository.save(u);
     }
-
-    u.setPassword(sha256(nuevaPasswordPlana));   // ← SHA-256
-    u.setRequiereCambiarPassword(false);
-    // si tienes este campo:
-    u.setUltimaFechaCambioPassword(LocalDateTime.now());
-
-    u.setFechaModificacion(LocalDateTime.now());
-    u.setUsuarioModificacion((usuarioAccion==null || usuarioAccion.isBlank()) ? "system" : usuarioAccion);
-
-    usuarioRepository.save(u);
-}
-
-
 }
