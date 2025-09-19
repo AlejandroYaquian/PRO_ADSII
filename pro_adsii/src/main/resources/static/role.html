@@ -19,31 +19,19 @@
     }
 </style>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="index.html">Inicio</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMenu">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarMenu">
-                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                    <li class="nav-item"><a class="nav-link" href="genero.html">Género</a></li>
-                    <li class="nav-item"><a class="nav-link" href="modulo.html">Módulo</a></li>
-                    <li class="nav-item"><a class="nav-link" href="role.html">Rol</a></li>
-                    <li class="nav-item"><a class="nav-link" href="bitacora.html">Bitácora</a></li>
-                    <li class="nav-item"><a class="nav-link" href="usuarios.html">Usuarios</a></li>
-                    <li class="nav-item"><a class="nav-link" href="sucursal.html">Sucursal</a></li>
-                    <li class="nav-item"><a class="nav-link" href="empresa.html">Empresa</a></li>
-                    <li class="nav-item"><a class="nav-link" href="menu.html">Menu</a></li>
-                    <li class="nav-item"><a class="nav-link" href="opcion.html">Opción</a></li>
-                    <li class="nav-item"><a class="nav-link" href="status-usuario.html">Estatus Usuarios</a></li>
-                    <li class="nav-item"><a class="nav-link" href="tipoacceso.html">Tipo Acceso</a></li>
-                </ul>
-                <span class="navbar-text me-3" id="navUsuario"></span>
-                <button class="btn ms-2" id="btnCerrarSesion">Cerrar Sesión</button>
-            </div>
-        </div>
-    </nav>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="index.html">Inicio</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMenu">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarMenu">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0"></ul>
+      <span class="navbar-text me-3 fw-semibold" id="navUsuario"></span>
+    </div>
+  </div>
+</nav>
+
 
 
 
@@ -102,240 +90,240 @@
 <!--ESTRUCTURA DEL DOM FIN**********************************************************************************************************************-->
 
   <script>
-    const usuario = sessionStorage.getItem('usuarioActual');
+  const API_URL_ROLEOPCION = "http://localhost:8080/RoleOpcion";
+  const idRole = sessionStorage.getItem("idRole");
+  let permisosUsuario = [];
 
-    if (!usuario) {
-      window.location.href = 'login.html';
-    } else {
-      document.getElementById('navUsuario').textContent = usuario;
+  const usuario = sessionStorage.getItem('usuarioActual');
+
+  if (!usuario) {
+    window.location.href = 'login.html';
+  } else {
+    document.getElementById('navUsuario').textContent = usuario;
+  }
+
+  const tableBody = document.getElementById('roles-table-body');
+
+
+  async function cargarPermisos() {
+    const res = await fetch(`${API_URL_ROLEOPCION}/opcionesRol/${idRole}`);
+    permisosUsuario = await res.json();
+    aplicarPermisosUI();
+  }
+
+  function aplicarPermisosUI() {
+    document.getElementById("btn-guardar").disabled = !tienePermiso("Roles", "alta");
+  }
+
+  function tienePermiso(nombreOpcion, permiso) {
+    const op = permisosUsuario.find(o => o.nombre.toLowerCase() === nombreOpcion.toLowerCase());
+    return op ? op[permiso.toLowerCase()] === true : false;
+  }
+
+  function cargarRoles() {
+
+    const puedeEditarRoles = !tienePermiso("Roles", "cambio");
+    const puedeEliminarRoles = !tienePermiso("Roles", "baja");
+
+    fetch('http://localhost:8080/role/getRoles')
+      .then(response => response.json())
+      .then(roles => {
+        roles.forEach(rol => {
+          const tr = document.createElement('tr');
+
+          const tdId = document.createElement('td');
+          tdId.textContent = rol.idRole;
+
+          const tdName = document.createElement('td');
+          const inputName = document.createElement('input');
+          inputName.type = 'text';
+          inputName.value = rol.nombre;
+          inputName.disabled = true;
+          inputName.className = 'form-control form-control-sm';
+
+          const tdSelect = document.createElement('td');
+          tdSelect.className = 'align-middle text-center';
+          const selectBtn = document.createElement('button');
+          selectBtn.className = 'btn btn btn-primary text-white btn-sm';
+          selectBtn.textContent = 'Editar opciones de rol';
+          selectBtn.setAttribute('type', 'button');
+          selectBtn.setAttribute('data-id', rol.idRole);
+          selectBtn.setAttribute('data-nombre', rol.nombre);
+          selectBtn.disabled = puedeEditarRoles; 
+          
+          selectBtn.addEventListener('click', function () {
+            const id = rol.idRole;
+            const nombre = encodeURIComponent(rol.nombre);
+            window.location.href = `roleOpcion.html?idRol=${id}&nombre=${nombre}`;
+          });
+          tdSelect.appendChild(selectBtn);
+
+          const tdEdit = document.createElement('td');
+          tdEdit.className = 'align-middle text-center';
+
+          const deleteBtn = document.createElement('button');
+          deleteBtn.className = 'btn btn-danger btn-sm text-white';
+          deleteBtn.textContent = 'Eliminar rol';
+          deleteBtn.setAttribute('type', 'button');
+          deleteBtn.setAttribute('data-id', rol.idRole);
+          deleteBtn.setAttribute('data-nombre', rol.nombre);
+          deleteBtn.disabled = puedeEliminarRoles; 
+          deleteBtn.addEventListener('click', () => {
+            const rolId = deleteBtn.getAttribute('data-id');
+            const rolNombre = deleteBtn.getAttribute('data-nombre');
+
+            if (confirm(`¿Estás seguro de eliminar el rol "${rolNombre}"? Esta acción no se puede deshacer.`)) {
+              fetch(`http://localhost:8080/role/eliminar/${rolId}`, {
+                method: 'DELETE',
+              })
+                .then(response => {
+                  if (!response.ok) {
+                    return response.text().then(text => { throw new Error(text); });
+                  }
+                  return response.text();
+                })
+                .then(message => {
+                  alert(message);
+                  location.reload();
+                })
+                .catch(error => {
+                  alert('Error al eliminar el rol: ' + error.message);
+                });
+            }
+          });
+
+          const editBtn = document.createElement('button');
+          editBtn.className = 'btn btn-warning btn-sm text-black me-2';
+          editBtn.textContent = 'Editar Rol';
+          editBtn.setAttribute('type', 'button');
+          editBtn.setAttribute('data-id', rol.idRole);
+          editBtn.setAttribute('data-nombre', rol.nombre);
+          editBtn.disabled = puedeEditarRoles; 
+          editBtn.addEventListener('click', function () {
+            deleteBtn.style.display = 'none';
+            const allButtons = document.querySelectorAll('button');
+            allButtons.forEach(btn => btn.disabled = true);
+            inputName.disabled = false;
+            inputName.focus();
+
+            const saveBtn = document.createElement('button');
+            saveBtn.className = 'btn btn-success btn-sm ms-2';
+            saveBtn.textContent = 'Guardar';
+            saveBtn.type = 'button';
+
+            const cancelBtn = document.createElement('button');
+            cancelBtn.className = 'btn btn-secondary btn-sm ms-2';
+            cancelBtn.textContent = 'Cancelar';
+
+            tdEdit.appendChild(saveBtn);
+            tdEdit.appendChild(cancelBtn);
+            editBtn.style.display = 'none';
+
+            saveBtn.addEventListener('click', () => {
+              deleteBtn.style.display = '';
+              event.preventDefault();
+              const usu = sessionStorage.getItem('usuarioActual');
+              const data = {
+                idRole: editBtn.getAttribute('data-id'),
+                nombre: inputName.value,
+                usuario: usu
+              };
+              fetch('http://localhost:8080/role/editar', {
+                method: 'PUT',
+                headers: {
+                  'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+              })
+                .then(response => {
+                  if (!response.ok) {
+                    throw new Error('Error al guardar el rol');
+                  }
+                  return response.text().then(text => {
+                    try {
+                      return JSON.parse(text);
+                    } catch {
+                      throw new Error("Respuesta no es JSON válido");
+                    }
+                  });
+                })
+                .then(result => {
+                  alert(`Rol "${result.nombre}" guardado correctamente.`);
+                  location.reload();
+                })
+                .catch(error => {
+                  alert('Ocurrió un error al guardar el rol: ' + error.message);
+                });
+            });
+
+            cancelBtn.addEventListener('click', () => {
+              deleteBtn.style.display = '';
+              inputName.value = rol.nombre;
+              inputName.disabled = true;
+              allButtons.forEach(btn => btn.disabled = false);
+              saveBtn.remove();
+              cancelBtn.remove();
+              editBtn.style.display = '';
+            });
+          });
+
+          tdEdit.appendChild(editBtn);
+          tdEdit.appendChild(deleteBtn);
+
+          tr.appendChild(tdId);
+          tr.appendChild(tdName);
+          tr.appendChild(tdEdit);
+          tr.appendChild(tdSelect);
+          tdName.appendChild(inputName);
+          tableBody.appendChild(tr);
+        });
+      });
+  }
+
+  // ✅ Evento para guardar nuevo rol
+  document.getElementById('form-nuevo-rol').addEventListener('submit', function (e) {
+    e.preventDefault();
+    const nuevoRol = document.getElementById('nombreNuevoRol').value.trim();
+    if (!nuevoRol) {
+      alert('Por favor, ingresa un nombre para el nuevo rol.');
+      return;
     }
 
-
-    const tableBody = document.getElementById('roles-table-body');
-
-  //Manipulacion de formulario de agregar rol  
-  document.getElementById('form-nuevo-rol').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const nuevoRol = document.getElementById('nombreNuevoRol').value.trim();
-            if (!nuevoRol) {
-              alert('Por favor, ingresa un nombre para el nuevo rol.');
-              return;
-            }
-
-            const usu = sessionStorage.getItem('usuarioActual');
-            const data = {
-              nombre: nuevoRol,
-              usuario: usu
-            };
-            console.log("Datos enviados al backend:", data); // <-- IMPORTANTE
-            fetch('http://localhost:8080/role/agregar', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json'
-              },
-              body: JSON.stringify(data)
-            })
-              .then(response => {
-                if (!response.ok) {
-                  throw new Error('Error al guardar el rol');
-                }
-                return response.json();
-              })
-              .then(result => {
-                alert(`Rol "${result.nombre}" guardado correctamente.`);
-                document.getElementById('form-nuevo-rol').reset();
-                location.reload();
-              })
-              .catch(error => {
-                console.error('Error:', error);
-                alert('Ocurrió un error al guardar el rol.');
-              });
-});
+    const usu = sessionStorage.getItem('usuarioActual');
+    const data = {
+      nombre: nuevoRol,
+      usuario: usu
+    };
+    fetch('http://localhost:8080/role/agregar', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(data)
+    })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Error al guardar el rol');
+        }
+        return response.json();
+      })
+      .then(result => {
+        alert(`Rol "${result.nombre}" guardado correctamente.`);
+        document.getElementById('form-nuevo-rol').reset();
+        location.reload();
+      })
+      .catch(error => {
+        alert('Ocurrió un error al guardar el rol.');
+      });
+  });
 
 
-//Manipular tabla que muestra roles
-fetch('http://localhost:8080/role/getRoles')
-        .then(response => response.json())
-        .then(roles => {
-          roles.forEach(rol => {
-            const tr = document.createElement('tr');
+  document.addEventListener('DOMContentLoaded', async () => {
+    await cargarPermisos();
+    cargarRoles();          
+  });
+</script>
 
-            const tdId = document.createElement('td');
-            tdId.textContent = rol.idRole;
-
-            const tdName = document.createElement('td');
-            const inputName = document.createElement('input');
-            inputName.type = 'text';
-            inputName.value = rol.nombre;
-            inputName.disabled = true;
-            inputName.className = 'form-control form-control-sm';
-
-            const tdSelect = document.createElement('td');
-            tdSelect.className = 'align-middle text-center';
-            const selectBtn = document.createElement('button');
-            selectBtn.className = 'btn btn btn-primary text-white btn-sm';
-            selectBtn.textContent = 'Editar opciones de rol';
-            selectBtn.setAttribute('type', 'button');
-            selectBtn.setAttribute('data-id', rol.idRole);
-            selectBtn.setAttribute('data-nombre', rol.nombre);
-            selectBtn.addEventListener('click', function () {
-               const id = rol.idRole;
-               const nombre = encodeURIComponent(rol.nombre); // para evitar errores con espacios/acentos
-               window.location.href = `roleOpcion.html?idRol=${id}&nombre=${nombre}`;
-            });
-            tdSelect.appendChild(selectBtn);
-
-            const tdEdit = document.createElement('td');
-            tdEdit.className = 'align-middle text-center';
-
-
-            const deleteBtn = document.createElement('button');
-            deleteBtn.className = 'btn btn-danger btn-sm text-white';
-            deleteBtn.textContent = 'Eliminar rol';
-            deleteBtn.setAttribute('type', 'button');
-            deleteBtn.setAttribute('data-id', rol.idRole);
-            deleteBtn.setAttribute('data-nombre', rol.nombre);
-            deleteBtn.addEventListener('click', () => {
-                const rolId = deleteBtn.getAttribute('data-id');
-                const rolNombre = deleteBtn.getAttribute('data-nombre');
-
-                if (confirm(`¿Estás seguro de eliminar el rol "${rolNombre}"? Esta acción no se puede deshacer.`)) {
-                    fetch(`http://localhost:8080/role/eliminar/${rolId}`, {
-                        method: 'DELETE',
-                    })
-                    .then(response => {
-                        if (!response.ok) {
-                            return response.text().then(text => { throw new Error(text); });
-                        }
-                        return response.text();
-                    })
-                    .then(message => {
-                        alert(message);
-                        // Recarga la página o actualiza la tabla para reflejar los cambios
-                        location.reload();
-                    })
-                    .catch(error => {
-                        alert('Error al eliminar el rol: ' + error.message);
-                    });
-                }
-            });
-
-            
-            const editBtn = document.createElement('button');
-            editBtn.className = 'btn btn-warning btn-sm text-black me-2';
-            editBtn.textContent = 'Editar Rol';
-            editBtn.setAttribute('type', 'button');
-            editBtn.setAttribute('data-id', rol.idRole);
-            editBtn.setAttribute('data-nombre', rol.nombre);
-            editBtn.addEventListener('click', function () {
-                // 1. Deshabilitar todos los botones de la tabla
-               deleteBtn.style.display = 'none';
-
-                const allButtons = document.querySelectorAll('button');
-                allButtons.forEach(btn => btn.disabled = true);
-
-                // 2. Habilitar el input de nombre de esta fila
-                inputName.disabled = false;
-                inputName.focus();
-
-                // 3. Crear botones Guardar y Cancelar
-                const saveBtn = document.createElement('button');
-                saveBtn.className = 'btn btn-success btn-sm ms-2';
-                saveBtn.textContent = 'Guardar';
-                saveBtn.type = 'button';
-
-                const cancelBtn = document.createElement('button');
-                cancelBtn.className = 'btn btn-secondary btn-sm ms-2';
-                cancelBtn.textContent = 'Cancelar';
-
-                // Añadir botones al tdEdit
-                tdEdit.appendChild(saveBtn);
-                tdEdit.appendChild(cancelBtn);
-
-                // 4. Ocultar botón Editar (para evitar confusión)
-                editBtn.style.display = 'none';
-
-                // 5. Funcionalidad botones Guardar y Cancelar
-                saveBtn.addEventListener('click',() =>{
-                    deleteBtn.style.display = '';
-
-                    event.preventDefault();  
-                    const usu = sessionStorage.getItem('usuarioActual'); 
-                    const data = {
-                      idRole: editBtn.getAttribute('data-id'),
-                      nombre: inputName.value,
-                      usuario: usu
-                    };
-                   fetch('http://localhost:8080/role/editar', {
-                      method: 'PUT',
-                      headers: {
-                          'Content-Type': 'application/json'
-                      },
-                      body: JSON.stringify(data)
-                  })
-                  .then(response => {
-                        if (!response.ok) {
-                            throw new Error('Error al guardar el rol');
-                        }
-
-                        // Leer como texto para depurar
-                        return response.text().then(text => {
-                            console.log("🔎 Respuesta cruda:", text);
-                            try {
-                                const json = JSON.parse(text);
-                                console.log(" JSON parseado:", json);
-                                return json;
-                            } catch (err) {
-                                console.error(" Error al parsear JSON:", err);
-                                throw new Error("Respuesta no es JSON válido");
-                            }
-                        });
-                    })
-                    .then(result => {
-                        alert(`Rol "${result.nombre}" guardado correctamente.`);
-                        location.reload();
-                    })
-                    .catch(error => {
-                        //console.error('Error:', error);
-                        alert('Ocurrió un error al guardar el rol: ' + error.message);
-                    });
-                });
-                cancelBtn.addEventListener('click', () => {
-                  deleteBtn.style.display = '';
-
-                  inputName.value = rol.nombre; // restaurar valor original
-                  inputName.disabled = true;
-                  
-
-                  // Volver a habilitar todos los botones
-                  allButtons.forEach(btn => btn.disabled = false);
-
-                  // Quitar botones Guardar y Cancelar
-                  saveBtn.remove();
-                  cancelBtn.remove();
-
-                  // Mostrar botón Editar
-                  editBtn.style.display = '';
-                            
-                });
-            });
-
-
-            tdEdit.appendChild(editBtn);
-            tdEdit.appendChild(deleteBtn);
-           
-
-            tr.appendChild(tdId);
-            tr.appendChild(inputName);
-            tr.appendChild(tdEdit);
-            tr.appendChild(tdSelect);
-            tableBody.appendChild(tr);
-
-           
-
-          });
-  });   
-  </script>
 </body>
 
 </html>
