@@ -6,39 +6,16 @@
     <title>CRUD Sucursal</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
 </head>
-<style>
-    #btnCerrarSesion {
-        background-color: transparent;
-        border: 1px solid #fff;
-        color: #fff;
-    }
-    #btnCerrarSesion:hover {
-        background-color: rgba(255, 255, 255, 0.2);
-    }
-</style>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container-fluid">
             <a class="navbar-brand" href="index.html">Inicio</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMenu">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarMenu">
-                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                    <li class="nav-item"><a class="nav-link" href="genero.html">Género</a></li>
-                    <li class="nav-item"><a class="nav-link" href="modulo.html">Módulo</a></li>
-                    <li class="nav-item"><a class="nav-link" href="role.html">Rol</a></li>
-                    <li class="nav-item"><a class="nav-link" href="bitacora.html">Bitácora</a></li>
-                    <li class="nav-item"><a class="nav-link" href="usuarios.html">Usuarios</a></li>
-                    <li class="nav-item"><a class="nav-link" href="sucursal.html">Sucursal</a></li>
-                    <li class="nav-item"><a class="nav-link" href="empresa.html">Empresa</a></li>
-                    <li class="nav-item"><a class="nav-link" href="menu.html">Menu</a></li>
-                    <li class="nav-item"><a class="nav-link" href="opcion.html">Opción</a></li>
-                    <li class="nav-item"><a class="nav-link" href="status-usuario.html">Estatus Usuarios</a></li>
-                    <li class="nav-item"><a class="nav-link" href="tipoacceso.html">Tipo Acceso</a></li>
-                </ul>
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0"></ul>
                 <span class="navbar-text me-3" id="navUsuario"></span>
-                <button class="btn ms-2" id="btnCerrarSesion">Cerrar Sesión</button>
             </div>
         </div>
     </nav>
@@ -62,6 +39,10 @@
                         <label for="direccion" class="form-label">Dirección</label>
                         <input type="text" id="direccion" class="form-control" required>
                     </div>
+                    <div class="mb-3">
+                        <label for="idEmpresa" class="form-label">ID Empresa</label>
+                        <input type="number" id="idEmpresa" class="form-control" required>
+                    </div>
                     <button type="submit" class="btn btn-success">Guardar</button>
                     <button type="button" id="cancelar" class="btn btn-secondary">Cancelar</button>
                 </form>
@@ -75,6 +56,11 @@
                     <th>ID</th>
                     <th>Nombre</th>
                     <th>Dirección</th>
+                    <th>ID Empresa</th>
+                    <th>Fecha Creación</th>
+                    <th>Usuario Creación</th>
+                    <th>Fecha Modificación</th>
+                    <th>Usuario Modificación</th>
                     <th>Acciones</th>
                 </tr>
             </thead>
@@ -82,88 +68,90 @@
         </table>
     </div>
 
-    <script>
-        const usuario = sessionStorage.getItem('usuarioActual');
+<script>
+    const usuario = sessionStorage.getItem('usuarioActual');
+    if (!usuario) {
+        window.location.href = 'login.html';
+    } else {
+        document.getElementById('navUsuario').textContent = usuario;
+    }
 
-        if (!usuario) {
-            window.location.href = 'login.html';
-        } else {
-            document.getElementById('navUsuario').textContent = usuario;
-        }
+    const apiBase = '/sucursal';
 
-        document.getElementById('btnCerrarSesion').addEventListener('click', () => {
-            sessionStorage.removeItem('usuarioActual');
-            window.location.href = 'login.html';
+    async function listarSucursales() {
+        const res = await fetch(apiBase);
+        const sucursales = await res.json();
+        const tbody = document.getElementById('sucursales-table');
+        tbody.innerHTML = '';
+        sucursales.forEach(s => {
+            tbody.innerHTML += `
+                <tr>
+                    <td>${s.idSucursal}</td>
+                    <td>${s.nombre}</td>
+                    <td>${s.direccion}</td>
+                    <td>${s.idEmpresa}</td>
+                    <td>${s.fechaCreacion ?? ''}</td>
+                    <td>${s.usuarioCreacion ?? ''}</td>
+                    <td>${s.fechaModificacion ?? ''}</td>
+                    <td>${s.usuarioModificacion ?? ''}</td>
+                    <td>
+                        <button class="btn btn-warning btn-sm" onclick="editarSucursal(${s.idSucursal})">Editar</button>
+                        <button class="btn btn-danger btn-sm" onclick="eliminarSucursal(${s.idSucursal})">Eliminar</button>
+                    </td>
+                </tr>
+            `;
+        });
+    }
+
+    document.getElementById('sucursal-form').addEventListener('submit', async e => {
+        e.preventDefault();
+        const idSucursal = document.getElementById('idSucursal').value;
+        const nombre = document.getElementById('nombre').value;
+        const direccion = document.getElementById('direccion').value;
+        const idEmpresa = document.getElementById('idEmpresa').value;
+
+        const method = idSucursal ? 'PUT' : 'POST';
+        const url = idSucursal ? `${apiBase}/${idSucursal}` : apiBase;
+
+        await fetch(url, {
+            method: method,
+            headers: {
+                'Content-Type': 'application/json',
+                'usuario': usuario
+            },
+            body: JSON.stringify({ nombre, direccion, idEmpresa })
         });
 
-        const apiBase = '/sucursal';
-
-        async function listarSucursales() {
-            const res = await fetch(apiBase);
-            const sucursales = await res.json();
-            const tbody = document.getElementById('sucursales-table');
-            tbody.innerHTML = '';
-            sucursales.forEach(s => {
-                tbody.innerHTML += `
-                    <tr>
-                        <td>${s.idSucursal}</td>
-                        <td>${s.nombre}</td>
-                        <td>${s.direccion}</td>
-                        <td>
-                            <button class="btn btn-warning btn-sm" onclick="editarSucursal(${s.idSucursal})">Editar</button>
-                            <button class="btn btn-danger btn-sm" onclick="eliminarSucursal(${s.idSucursal})">Eliminar</button>
-                        </td>
-                    </tr>
-                `;
-            });
-        }
-
-        document.getElementById('sucursal-form').addEventListener('submit', async e => {
-            e.preventDefault();
-            const idSucursal = document.getElementById('idSucursal').value;
-            const nombre = document.getElementById('nombre').value;
-            const direccion = document.getElementById('direccion').value;
-
-            await fetch(apiBase, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    idSucursal: idSucursal || null,
-                    nombre,
-                    direccion
-                })
-            });
-
-            document.getElementById('sucursal-form').reset();
-            document.getElementById('form-title').innerText = 'Nueva Sucursal';
-            listarSucursales();
-        });
-
-        async function editarSucursal(id) {
-            const res = await fetch(`${apiBase}/${id}`);
-            const s = await res.json();
-            document.getElementById('idSucursal').value = s.idSucursal;
-            document.getElementById('nombre').value = s.nombre;
-            document.getElementById('direccion').value = s.direccion;
-            document.getElementById('form-title').innerText = 'Editar Sucursal';
-        }
-
-        async function eliminarSucursal(id) {
-            if (confirm('¿Seguro que deseas eliminar esta sucursal?')) {
-                await fetch(`${apiBase}/${id}`, { method: 'DELETE' });
-                listarSucursales();
-            }
-        }
-
-        document.getElementById('cancelar').addEventListener('click', () => {
-            document.getElementById('sucursal-form').reset();
-            document.getElementById('idSucursal').value = '';
-            document.getElementById('form-title').innerText = 'Nueva Sucursal';
-        });
-
+        document.getElementById('sucursal-form').reset();
+        document.getElementById('form-title').innerText = 'Nueva Sucursal';
         listarSucursales();
-    </script>
+    });
+
+    async function editarSucursal(id) {
+        const res = await fetch(`${apiBase}/${id}`);
+        const s = await res.json();
+        document.getElementById('idSucursal').value = s.idSucursal;
+        document.getElementById('nombre').value = s.nombre;
+        document.getElementById('direccion').value = s.direccion;
+        document.getElementById('idEmpresa').value = s.idEmpresa;
+        document.getElementById('form-title').innerText = 'Editar Sucursal';
+    }
+
+    async function eliminarSucursal(id) {
+        if (confirm('¿Seguro que deseas eliminar esta sucursal?')) {
+            await fetch(`${apiBase}/${id}`, { method: 'DELETE' });
+            listarSucursales();
+        }
+    }
+
+    document.getElementById('cancelar').addEventListener('click', () => {
+        document.getElementById('sucursal-form').reset();
+        document.getElementById('idSucursal').value = '';
+        document.getElementById('form-title').innerText = 'Nueva Sucursal';
+    });
+
+    listarSucursales();
+</script>
 
 </body>
-
 </html>
