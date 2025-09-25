@@ -1,102 +1,50 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <title>Parámetros Generales · Estado Civil</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <!-- Bootstrap -->
+  <meta charset="utf-8"/>
+  <title>Parámetros Generales - Estado Civil</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-
-  <style>
-    :root { --sidebar-w:270px; --line:#e5e7eb; --muted:#6b7280; }
-    body { background:#f7f8fb; }
-    .layout { display:flex; min-height:100vh; }
-    aside { width:var(--sidebar-w); background:#fff; border-right:1px solid var(--line); }
-    main  { flex:1; }
-    .menu-title { font-weight:600; color:#111827; padding:16px 16px 8px; }
-    .menu-group { padding:8px 16px; color:#111827; font-weight:600; }
-    .menu-list { list-style: none; padding-left:26px; margin:0 0 12px; }
-    .menu-list li { margin:4px 0; }
-    .menu-link { color:#111827; text-decoration:none; }
-    .menu-link:hover { text-decoration:underline; }
-    .menu-link.active { font-weight:700; }
-    .page-header{ padding:16px 24px; border-bottom:1px solid var(--line); background:#fff; }
-    .page-header h1{ font-size:1.4rem; margin:0; }
-    .card{ border:1px solid var(--line); }
-    .table thead th{ background:#f3f4f6; }
-    .muted{ color:var(--muted); font-size:.9rem; }
-    .search-input{ max-width:260px; }
-  </style>
 </head>
-<body>
-<div class="layout">
+<body class="bg-light">
 
-  <!-- ===== Sidebar (Parámetros Generales) ===== -->
-  <aside>
-    <div class="menu-title">Menú</div>
-
-    <div class="menu-group">Seguridad</div>
-    <ul class="menu-list">
-      <li><span class="muted">—</span></li>
-    </ul>
-
-    <div class="menu-group">Parametros Generales</div>
-    <ul class="menu-list">
-      <li><a class="menu-link" href="empresas.html">Empresas</a></li>
-      <li><a class="menu-link" href="sucursales.html">Sucursales</a></li>
-      <li><a class="menu-link" href="generos.html">Generos</a></li>
-      <li><a class="menu-link" href="estatus_usuario.html">Estatus Usuario</a></li>
-      <li><a class="menu-link" href="roles.html">Roles</a></li>
-      <li><a class="menu-link" href="modulos.html">Modulos</a></li>
-      <li><a class="menu-link" href="menus.html">Menus</a></li>
-      <li><a class="menu-link" href="opciones.html">Opciones</a></li>
-      <!-- 👇 NUEVO enlace, activo -->
-      <li><a class="menu-link active" href="estado_civil.html">Estado Civil</a></li>
-    </ul>
-
-    <div class="menu-group">Acciones</div>
-    <ul class="menu-list">
-      <li><a class="menu-link" href="usuarios.html">Usuarios</a></li>
-      <li><a class="menu-link" href="asignar_opciones_role.html">Asignar Opciones a un Role</a></li>
-    </ul>
-
-    <div class="menu-group">Reportes</div>
-    <ul class="menu-list">
-      <li><a class="menu-link" href="interfaz.html">Interfaz</a></li>
-      <li><a class="menu-link" href="cxc.html">Cuenta Corriente Por Cobrar</a></li>
-    </ul>
-  </aside>
-
-  <!-- ===== Contenido ===== -->
-  <main>
-    <div class="page-header d-flex align-items-center justify-content-between">
-      <div>
-        <div class="muted">Parámetros Generales</div>
-        <h1 class="m-0">Estado Civil</h1>
+  <!-- Navbar (igual patrón que otras pantallas) -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="index.html">Inicio</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMenu">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarMenu">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0"></ul>
+        <span class="navbar-text me-3 fw-semibold" id="navUsuario"></span>
       </div>
+    </div>
+  </nav>
+
+  <div class="container my-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h2 class="m-0">Estado Civil</h2>
       <button id="btnNuevo" class="btn btn-primary btn-sm">+ Nuevo</button>
     </div>
 
-    <div class="container py-4">
+    <div id="alertBox" class="alert d-none" role="alert"></div>
 
-      <!-- Filtros -->
-      <div class="d-flex flex-wrap align-items-center justify-content-between mb-3 gap-2">
-        <input id="txtBuscar" type="text" class="form-control search-input" placeholder="Buscar por nombre..." />
-        <div class="muted">Total: <span id="lblTotal">0</span></div>
-      </div>
+    <div class="d-flex flex-wrap align-items-center justify-content-between mb-3 gap-2">
+      <input id="txtBuscar" type="text" class="form-control" style="max-width:260px" placeholder="Buscar por nombre..."/>
+      <div class="text-muted">Total: <span id="lblTotal">0</span></div>
+    </div>
 
-      <!-- Alertas -->
-      <div id="alertBox" class="alert d-none" role="alert"></div>
-
-      <!-- Tabla -->
-      <div class="card shadow-sm">
+    <div class="card shadow-sm">
+      <div class="card-body">
         <div class="table-responsive">
-          <table class="table table-sm align-middle mb-0" id="tbDatos">
-            <thead>
+          <table class="table table-striped table-hover align-middle">
+            <thead class="table-dark">
               <tr>
-                <th style="width: 80px;">ID</th>
+                <th style="width:90px">ID</th>
                 <th>Nombre</th>
-                <th style="width: 180px;" class="text-center">Acciones</th>
+                <th style="width:180px" class="text-center">Acciones</th>
               </tr>
             </thead>
             <tbody id="tbBody"></tbody>
@@ -104,145 +52,151 @@
         </div>
       </div>
     </div>
-  </main>
-</div>
-
-<!-- ===== Modal Crear/Editar ===== -->
-<div class="modal fade" id="modalForm" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog">
-    <form class="modal-content" id="frmEC">
-      <div class="modal-header">
-        <h5 class="modal-title" id="modalTitle">Nuevo Estado Civil</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-      </div>
-      <div class="modal-body">
-        <input type="hidden" id="idEstadoCivil">
-        <div class="mb-3">
-          <label for="nombre" class="form-label">Nombre *</label>
-          <input type="text" class="form-control" id="nombre" maxlength="50" placeholder="Soltero, Casado, Unión Libre..." required>
-        </div>
-        <div class="form-text">Los campos marcados con * son obligatorios.</div>
-        <div id="formAlert" class="alert alert-danger d-none mt-3"></div>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
-        <button type="submit" id="btnGuardar" class="btn btn-primary">
-          <span class="spinner-border spinner-border-sm d-none" id="spSave"></span>
-          Guardar
-        </button>
-      </div>
-    </form>
   </div>
-</div>
 
-<!-- ===== Modal Confirmación Eliminar ===== -->
-<div class="modal fade" id="modalDelete" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <input type="hidden" id="delId">
-      <div class="modal-header">
-        <h5 class="modal-title">Eliminar Estado Civil</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-      </div>
-      <div class="modal-body">
-        <p class="mb-0">¿Seguro que deseas eliminar <b id="delNombre"></b>?</p>
-        <div id="delAlert" class="alert alert-danger d-none mt-3"></div>
-      </div>
-      <div class="modal-footer">
-        <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
-        <button id="btnEliminar" class="btn btn-danger">
-          <span class="spinner-border spinner-border-sm d-none" id="spDel"></span>
-          Eliminar
-        </button>
+  <!-- Modal Crear/Editar -->
+  <div class="modal fade" id="modalForm" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+      <form class="modal-content" id="frmEC">
+        <div class="modal-header">
+          <h5 class="modal-title" id="modalTitle">Nuevo Estado Civil</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" id="idEstadoCivil">
+          <div class="mb-3">
+            <label for="nombre" class="form-label">Nombre *</label>
+            <input type="text" class="form-control" id="nombre" maxlength="50" placeholder="Soltero, Casado, Unión Libre..." required>
+          </div>
+          <div id="formAlert" class="alert alert-danger d-none mt-3"></div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" id="btnGuardar" class="btn btn-primary">
+            <span class="spinner-border spinner-border-sm d-none" id="spSave"></span>
+            Guardar
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal Eliminar -->
+  <div class="modal fade" id="modalDelete" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <input type="hidden" id="delId">
+        <div class="modal-header">
+          <h5 class="modal-title">Eliminar Estado Civil</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body">
+          <p class="mb-0">¿Eliminar <b id="delNombre"></b>?</p>
+          <div id="delAlert" class="alert alert-danger d-none mt-3"></div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button id="btnEliminar" class="btn btn-danger">
+            <span class="spinner-border spinner-border-sm d-none" id="spDel"></span>
+            Eliminar
+          </button>
+        </div>
       </div>
     </div>
   </div>
-</div>
 
-<!-- Bootstrap + App -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-  // ===== Config =====
-  const CONTEXT = (function(){
-    // si tu app usa context-path (p.ej. /pro_adsii), ajusta automático
-    const m = location.pathname.match(/^\/[^\/]+/);
-    return (m && m[0] !== '/estado_civil.html') ? m[0] : '';
-  })();
-  const API = CONTEXT + '/estado_civil';
-  const CURRENT_USER = (sessionStorage && sessionStorage.getItem('usuario')) || '';
+  <!-- Bootstrap + App -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // Usuario en navbar
+    const usuario = sessionStorage.getItem("usuarioActual");
+    if (!usuario) { window.location.href = "login.html"; }
+    else { document.getElementById("navUsuario").textContent = usuario; }
 
-  // ===== Estado =====
-  let DATA = [];
-  let MODAL_FORM, MODAL_DEL;
+    // API base (soporta context-path si lo hubiera)
+    const CONTEXT = (function () {
+      const parts = location.pathname.split('/');
+      return (parts.length > 2 && parts[1] && parts[1].includes('.html') === false) ? ('/' + parts[1]) : '';
+    })();
+    const API = CONTEXT + '/estado_civil';
+    const CURRENT_USER = usuario || 'system';
 
-  // ===== Utils =====
-  function showAlert(msg, type='success'){
-    const box = document.getElementById('alertBox');
-    box.className = 'alert alert-' + type;
-    box.textContent = msg;
-    box.classList.remove('d-none');
-    setTimeout(()=> box.classList.add('d-none'), 4000);
-  }
-  function showFormError(msg){ const a = document.getElementById('formAlert'); a.textContent = msg; a.classList.remove('d-none'); setTimeout(()=>a.classList.add('d-none'), 4000); }
-  function showDelError(msg){ const a = document.getElementById('delAlert'); a.textContent = msg; a.classList.remove('d-none'); setTimeout(()=>a.classList.add('d-none'), 4000); }
-  function setSaving(b){ document.getElementById('btnGuardar').disabled=b; document.getElementById('spSave').classList.toggle('d-none', !b); }
-  function setDeleting(b){ document.getElementById('btnEliminar').disabled=b; document.getElementById('spDel').classList.toggle('d-none', !b); }
-  function escapeHtml(s){ return String(s||'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#39;'); }
+    let DATA = [];
+    let MODAL_FORM, MODAL_DEL;
 
-  // ===== API =====
-  async function apiListar(){ const r=await fetch(`${API}/listar`); if(!r.ok) throw new Error('No se pudo listar'); return r.json(); }
-  async function apiObtener(id){ const r=await fetch(`${API}/obtener/${id}`); if(r.status===404) throw new Error('No encontrado'); if(!r.ok) throw new Error('Error al obtener'); return r.json(); }
-  async function apiGuardar(obj){
-    const r=await fetch(`${API}/guardar`,{
-      method:'POST',
-      headers:{'Content-Type':'application/json', ...(CURRENT_USER?{'X-User':CURRENT_USER}:{})},
-      body:JSON.stringify(obj)
+    // Utils
+    function showAlert(msg, type='success'){
+      const box = document.getElementById('alertBox');
+      box.className = 'alert alert-' + type;
+      box.textContent = msg;
+      box.classList.remove('d-none');
+      setTimeout(()=> box.classList.add('d-none'), 4000);
+    }
+    function showFormError(msg){ const a=document.getElementById('formAlert'); a.textContent=msg; a.classList.remove('d-none'); setTimeout(()=>a.classList.add('d-none'),4000); }
+    function showDelError(msg){ const a=document.getElementById('delAlert'); a.textContent=msg; a.classList.remove('d-none'); setTimeout(()=>a.classList.add('d-none'),4000); }
+    function setSaving(b){ document.getElementById('btnGuardar').disabled=b; document.getElementById('spSave').classList.toggle('d-none', !b); }
+    function setDeleting(b){ document.getElementById('btnEliminar').disabled=b; document.getElementById('spDel').classList.toggle('d-none', !b); }
+    function escapeHtml(s){ return String(s||'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#39;'); }
+
+    // API calls
+    async function apiListar(){ const r=await fetch(`${API}/listar`); if(!r.ok) throw new Error('No se pudo listar'); return r.json(); }
+    async function apiObtener(id){ const r=await fetch(`${API}/obtener/${id}`); if(r.status===404) throw new Error('No encontrado'); if(!r.ok) throw new Error('Error al obtener'); return r.json(); }
+    async function apiGuardar(obj){
+      const r=await fetch(`${API}/guardar`,{
+        method:'POST',
+        headers:{'Content-Type':'application/json','X-User':CURRENT_USER},
+        body:JSON.stringify(obj)
+      });
+      if(!r.ok){ const t=await r.text(); throw new Error(t||'Error al guardar'); }
+      return r.json();
+    }
+    async function apiEliminar(id){
+      const r=await fetch(`${API}/eliminar/${id}`,{method:'DELETE'});
+      if(r.status===204) return true;
+      const t=await r.text(); throw new Error(t||'No se pudo eliminar');
+    }
+
+    // Render
+    function renderTable(rows){
+      const tbody=document.getElementById('tbBody'); tbody.innerHTML='';
+      rows.forEach(r=>{
+        const tr=document.createElement('tr');
+        tr.innerHTML=`
+          <td>${r.idEstadoCivil}</td>
+          <td>${escapeHtml(r.nombre)}</td>
+          <td class="text-center">
+            <button class="btn btn-sm btn-warning me-2" onclick="openEdit(${r.idEstadoCivil})">Editar</button>
+            <button class="btn btn-sm btn-danger" onclick="openDelete(${r.idEstadoCivil})">Eliminar</button>
+          </td>`;
+        tbody.appendChild(tr);
+      });
+      document.getElementById('lblTotal').textContent = rows.length;
+    }
+
+    // Actions
+    async function load(){ try{ DATA=await apiListar(); applyFilter(); }catch(e){ showAlert(e.message,'danger'); } }
+    function openNew(){ document.getElementById('modalTitle').textContent='Nuevo Estado Civil'; document.getElementById('idEstadoCivil').value=''; document.getElementById('nombre').value=''; document.getElementById('formAlert').classList.add('d-none'); MODAL_FORM.show(); setTimeout(()=>document.getElementById('nombre').focus(),150); }
+    async function openEdit(id){ try{ const it=await apiObtener(id); document.getElementById('modalTitle').textContent='Editar Estado Civil'; document.getElementById('idEstadoCivil').value=it.idEstadoCivil; document.getElementById('nombre').value=it.nombre||''; document.getElementById('formAlert').classList.add('d-none'); MODAL_FORM.show(); setTimeout(()=>document.getElementById('nombre').focus(),150); }catch(e){ showAlert(e.message,'danger'); } }
+    async function onSave(e){ e.preventDefault(); setSaving(true); try{ const id=document.getElementById('idEstadoCivil').value||null; const nombre=(document.getElementById('nombre').value||'').trim(); if(!nombre){ showFormError('El nombre es obligatorio'); setSaving(false); return; } const payload={nombre}; if(id) payload.idEstadoCivil=parseInt(id,10); await apiGuardar(payload); MODAL_FORM.hide(); showAlert('Guardado con éxito'); await load(); }catch(e){ showFormError(e.message); }finally{ setSaving(false);} }
+    function openDelete(id){ const it=DATA.find(x=>x.idEstadoCivil===id); if(!it){ showAlert('Registro no encontrado','danger'); return; } document.getElementById('delId').value=id; document.getElementById('delNombre').textContent=it.nombre||''; document.getElementById('delAlert').classList.add('d-none'); MODAL_DEL.show(); }
+    async function onDelete(){ setDeleting(true); const id=parseInt(document.getElementById('delId').value,10); try{ await apiEliminar(id); MODAL_DEL.hide(); showAlert('Eliminado correctamente'); await load(); }catch(e){ showDelError(e.message); }finally{ setDeleting(false);} }
+
+    function applyFilter(){
+      const q=(document.getElementById('txtBuscar').value||'').toLowerCase().trim();
+      const rows = !q ? DATA : DATA.filter(x => (x.nombre||'').toLowerCase().includes(q) || String(x.idEstadoCivil).includes(q));
+      renderTable(rows);
+    }
+
+    // Init
+    document.addEventListener('DOMContentLoaded', ()=>{
+      MODAL_FORM=new bootstrap.Modal(document.getElementById('modalForm'));
+      MODAL_DEL=new bootstrap.Modal(document.getElementById('modalDelete'));
+      document.getElementById('btnNuevo').addEventListener('click', openNew);
+      document.getElementById('frmEC').addEventListener('submit', onSave);
+      document.getElementById('btnEliminar').addEventListener('click', onDelete);
+      document.getElementById('txtBuscar').addEventListener('input', applyFilter);
+      load();
     });
-    if(!r.ok){ const t=await r.text(); throw new Error(t||'Error al guardar'); }
-    return r.json();
-  }
-  async function apiEliminar(id){
-    const r=await fetch(`${API}/eliminar/${id}`,{method:'DELETE'});
-    if(r.status===204) return true;
-    const t=await r.text(); throw new Error(t||'No se pudo eliminar');
-  }
-
-  // ===== Render =====
-  function renderTable(rows){
-    const body=document.getElementById('tbBody'); body.innerHTML='';
-    rows.forEach(r=>{
-      const tr=document.createElement('tr');
-      tr.innerHTML=`
-        <td>${r.idEstadoCivil}</td>
-        <td>${escapeHtml(r.nombre)}</td>
-        <td class="text-center">
-          <button class="btn btn-sm btn-outline-primary me-2" onclick="openEdit(${r.idEstadoCivil})">Editar</button>
-          <button class="btn btn-sm btn-outline-danger" onclick="openDelete(${r.idEstadoCivil})">Eliminar</button>
-        </td>`;
-      body.appendChild(tr);
-    });
-    document.getElementById('lblTotal').textContent=rows.length;
-  }
-
-  // ===== Acciones =====
-  async function load(){ try{ DATA=await apiListar(); applyFilter(); }catch(e){ showAlert(e.message,'danger'); } }
-  function openNew(){ document.getElementById('modalTitle').textContent='Nuevo Estado Civil'; document.getElementById('idEstadoCivil').value=''; document.getElementById('nombre').value=''; document.getElementById('formAlert').classList.add('d-none'); MODAL_FORM.show(); setTimeout(()=>document.getElementById('nombre').focus(),150); }
-  async function openEdit(id){ try{ const it=await apiObtener(id); document.getElementById('modalTitle').textContent='Editar Estado Civil'; document.getElementById('idEstadoCivil').value=it.idEstadoCivil; document.getElementById('nombre').value=it.nombre||''; document.getElementById('formAlert').classList.add('d-none'); MODAL_FORM.show(); setTimeout(()=>document.getElementById('nombre').focus(),150); }catch(e){ showAlert(e.message,'danger'); } }
-  async function onSave(e){ e.preventDefault(); setSaving(true); try{ const id=document.getElementById('idEstadoCivil').value||null; const nombre=(document.getElementById('nombre').value||'').trim(); if(!nombre){ showFormError('El nombre es obligatorio'); setSaving(false); return; } const payload={nombre}; if(id) payload.idEstadoCivil=parseInt(id,10); await apiGuardar(payload); MODAL_FORM.hide(); showAlert('Guardado con éxito'); await load(); }catch(e){ showFormError(e.message); }finally{ setSaving(false);} }
-  function openDelete(id){ const it=DATA.find(x=>x.idEstadoCivil===id); if(!it){ showAlert('Registro no encontrado','danger'); return; } document.getElementById('delId').value=id; document.getElementById('delNombre').textContent=it.nombre||''; document.getElementById('delAlert').classList.add('d-none'); MODAL_DEL.show(); }
-  async function onDelete(){ setDeleting(true); const id=parseInt(document.getElementById('delId').value,10); try{ await apiEliminar(id); MODAL_DEL.hide(); showAlert('Eliminado correctamente'); await load(); }catch(e){ showDelError(e.message); }finally{ setDeleting(false);} }
-  function applyFilter(){ const q=(document.getElementById('txtBuscar').value||'').toLowerCase().trim(); const rows=!q?DATA:DATA.filter(x=>(x.nombre||'').toLowerCase().includes(q)||String(x.idEstadoCivil).includes(q)); renderTable(rows); }
-
-  // ===== Init =====
-  document.addEventListener('DOMContentLoaded', ()=>{
-    MODAL_FORM=new bootstrap.Modal(document.getElementById('modalForm'));
-    MODAL_DEL=new bootstrap.Modal(document.getElementById('modalDelete'));
-    document.getElementById('btnNuevo').addEventListener('click', openNew);
-    document.getElementById('frmEC').addEventListener('submit', onSave);
-    document.getElementById('btnEliminar').addEventListener('click', onDelete);
-    document.getElementById('txtBuscar').addEventListener('input', applyFilter);
-    load();
-  });
-</script>
+  </script>
 </body>
 </html>
