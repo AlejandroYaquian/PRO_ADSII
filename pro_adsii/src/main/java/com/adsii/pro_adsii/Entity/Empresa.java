@@ -1,7 +1,6 @@
 package com.adsii.pro_adsii.Entity;
 
 import java.time.LocalDateTime;
-
 import jakarta.persistence.*;
 import lombok.Data;
 
