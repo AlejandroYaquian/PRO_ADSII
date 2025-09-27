@@ -1,21 +1,20 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
     <meta charset="UTF-8">
     <title>Módulos</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        #btnCerrarSesion {
+            background-color: transparent;
+            border: 1px solid #fff;
+            color: #fff;
+        }
+        #btnCerrarSesion:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+    </style>
 </head>
-<style>
-    #btnCerrarSesion {
-        background-color: transparent;
-        border: 1px solid #fff;
-        color: #fff;
-    }
-    #btnCerrarSesion:hover {
-        background-color: rgba(255, 255, 255, 0.2);
-    }
-</style>
 <body class="bg-light">
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container-fluid">
@@ -34,32 +33,28 @@
         <div class="container py-5">
             <h2 class="mb-4 text-center">Gestión de Módulos</h2>
 
-            <!-- Formulario para agregar / editar -->
             <div class="card mb-4">
                 <div class="card-header">Agregar / Editar Módulo</div>
                 <div class="card-body">
-                    <input type="hidden" id="moduloId">
-                    <div class="row g-2">
-                        <div class="col-md-4">
-                            <input type="text" id="nombreModulo" class="form-control" placeholder="Nombre" required>
+                    <form id="modulo-form">
+                        <input type="hidden" id="moduloId">
+                        <input type="hidden" id="usuarioCreacion"> <!-- oculto -->
+                        <div class="row g-2">
+                            <div class="col-md-4">
+                                <input type="text" id="nombreModulo" class="form-control" placeholder="Nombre" required>
+                            </div>
+                            <div class="col-md-2">
+                                <input type="number" id="ordenMenu" class="form-control" placeholder="Orden" required>
+                            </div>
+                            <div class="col-md-3 d-flex gap-2">
+                                <button type="submit" class="btn btn-primary" id="btnGuardar">Guardar</button>
+                                <button type="button" id="btnCancelar" class="btn btn-secondary" style="display:none;">Cancelar</button>
+                            </div>
                         </div>
-                        <div class="col-md-2">
-                            <input type="number" id="ordenMenu" class="form-control" placeholder="Orden" required>
-                        </div>
-                        <div class="col-md-3">
-                            <input type="text" id="usuarioCreacion" class="form-control" placeholder="Usuario Creación"
-                                required>
-                        </div>
-                        <div class="col-md-3 d-flex gap-2">
-                            <button class="btn btn-primary" onclick="guardarModulo()" id="btnGuardar">Guardar</button>
-                            <button class="btn btn-secondary" onclick="cancelarEdicion()" id="btnCancelar"
-                                style="display:none;">Cancelar</button>
-                        </div>
-                    </div>
+                    </form>
                 </div>
             </div>
 
-            <!-- Tabla de módulos -->
             <div class="card">
                 <div class="card-header">Listado de Módulos</div>
                 <div class="card-body">
@@ -85,107 +80,108 @@
                 </div>
             </div>
         </div>
+    </div>
 
-        <script>
-            const usuario = sessionStorage.getItem('usuarioActual');
+    <script>
+        const usuario = sessionStorage.getItem('usuarioActual');
+        const moduloForm = document.getElementById('modulo-form');
+        const moduloBody = document.getElementById('modulo-body');
+        const moduloIdInput = document.getElementById('moduloId');
+        const nombreModuloInput = document.getElementById('nombreModulo');
+        const ordenMenuInput = document.getElementById('ordenMenu');
+        const usuarioCreacionInput = document.getElementById('usuarioCreacion');
+        const btnGuardar = document.getElementById('btnGuardar');
+        const btnCancelar = document.getElementById('btnCancelar');
 
-            if (!usuario) {
-                window.location.href = 'login.html';
-            } else {
-                document.getElementById('navUsuario').textContent = usuario;
-            }
+        if (!usuario) {
+            window.location.href = 'login.html';
+        } else {
+            document.getElementById('navUsuario').textContent = usuario;
+            usuarioCreacionInput.value = usuario;
+        }
 
-            async function cargarModulos() {
+        const toLocaleString = (date) => date ? new Date(date).toLocaleString() : '';
+        const createRow = (m) => `
+            <tr>
+                <td>${m.idModulo}</td>
+                <td>${m.nombre ?? ""}</td>
+                <td>${m.ordenMenu ?? ""}</td>
+                <td>${toLocaleString(m.fechaCreacion)}</td>
+                <td>${m.usuarioCreacion ?? ""}</td>
+                <td>${toLocaleString(m.fechaModificacion)}</td>
+                <td>${m.usuarioModificacion ?? ""}</td>
+                <td>
+                    <button class="btn btn-warning btn-sm" onclick="editarModulo(${m.idModulo})">Editar</button>
+                    <button class="btn btn-danger btn-sm" onclick="eliminarModulo(${m.idModulo})">Eliminar</button>
+                </td>
+            </tr>
+        `;
+
+        const cargarModulos = async () => {
+            moduloBody.innerHTML = `<tr><td colspan="8" class="text-center">Cargando...</td></tr>`;
+            try {
                 const res = await fetch("/modulo/listar");
                 const data = await res.json();
+                moduloBody.innerHTML = data.length ? data.map(createRow).join('') : `<tr><td colspan="8" class="text-center">No hay módulos registrados.</td></tr>`;
+            } catch (error) {
+                console.error('Error al cargar módulos:', error);
+                moduloBody.innerHTML = `<tr><td colspan="8" class="text-center">Error al cargar los datos.</td></tr>`;
+            }
+        };
 
-                const tbody = document.getElementById("modulo-body");
-                tbody.innerHTML = "";
+        const guardarModulo = async (e) => {
+            e.preventDefault();
+            const modulo = {
+                idModulo: moduloIdInput.value || undefined,
+                nombre: nombreModuloInput.value,
+                ordenMenu: parseInt(ordenMenuInput.value),
+                usuarioCreacion: usuario
+            };
 
-                if (data.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="8" class="text-center">No hay módulos registrados.</td></tr>`;
-                    return;
-                }
-
-                data.forEach(m => {
-                    const row = `
-                <tr>
-                    <td>${m.idModulo}</td>
-                    <td>${m.nombre ?? ""}</td>
-                    <td>${m.ordenMenu ?? ""}</td>
-                    <td>${m.fechaCreacion ? new Date(m.fechaCreacion).toLocaleString() : ""}</td>
-                    <td>${m.usuarioCreacion ?? ""}</td>
-                    <td>${m.fechaModificacion ? new Date(m.fechaModificacion).toLocaleString() : ""}</td>
-                    <td>${m.usuarioModificacion ?? ""}</td>
-                    <td>
-                        <button class="btn btn-warning btn-sm" onclick="editarModulo(${m.idModulo})">Editar</button>
-                        <button class="btn btn-danger btn-sm" onclick="eliminarModulo(${m.idModulo})">Eliminar</button>
-                    </td>
-                </tr>
-            `;
-                    tbody.innerHTML += row;
-                });
+            if (!modulo.nombre || isNaN(modulo.ordenMenu)) {
+                return alert("Complete todos los campos requeridos y asegúrese de que la 'Orden' sea un número.");
             }
 
-            async function guardarModulo() {
-                const id = document.getElementById("moduloId").value;
-                const nombre = document.getElementById("nombreModulo").value;
-                const ordenMenu = parseInt(document.getElementById("ordenMenu").value);
-                const usuarioCreacion = document.getElementById("usuarioCreacion").value;
+            await fetch("/modulo/guardar", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(modulo)
+            });
 
-                if (!nombre || !ordenMenu || !usuarioCreacion) {
-                    return alert("Complete todos los campos requeridos");
-                }
-
-                const modulo = {
-                    idModulo: id || undefined,
-                    nombre,
-                    ordenMenu,
-                    usuarioCreacion
-                };
-
-                const metodo = id ? "POST" : "POST";
-                await fetch("/modulo/guardar", {
-                    method: metodo,
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(modulo)
-                });
-
-                cancelarEdicion();
-                cargarModulos();
-            }
-
-            async function editarModulo(id) {
-                const res = await fetch(`/modulo/${id}`);
-                const m = await res.json();
-
-                document.getElementById("moduloId").value = m.idModulo;
-                document.getElementById("nombreModulo").value = m.nombre;
-                document.getElementById("ordenMenu").value = m.ordenMenu;
-                document.getElementById("usuarioCreacion").value = m.usuarioCreacion;
-
-                document.getElementById("btnCancelar").style.display = "inline-block";
-                document.getElementById("btnGuardar").textContent = "Actualizar";
-            }
-
-            function cancelarEdicion() {
-                document.getElementById("moduloId").value = "";
-                document.getElementById("nombreModulo").value = "";
-                document.getElementById("ordenMenu").value = "";
-                document.getElementById("usuarioCreacion").value = "";
-                document.getElementById("btnCancelar").style.display = "none";
-                document.getElementById("btnGuardar").textContent = "Guardar";
-            }
-
-            async function eliminarModulo(id) {
-                if (!confirm("¿Seguro de eliminar este módulo?")) return;
-
-                await fetch(`/modulo/eliminar/${id}`, { method: "DELETE" });
-                cargarModulos();
-            }
-
+            cancelarEdicion();
             cargarModulos();
-        </script>
-</body>
+        };
 
+        const editarModulo = async (id) => {
+            const res = await fetch(`/modulo/${id}`);
+            const m = await res.json();
+
+            moduloIdInput.value = m.idModulo;
+            nombreModuloInput.value = m.nombre;
+            ordenMenuInput.value = m.ordenMenu;
+
+            btnCancelar.style.display = "inline-block";
+            btnGuardar.textContent = "Actualizar";
+        };
+
+        const cancelarEdicion = () => {
+            moduloForm.reset();
+            moduloIdInput.value = "";
+            btnCancelar.style.display = "none";
+            btnGuardar.textContent = "Guardar";
+            usuarioCreacionInput.value = usuario;
+        };
+
+        const eliminarModulo = async (id) => {
+            if (!confirm("¿Seguro de eliminar este módulo?")) return;
+            await fetch(`/modulo/eliminar/${id}`, { method: "DELETE" });
+            cargarModulos();
+        };
+
+        moduloForm.addEventListener('submit', guardarModulo);
+        btnCancelar.addEventListener('click', cancelarEdicion);
+
+        cargarModulos();
+    </script>
+</body>
 </html>

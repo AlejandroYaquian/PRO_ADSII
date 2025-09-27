@@ -24,10 +24,9 @@ public class GeneroController {
     public Genero obtener(@PathVariable Long id) {
         return generoService.obtenerPorId(id).orElse(null);
     }
-
-    @PostMapping("/guardar")
+   @PostMapping("/guardar")
     public Genero guardar(@RequestBody Genero genero) {
-        String usuarioActual = "Admin"; // usuario real del login
+        String usuarioActual = genero.getUsuarioCreacion(); // ← capturado desde el JSON enviado por el frontend
         return generoService.guardar(genero, usuarioActual);
     }
 

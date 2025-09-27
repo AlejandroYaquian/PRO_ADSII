@@ -27,7 +27,7 @@ public class ModuloController {
 
     @PostMapping("/guardar")
     public Modulo guardar(@RequestBody Modulo modulo) {
-        String usuarioActual = "Admin"; // usuario real del login
+        String usuarioActual = modulo.getUsuarioCreacion(); // ← capturado desde el frontend
         return moduloService.guardar(modulo, usuarioActual);
     }
 
