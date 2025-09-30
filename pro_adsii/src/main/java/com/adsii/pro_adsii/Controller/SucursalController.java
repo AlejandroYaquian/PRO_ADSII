@@ -9,6 +9,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/sucursal")
+@CrossOrigin(origins = "*")
 public class SucursalController {
 
     @Autowired
@@ -21,6 +22,12 @@ public class SucursalController {
 
     @PostMapping
     public Sucursal crearSucursal(@RequestBody Sucursal sucursal) {
+        return sucursalService.guardarSucursal(sucursal);
+    }
+
+    @PutMapping("/{id}")
+    public Sucursal actualizarSucursal(@PathVariable int id, @RequestBody Sucursal sucursal) {
+        sucursal.setIdSucursal(id);
         return sucursalService.guardarSucursal(sucursal);
     }
 

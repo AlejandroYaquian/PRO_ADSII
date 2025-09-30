@@ -1,6 +1,5 @@
 <!DOCTYPE html>
-<html>
-
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <title>CRUD Sucursal</title>
@@ -40,8 +39,8 @@
                         <input type="text" id="direccion" class="form-control" required>
                     </div>
                     <div class="mb-3">
-                        <label for="idEmpresa" class="form-label">ID Empresa</label>
-                        <input type="number" id="idEmpresa" class="form-control" required>
+                        <label for="idEmpresa" class="form-label">Empresa</label>
+                        <select id="idEmpresa" class="form-select" required></select>
                     </div>
                     <button type="submit" class="btn btn-success">Guardar</button>
                     <button type="button" id="cancelar" class="btn btn-secondary">Cancelar</button>
@@ -77,6 +76,19 @@
     }
 
     const apiBase = '/sucursal';
+
+    async function cargarEmpresas() {
+        const res = await fetch('/empresa/listar');
+        const empresas = await res.json();
+        const select = document.getElementById('idEmpresa');
+        select.innerHTML = '';
+        empresas.forEach(e => {
+            const option = document.createElement('option');
+            option.value = e.idEmpresa;
+            option.textContent = `${e.idEmpresa} - ${e.nombre}`;
+            select.appendChild(option);
+        });
+    }
 
     async function listarSucursales() {
         const res = await fetch(apiBase);
@@ -150,6 +162,7 @@
         document.getElementById('form-title').innerText = 'Nueva Sucursal';
     });
 
+    cargarEmpresas();
     listarSucursales();
 </script>
 
