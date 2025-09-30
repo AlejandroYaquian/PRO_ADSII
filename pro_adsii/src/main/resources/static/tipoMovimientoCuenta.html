@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Opcion</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous"> 
+</head>
+<body class="bg-light">
+
+    <body class="bg-light">
+
+<!-- NAVBAR FUERA DEL CONTAINER -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="index.html">Inicio</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMenu">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarMenu">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0"></ul>
+      <span class="navbar-text me-3 fw-semibold" id="navUsuario"></span>
+    </div>
+  </div>
+</nav>
+
+
+<div class="container py-5">
+    <h2 class="mb-4 text-center">Gestión de tipo de movimiento cuenta corriente</h2>
+
+    <!-- Formulario para agregar / editar -->
+    <div class="card mb-4">
+        <div class="card-header">Agregar Opcion</div>
+        <div class="card-body">
+          <div class="container mt-3">
+            <!-- Fila 1: Nombre + Orden Opción -->
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <input type="text" id="nombreOpcion" class="form-control" placeholder="Nombre" required>
+                </div>
+                <div class="col-md-6">
+                    <input type="text" id="operacionCuenta" class="form-control" placeholder="Operacion cuenta corriente" required>
+                </div>
+            </div>
+           
+
+            <!-- Fila 3: Botones -->
+            <div class="row mb-3">
+                <div class="col-md-12 d-flex gap-2">
+                   <button id="btn-guardar" class="btn btn-primary" onclick="guardarOpcion()">Guardar</button>
+                    <button class="btn btn-secondary" onclick="cancelarEdicion()">Cancelar</button>
+                </div>
+            </div>
+        </div>         
+        </div>
+    </div>
+
+
+<!-- Tabla de módulos -->
+    <div class="card">
+        <div class="card-header">Listado de Opciones</div>
+        <div class="card-body">
+            <table class="table table-bordered table-hover">
+                <thead class="table-dark">
+                <tr>
+                    <th>Nombre</th>
+                    <th>Operacion cuenta corriente</th>
+                     <th>Acciones</th>
+                </tr>
+                </thead>
+                <tbody id="opcion-body">
+                    <tr><td colspan="10" class="text-center">Cargando...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+   
+    let menus = [];
+    let opcionEditandoId = null;
+
+    const API_URL_ROLEOPCION = "http://localhost:8080/RoleOpcion";
+    const idRole = sessionStorage.getItem("idRole");
+    let permisosUsuario = [];
+
+    const usuario = sessionStorage.getItem('usuarioActual');
+
+    if (!usuario) {
+        window.location.href = 'login.html';
+    } else {
+        document.getElementById('navUsuario').textContent = usuario;
+    }
+
+    const tableBody = document.getElementById('roles-table-body');
+
+
+    async function cargarPermisos() {
+        const res = await fetch(`${API_URL_ROLEOPCION}/opcionesRol/${idRole}`);
+        permisosUsuario = await res.json();
+        aplicarPermisosUI();
+    }
+
+    function aplicarPermisosUI() {
+        document.getElementById("btn-guardar").disabled = !tienePermiso("Tipos de Movimientos Cuenta Corriente", "alta");
+    }
+
+    function tienePermiso(nombreOpcion, permiso) {
+        const op = permisosUsuario.find(o => o.nombre.toLowerCase() === nombreOpcion.toLowerCase());
+        return op ? op[permiso.toLowerCase()] === true : false;
+    }
+
+
+    async function cargarMenus() {
+        
+         try {
+            const response = await fetch('http://localhost:8080/menu/listar');
+            if (!response.ok) {
+                throw new Error('Error al obtener los menús');
+            }
+            menus = await response.json(); // esto debe ser un array
+            const select = document.getElementById('menuId');
+            menus.forEach(menu => {
+                const option = document.createElement('option');
+                option.value = menu.idMenu;           // Asegúrate de que tu objeto tenga 'id'
+                option.textContent = menu.nombre; // Asegúrate de que tenga 'nombre'
+                select.appendChild(option);
+            });
+        } catch (error) {
+            console.error('Error al cargar los menús:', error);
+        }     
+            
+    }
+
+ 
+
+    async function cargarOpcion() {
+        const res = await fetch("/tipoMovimiento/getTipoMovimientos");
+        const data = await res.json();
+
+        const tbody = document.getElementById("opcion-body");
+        tbody.innerHTML = "";
+
+        if (data.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="8" class="text-center">No hay opciones registradas.</td></tr>`;
+            return;
+        }
+
+        const puedeEditar = tienePermiso("Tipos de Movimientos Cuenta Corriente", "cambio"); // Permiso de edición
+        const puedeEliminar = tienePermiso("Tipos de Movimientos Cuenta Corriente", "baja");  // Permiso de eliminación
+        data.forEach(m => {
+            const nombreMenu = menus.find(menu => menu.idMenu === m.idMenu)?.nombre || "Desconocido";
+            const row = `
+                <tr>
+                    <td>${m.nombre ?? ""}</td>
+                    <td>${m.operacionCuentaCorriente?? ""}</td>
+                    <td>
+                      <div class="d-flex gap-2">
+                         <button class="btn btn-warning btn-sm" onclick="editarOpcion(${m.idTipoMovimientoCXC})" ${!puedeEditar ? 'disabled' : ''}>Editar</button>
+                         <button class="btn btn-danger btn-sm" onclick="eliminarOpcion(${m.idTipoMovimientoCXC})"${!puedeEliminar ? 'disabled' : ''}>Eliminar</button>
+                       </div>
+                    </td>
+                </tr>
+            `;
+            tbody.innerHTML += row;
+        });
+    }
+
+    async function guardarOpcion() {
+            const nombre = document.getElementById("nombreOpcion").value.trim();
+            const operacionCuenta = document.getElementById("operacionCuenta").value.trim();
+
+            if (!nombre || !operacionCuenta) {
+                return alert("Complete todos los campos requeridos.");
+            }
+
+             const usu = sessionStorage.getItem('usuarioActual');
+            // Crear objeto para enviar
+            const opcion = {
+                nombre,
+                operacionCuentaCorriente: parseInt(operacionCuenta),
+            };
+
+            // Si estamos editando, agregamos el idOpcion
+            if (opcionEditandoId) {
+                opcion.idOpcion = opcionEditandoId;
+                opcion.usuarioModificacion = usu; // Solo en edición
+            } else {
+                opcion.usuarioCreacion = usu; // Solo en creación
+            }
+
+            try {
+                const response = await fetch("/tipoMovimiento/agregar", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(opcion)
+                });
+
+                if (!response.ok) {
+                    throw new Error("Error al guardar el tipo de movimiento de cuenta.");
+                }
+
+                const data = await response.json();
+                alert(`Movimiento de cuenta ${opcionEditandoId ? "actualizada" : "guardada"} con éxito: ${data.nombre}`);
+
+                // Limpiar formulario
+                cancelarEdicion();
+
+                // Recargar tabla
+                cargarOpcion();
+
+            } catch (error) {
+                console.error("Error al guardar la opción:", error);
+                alert("Ocurrió un error al guardar. Revisa la consola.");
+            }
+    }
+
+
+
+    async function editarOpcion(id) {
+        try {
+            const res = await fetch(`/opcion/${id}`); // Debes tener este endpoint en el backend
+            if (!res.ok) throw new Error("No se pudo obtener la opción");
+
+            const opcion = await res.json();
+
+            // Guardar el ID que estamos editando
+            opcionEditandoId = opcion.idOpcion;
+
+            // Rellenar los campos
+            document.getElementById("nombreOpcion").value = opcion.nombre || "";
+            document.getElementById("operacionCuenta").value = opcion.ordenMenu || "";
+
+            // Cambiar texto del botón si quieres
+            document.querySelector("button.btn-primary").textContent = "Actualizar";
+
+        } catch (error) {
+            console.error("Error al cargar el movimiento de cuenta para edición:", error);
+            alert("No se pudo cargar el movimiento de cuenta.");
+        }
+    }
+
+
+    function cancelarEdicion() {
+        opcionEditandoId = null;
+
+        document.getElementById("nombreOpcion").value = "";
+        document.getElementById("operacionCuenta").value = "";
+    
+        // Restaurar texto del botón
+        document.querySelector("button.btn-primary").textContent = "Guardar";
+    }
+
+
+    async function eliminarOpcion(id) {
+        if (!confirm("¿Seguro de eliminar esta opción?")) return;
+
+        try {
+            const response = await fetch(`/tipoMovimiento/eliminar/${id}`, { method: "DELETE" });
+
+            if (!response.ok) {
+                throw new Error("Error al eliminar");
+            }
+
+            alert("Opción eliminada correctamente.");
+            cargarOpcion(); // Refresca la lista
+        } catch (error) {
+            console.error("Error al eliminar:", error);
+            alert("No se pudo eliminar la opción.");
+        }
+    }
+
+
+   document.addEventListener('DOMContentLoaded', async () => {
+    await cargarPermisos();
+    await cargarOpcion();    // Luego carga las opciones
+    });
+
+</script>
+</body>
+</html>
