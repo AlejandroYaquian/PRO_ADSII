@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>CRUD Status Cuenta</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+</head>
+<body>
+    <nav class="navbar navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="index.html">Inicio</a>
+            <span class="navbar-text" id="navUsuario"></span>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <h2>Status de Cuenta</h2>
+
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 id="form-title">Nuevo Status</h5>
+            </div>
+            <div class="card-body">
+                <form id="status-form">
+                    <input type="hidden" id="idStatusCuenta">
+                    <div class="mb-3">
+                        <label for="nombre" class="form-label">Nombre</label>
+                        <input type="text" id="nombre" class="form-control" required>
+                    </div>
+                    <button type="submit" class="btn btn-success">Guardar</button>
+                    <button type="button" id="cancelar" class="btn btn-secondary">Cancelar</button>
+                </form>
+            </div>
+        </div>
+
+        <table class="table table-bordered table-striped">
+            <thead class="table-dark">
+                <tr>
+                    <th>ID</th>
+                    <th>Nombre</th>
+                    <th>Fecha Creación</th>
+                    <th>Usuario Creación</th>
+                    <th>Fecha Modificación</th>
+                    <th>Usuario Modificación</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody id="status-table"></tbody>
+        </table>
+    </div>
+
+<script>
+    // Inicialización y verificación de usuario
+    const usuario = sessionStorage.getItem('usuarioActual');
+    if (!usuario) {
+        window.location.href = 'login.html';
+    } else {
+        document.getElementById('navUsuario').textContent = usuario;
+    }
+
+    // CORRECCIÓN CLAVE: El path debe coincidir con el Controller.
+    const apiBase = '/statuscuenta'; 
+
+    /**
+     * Lista todos los status de cuenta y renderiza la tabla.
+     */
+    async function listarStatus() {
+        try {
+            const res = await fetch(apiBase);
+            if (!res.ok) {
+                throw new Error(`Error HTTP: ${res.status}`);
+            }
+            const lista = await res.json();
+            const tbody = document.getElementById('status-table');
+            tbody.innerHTML = '';
+            
+            lista.forEach(s => {
+                // Función para formatear fechas si es necesario. Aquí se usa el string directo.
+                const formatDate = (dateString) => dateString ? new Date(dateString).toLocaleString() : '';
+                
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${s.idStatusCuenta}</td>
+                        <td>${s.nombre}</td>
+                        <td>${formatDate(s.fechaCreacion) || ''}</td>
+                        <td>${s.usuarioCreacion ?? ''}</td>
+                        <td>${formatDate(s.fechaModificacion) || ''}</td>
+                        <td>${s.usuarioModificacion ?? ''}</td>
+                        <td>
+                            <button class="btn btn-warning btn-sm" onclick="editar(${s.idStatusCuenta})">Editar</button>
+                            <button class="btn btn-danger btn-sm" onclick="eliminar(${s.idStatusCuenta})">Eliminar</button>
+                        </td>
+                    </tr>
+                `;
+            });
+        } catch (error) {
+            console.error("Error al listar status de cuenta:", error);
+            // Puedes mostrar un mensaje de error al usuario aquí
+        }
+    }
+
+    // Evento de Guardar (Crear/Actualizar)
+    document.getElementById('status-form').addEventListener('submit', async e => {
+        e.preventDefault();
+        const id = document.getElementById('idStatusCuenta').value;
+        const nombre = document.getElementById('nombre').value;
+
+        const method = id ? 'PUT' : 'POST';
+        const url = id ? `${apiBase}/${id}` : apiBase;
+
+        try {
+            const res = await fetch(url, {
+                method: method,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'usuario': usuario // Se envía el usuario en el header
+                },
+                body: JSON.stringify({ nombre })
+            });
+            
+            if (!res.ok) {
+                // Manejar errores de API
+                const errorData = await res.json().catch(() => ({ message: 'Error desconocido' }));
+                throw new Error(`Fallo al guardar: ${errorData.message || res.statusText}`);
+            }
+
+            document.getElementById('status-form').reset();
+            document.getElementById('idStatusCuenta').value = ''; // Limpiar ID oculto
+            document.getElementById('form-title').innerText = 'Nuevo Status';
+            listarStatus();
+
+        } catch (error) {
+            console.error("Error al guardar status:", error);
+            alert(`Error al guardar: ${error.message}`);
+        }
+    });
+
+    /**
+     * Carga los datos de un status para edición.
+     */
+    async function editar(id) {
+        try {
+            const res = await fetch(`${apiBase}/${id}`);
+            const s = await res.json();
+            document.getElementById('idStatusCuenta').value = s.idStatusCuenta;
+            document.getElementById('nombre').value = s.nombre;
+            document.getElementById('form-title').innerText = 'Editar Status';
+        } catch (error) {
+            console.error("Error al obtener status para edición:", error);
+        }
+    }
+
+    /**
+     * Elimina un status por ID.
+     */
+    async function eliminar(id) {
+        if (confirm('¿Seguro que deseas eliminar este status?')) {
+            try {
+                const res = await fetch(`${apiBase}/${id}`, { method: 'DELETE' });
+                if (!res.ok) {
+                    throw new Error(`Fallo al eliminar: ${res.statusText}`);
+                }
+                listarStatus();
+            } catch (error) {
+                console.error("Error al eliminar status:", error);
+                alert(`Error al eliminar: ${error.message}`);
+            }
+        }
+    }
+
+    // Evento de Cancelar
+    document.getElementById('cancelar').addEventListener('click', () => {
+        document.getElementById('status-form').reset();
+        document.getElementById('idStatusCuenta').value = '';
+        document.getElementById('form-title').innerText = 'Nuevo Status';
+    });
+
+    // Iniciar la carga de datos al cargar la página
+    listarStatus();
+</script>
+
+</body>
+</html>
