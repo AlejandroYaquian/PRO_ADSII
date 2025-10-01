@@ -182,14 +182,18 @@
                 operacionCuentaCorriente: parseInt(operacionCuenta),
             };
 
+
+            console.log("Nombre opcion: "+opcion.nombre);
+            console.log("operacion Cuenta Corriente: "+opcion.operacionCuentaCorriente);
+            console.log("Id a editar: "+opcionEditandoId);
             // Si estamos editando, agregamos el idOpcion
             if (opcionEditandoId) {
-                opcion.idOpcion = opcionEditandoId;
+                opcion.idTipoMovimientoCXC = opcionEditandoId;
                 opcion.usuarioModificacion = usu; // Solo en edición
             } else {
                 opcion.usuarioCreacion = usu; // Solo en creación
             }
-
+             console.log("Id a editar despues: "+opcion.idTipoMovimientoCXC);
             try {
                 const response = await fetch("/tipoMovimiento/agregar", {
                     method: "POST",
@@ -220,17 +224,18 @@
 
     async function editarOpcion(id) {
         try {
-            const res = await fetch(`/opcion/${id}`); // Debes tener este endpoint en el backend
+            const res = await fetch(`tipoMovimiento/buscarTipoMovimiento/${id}`); // Debes tener este endpoint en el backend
             if (!res.ok) throw new Error("No se pudo obtener la opción");
 
             const opcion = await res.json();
 
             // Guardar el ID que estamos editando
-            opcionEditandoId = opcion.idOpcion;
+            opcionEditandoId = opcion.idTipoMovimientoCXC;
+            console.log("La opcion a editar es: "+opcion.idTipoMovimientoCXC)
 
             // Rellenar los campos
             document.getElementById("nombreOpcion").value = opcion.nombre || "";
-            document.getElementById("operacionCuenta").value = opcion.ordenMenu || "";
+            document.getElementById("operacionCuenta").value = opcion.operacionCuentaCorriente || "";
 
             // Cambiar texto del botón si quieres
             document.querySelector("button.btn-primary").textContent = "Actualizar";

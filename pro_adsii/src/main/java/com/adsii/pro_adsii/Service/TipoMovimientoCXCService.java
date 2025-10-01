@@ -15,15 +15,33 @@ public class TipoMovimientoCXCService {
     @Autowired
     TipoMovimientoCXCRepository tipoMovCXCRepository;
 
-     public TipoMovimientoCXC guardarTipoMovimiento(TipoMovimientoCXC movimientoNuevo){
-        
-        if (movimientoNuevo.getIdTipoMovimientoCXC() == null) {
-            movimientoNuevo.setFechaCreacion(new Date());
-        } else {
-            movimientoNuevo.setFechaModificacion(new Date());
-        }
+     public TipoMovimientoCXC buscarTipoMovimiento(int idTipoMovimiento) {
+        Optional<TipoMovimientoCXC> tipoMovimientoCXC = tipoMovCXCRepository.findById(idTipoMovimiento);	
+		return tipoMovimientoCXC.isPresent() ? tipoMovimientoCXC.get() : null;
+	}
+
+
+   public TipoMovimientoCXC guardarTipoMovimiento(TipoMovimientoCXC movimientoNuevo) {
+    if (movimientoNuevo.getIdTipoMovimientoCXC() == null) {
+        // Creación
+        movimientoNuevo.setFechaCreacion(new Date());
         return tipoMovCXCRepository.save(movimientoNuevo);
-     }
+    } else {
+        // Edición: buscar el registro existente
+        Optional<TipoMovimientoCXC> existente = tipoMovCXCRepository.findById(movimientoNuevo.getIdTipoMovimientoCXC());
+        if (existente.isPresent()) {
+            TipoMovimientoCXC existenteEntity = existente.get();
+            existenteEntity.setNombre(movimientoNuevo.getNombre());
+            existenteEntity.setOperacionCuentaCorriente(movimientoNuevo.getOperacionCuentaCorriente());
+            existenteEntity.setFechaModificacion(new Date());
+            existenteEntity.setUsuarioModificacion(movimientoNuevo.getUsuarioModificacion());
+            return tipoMovCXCRepository.save(existenteEntity);
+        } else {
+            throw new RuntimeException("No se encontró el tipo de movimiento con ID: " + movimientoNuevo.getIdTipoMovimientoCXC());
+        }
+    }
+}
+
 
 
     public List<TipoMovimientoCXC> obtenerTipoMovimientosCXC(){
@@ -45,11 +63,9 @@ public class TipoMovimientoCXCService {
     public void eliminarTipoMovCXC(Integer idTipoMov) {
         TipoMovimientoCXC tipoMovimientoCXC = tipoMovCXCRepository.findById(idTipoMov)
             .orElseThrow(() -> new RuntimeException("Rol no encontrado con ID: " + idTipoMov));
-
        /*  if (tipoMovimientoCXC.getUsuarios() != null && !role.getUsuarios().isEmpty()) {
             throw new RuntimeException("No se puede eliminar el rol porque tiene usuarios vinculados.");
         }*/
-
         tipoMovCXCRepository.delete(tipoMovimientoCXC);
     }
 

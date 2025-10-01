@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
 import com.adsii.pro_adsii.Entity.TipoMovimientoCXC;
 import com.adsii.pro_adsii.Service.TipoMovimientoCXCService;
 
@@ -24,6 +23,10 @@ public class TipoMovimientoCXCController {
     @Autowired
     TipoMovimientoCXCService tipoMovCXCService;
 
+    @GetMapping(path="/buscarTipoMovimiento/{idTipoMovimiento}")
+	public TipoMovimientoCXC buscarTipoMovimiento(@PathVariable int idTipoMovimiento) {
+		return tipoMovCXCService.buscarTipoMovimiento(idTipoMovimiento);
+	}
 
     @PostMapping("/agregar")
     public TipoMovimientoCXC guardarTipoMovimiento(@RequestBody TipoMovimientoCXC tipoMovCXC) {
