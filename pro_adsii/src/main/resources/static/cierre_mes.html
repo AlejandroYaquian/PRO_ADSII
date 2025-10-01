@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8"/>
+  <title>Cierre de Mes</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="index.html">Inicio</a>
+    <div class="collapse navbar-collapse">
+      <ul class="navbar-nav me-auto"></ul>
+      <span class="navbar-text me-3 fw-semibold" id="navUsuario"></span>
+    </div>
+  </div>
+</nav>
+
+<div class="container py-4">
+  <h2 class="mb-3">Cierre de Mes</h2>
+  <div id="alertBox" class="alert d-none"></div>
+
+  <!-- Períodos abiertos -->
+  <div class="card mb-4">
+    <div class="card-body">
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <h5 class="m-0">Períodos abiertos</h5>
+        <button class="btn btn-sm btn-outline-secondary" id="btnRefrescar">Refrescar</button>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-striped table-hover align-middle">
+          <thead class="table-dark">
+          <tr>
+            <th style="width:100px">Año</th>
+            <th style="width:80px">Mes</th>
+            <th>Inicio</th>
+            <th>Final</th>
+            <th>Cierre</th>
+            <th class="text-center" style="width:220px;">Acciones</th>
+          </tr>
+          </thead>
+          <tbody id="tbPeriodos"></tbody>
+        </table>
+      </div>
+      <div class="text-muted">Total abiertos: <span id="lblAbiertos">0</span></div>
+    </div>
+  </div>
+
+  <!-- Historial -->
+  <div class="card">
+    <div class="card-body">
+      <div class="d-flex gap-2">
+        <div>
+          <label class="form-label">Año</label>
+          <input type="number" id="fAnio" class="form-control" style="width:130px;">
+        </div>
+        <div>
+          <label class="form-label">Mes</label>
+          <input type="number" id="fMes" class="form-control" style="width:130px;">
+        </div>
+        <div class="align-self-end">
+          <button class="btn btn-primary" id="btnVerHist">Ver Historial</button>
+        </div>
+      </div>
+      <div class="table-responsive mt-3">
+        <table class="table table-striped table-hover align-middle">
+          <thead class="table-dark">
+          <tr>
+            <th>Año</th><th>Mes</th><th>idSaldoCuenta</th><th>idPersona</th><th>idTipoSaldo</th>
+            <th class="text-end">SaldoAnterior</th><th class="text-end">Débitos</th><th class="text-end">Créditos</th>
+          </tr>
+          </thead>
+          <tbody id="tbHist"></tbody>
+        </table>
+      </div>
+      <div class="text-muted">Registros: <span id="lblHist">0</span></div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  const CONTEXT = (()=>{
+    const p = location.pathname.split('/');
+    return (p.length>2 && p[1] && !p[1].includes('.html')) ? '/'+p[1] : '';
+  })();
+  const API_PERI = CONTEXT + '/periodo_cierre_mes';
+  const API_HIST = CONTEXT + '/saldo_cuenta_hist';
+  const USER     = sessionStorage.getItem('usuarioActual') || 'system';
+
+  if (!sessionStorage.getItem('usuarioActual')) location.href = 'login.html';
+  document.getElementById('navUsuario').textContent = sessionStorage.getItem('usuarioActual') || '';
+
+  function showAlert(msg, type='success'){
+    const a = document.getElementById('alertBox');
+    a.className = 'alert alert-'+type;
+    a.textContent = msg;
+    a.classList.remove('d-none');
+    setTimeout(()=>a.classList.add('d-none'), 3500);
+  }
+  function fmt(n){ return (n??0).toLocaleString(undefined,{minimumFractionDigits:2, maximumFractionDigits:2}); }
+
+  async function cargarAbiertos(){
+    const r = await fetch(API_PERI + '/abiertos');
+    if(!r.ok) throw new Error('No se pudieron listar los períodos');
+    const rows = await r.json();
+    const tb = document.getElementById('tbPeriodos');
+    tb.innerHTML = '';
+    rows.forEach(p=>{
+      const tr=document.createElement('tr');
+      tr.innerHTML = `
+        <td>${p.anio}</td>
+        <td>${p.mes}</td>
+        <td>${p.fechaInicio ? new Date(p.fechaInicio).toLocaleString() : ''}</td>
+        <td>${p.fechaFinal  ? new Date(p.fechaFinal).toLocaleString()  : ''}</td>
+        <td>${p.fechaCierre ? new Date(p.fechaCierre).toLocaleString() : '<span class="text-danger">Abierto</span>'}</td>
+        <td class="text-center">
+          <button class="btn btn-sm btn-primary me-2" onclick="cerrar(${p.anio},${p.mes})">Cerrar Mes</button>
+          <button class="btn btn-sm btn-outline-secondary" onclick="verHist(${p.anio},${p.mes})">Ver Historial</button>
+        </td>`;
+      tb.appendChild(tr);
+    });
+    document.getElementById('lblAbiertos').textContent = rows.length;
+  }
+
+  async function cerrar(anio, mes){
+    if(!confirm(`¿Cerrar el período ${anio}-${String(mes).padStart(2,'0')}?`)) return;
+    try{
+      const r = await fetch(API_PERI + '/cerrar', {
+        method:'POST',
+        headers:{'Content-Type':'application/json','usuario':USER,'X-User':USER},
+        body: JSON.stringify({ anio, mes })
+      });
+      const out = await (r.ok ? r.json() : r.text());
+      if(!r.ok) throw new Error(out || 'Error al cerrar');
+      showAlert('Período cerrado');
+      await cargarAbiertos();
+      await verHist(anio, mes);
+    }catch(e){ showAlert(e.message,'danger'); }
+  }
+
+  async function verHist(anio, mes){
+    document.getElementById('fAnio').value = anio || '';
+    document.getElementById('fMes').value  = mes  || '';
+    const r = await fetch(`${API_HIST}/listar?anio=${anio}&mes=${mes}`);
+    if(!r.ok){ showAlert('No se pudo obtener el historial','danger'); return; }
+    const rows = await r.json();
+    const tb = document.getElementById('tbHist');
+    tb.innerHTML='';
+    rows.forEach(h=>{
+      const tr=document.createElement('tr');
+      tr.innerHTML = `
+        <td>${h.anio}</td>
+        <td>${h.mes}</td>
+        <td>${h.idSaldoCuenta}</td>
+        <td>${h.idPersona ?? ''}</td>
+        <td>${h.idTipoSaldoCuenta ?? ''}</td>
+        <td class="text-end">${fmt(h.saldoAnterior)}</td>
+        <td class="text-end">${fmt(h.debitos)}</td>
+        <td class="text-end">${fmt(h.creditos)}</td>`;
+      tb.appendChild(tr);
+    });
+    document.getElementById('lblHist').textContent = rows.length;
+  }
+
+  document.getElementById('btnRefrescar').addEventListener('click', cargarAbiertos);
+  document.getElementById('btnVerHist').addEventListener('click', ()=>{
+    const a = parseInt(document.getElementById('fAnio').value,10);
+    const m = parseInt(document.getElementById('fMes').value,10);
+    if(!a || !m) { showAlert('Indique año y mes','warning'); return; }
+    verHist(a,m);
+  });
+
+  (async()=>{ try{ await cargarAbiertos(); }catch(e){ showAlert(e.message,'danger'); } })();
+</script>
+</body>
+</html>
