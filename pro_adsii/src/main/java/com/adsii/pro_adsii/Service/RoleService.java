@@ -44,12 +44,11 @@ public class RoleService {
     public void editarRole(RoleDTO roleDTO){
         Optional<Role> roMod= roleRepository.findById(roleDTO.getIdRole());
         Date fecha = new Date();
-       
-            Role rol = roMod.get();
-            rol.setNombre(roleDTO.getNombre());
-            rol.setFechaModificacion(fecha);
-            rol.setUsuarioModificacion(roleDTO.getUsuario());
-            roleRepository.save(rol);
+        Role rol = roMod.get();
+        rol.setNombre(roleDTO.getNombre());
+        rol.setFechaModificacion(fecha);
+        rol.setUsuarioModificacion(roleDTO.getUsuario());
+        roleRepository.save(rol);
     
     }
 
