@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Consulta de Saldos</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+</head>
+<body>
+    <nav class="navbar navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="index.html">Inicio</a>
+            <span class="navbar-text" id="navUsuario"></span>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <h2>Consulta de Saldos</h2>
+
+        <div class="row mb-3">
+            <div class="col-md-3">
+                <input type="number" id="idCuenta" class="form-control" placeholder="ID Cuenta">
+            </div>
+            <div class="col-md-3">
+                <input type="number" id="idCliente" class="form-control" placeholder="ID Cliente">
+            </div>
+            <div class="col-md-3">
+                <input type="text" id="nombre" class="form-control" placeholder="Nombre Cliente">
+            </div>
+            <div class="col-md-3">
+                <input type="text" id="apellido" class="form-control" placeholder="Apellido Cliente">
+            </div>
+        </div>
+
+        <div class="row mb-3">
+            <div class="col-md-3">
+                <button class="btn btn-primary w-100" onclick="buscarPorCuenta()">Buscar por Cuenta</button>
+            </div>
+            <div class="col-md-3">
+                <button class="btn btn-primary w-100" onclick="buscarPorCliente()">Buscar por Cliente</button>
+            </div>
+            <div class="col-md-3">
+                <button class="btn btn-primary w-100" onclick="buscarPorNombre()">Buscar por Nombre</button>
+            </div>
+            <div class="col-md-3">
+                <button class="btn btn-secondary w-100" onclick="cargarTodos()">Ver Todos</button>
+            </div>
+        </div>
+
+        <table class="table table-bordered table-striped">
+            <thead class="table-dark">
+                <tr>
+                    <th>ID Cuenta</th>
+                    <th>ID Cliente</th>
+                    <th>Nombre</th>
+                    <th>Tipo Saldo</th>
+                    <th>Status</th>
+                    <th>Saldo Inicial</th>
+                    <th>Cargos</th>
+                    <th>Abonos</th>
+                    <th>Saldo Final</th>
+                </tr>
+            </thead>
+            <tbody id="tabla-saldos"></tbody>
+        </table>
+    </div>
+
+    <script>
+        const apiBase = '/saldo_cuenta';
+
+        async function cargarTodos() {
+            const res = await fetch(`${apiBase}/listar`);
+            const saldos = await res.json();
+            renderizar(saldos);
+        }
+
+        async function buscarPorCuenta() {
+            const id = document.getElementById('idCuenta').value;
+            if (!id) return alert("Ingrese el ID de cuenta");
+            const res = await fetch(`${apiBase}/buscar/cuenta?idSaldoCuenta=${id}`);
+            const saldos = await res.json();
+            renderizar(saldos);
+        }
+
+        async function buscarPorCliente() {
+            const id = document.getElementById('idCliente').value;
+            if (!id) return alert("Ingrese el ID de cliente");
+            const res = await fetch(`${apiBase}/buscar/cliente?idPersona=${id}`);
+            const saldos = await res.json();
+            renderizar(saldos);
+        }
+
+        async function buscarPorNombre() {
+            const nombre = document.getElementById('nombre').value;
+            const apellido = document.getElementById('apellido').value;
+            if (!nombre || !apellido) return alert("Ingrese nombre y apellido");
+            const res = await fetch(`${apiBase}/buscar/nombre?nombre=${nombre}&apellido=${apellido}`);
+            const saldos = await res.json();
+            renderizar(saldos);
+        }
+
+        function renderizar(saldos) {
+            const tbody = document.getElementById('tabla-saldos');
+            tbody.innerHTML = '';
+            saldos.forEach(s => {
+                const saldoFinal = parseFloat(s.saldoAnterior) + parseFloat(s.creditos) - parseFloat(s.debitos);
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${s.idSaldoCuenta}</td>
+                        <td>${s.persona?.idPersona ?? ''}</td>
+                        <td>${s.persona?.nombre ?? ''} ${s.persona?.apellido ?? ''}</td>
+                        <td>${s.tipoSaldoCuenta?.nombre ?? ''}</td>
+                        <td>${s.statusCuenta?.nombre ?? ''}</td>
+                        <td>${parseFloat(s.saldoAnterior).toFixed(2)}</td>
+                        <td>${parseFloat(s.debitos).toFixed(2)}</td>
+                        <td>${parseFloat(s.creditos).toFixed(2)}</td>
+                        <td>${saldoFinal.toFixed(2)}</td>
+                    </tr>
+                `;
+            });
+        }
+
+        document.getElementById('navUsuario').textContent = sessionStorage.getItem('usuarioActual') ?? '';
+        cargarTodos();
+    </script>
+</body>
+</html>

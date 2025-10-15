@@ -21,6 +21,7 @@ public class SucursalService {
         return sucursalRepository.findAll();
     }
 
+    @SuppressWarnings("null")
     public Sucursal guardarSucursal(Sucursal sucursal) {
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
         String usuario = request.getHeader("usuario");
