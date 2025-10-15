@@ -23,9 +23,9 @@ public class MovimientoCuenta {
 	@Column(name="IdMovimientoCuenta")
 	private Integer idMovimientoCuenta;
 
-   /*  @ManyToOne
+    @ManyToOne
     @JoinColumn(name = "IdSaldoCuenta", referencedColumnName = "IdSaldoCuenta")
-	private SaldoCuenta saldoCuenta;*/
+	private SaldoCuenta saldoCuenta;
 
     @ManyToOne
     @JoinColumn(name = "IdTipoMovimientoCXC", referencedColumnName = "IdTipoMovimientoCXC")
@@ -137,6 +137,22 @@ public class MovimientoCuenta {
 
     public void setUsuarioModificacion(String usuarioModificacion) {
         this.usuarioModificacion = usuarioModificacion;
+    }
+
+    public SaldoCuenta getSaldoCuenta() {
+        return saldoCuenta;
+    }
+
+    public void setSaldoCuenta(SaldoCuenta saldoCuenta) {
+        this.saldoCuenta = saldoCuenta;
+    }
+
+    public TipoMovimientoCXC getTipoMovimientoCXC() {
+        return tipoMovimientoCXC;
+    }
+
+    public void setTipoMovimientoCXC(TipoMovimientoCXC tipoMovimientoCXC) {
+        this.tipoMovimientoCXC = tipoMovimientoCXC;
     }
 
     

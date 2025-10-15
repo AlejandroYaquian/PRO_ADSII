@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Registro de Movimiento</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" />
 </head>
 <body class="bg-light">
 
@@ -24,7 +24,7 @@
     <div class="card-body">
       <div class="row g-3">
         <div class="col-md-6">
-          <input type="number" id="idSaldoCuenta" class="form-control" placeholder="Ingrese ID de la Cuenta">
+          <input type="number" id="idSaldoCuenta" class="form-control" placeholder="Ingrese ID de la Cuenta" min="0" />
         </div>
         <div class="col-md-3">
           <button class="btn btn-primary w-100" onclick="buscarCuenta()">Buscar</button>
@@ -41,10 +41,6 @@
       <form onsubmit="registrarMovimiento(event)">
         <div class="row mb-3">
           <div class="col-md-6">
-            <label for="fechaMovimiento" class="form-label">Fecha del Movimiento</label>
-            <input type="date" class="form-control" id="fechaMovimiento" required>
-          </div>
-          <div class="col-md-6">
             <label for="idTipoMovimiento" class="form-label">Tipo de Movimiento</label>
             <select class="form-select" id="idTipoMovimiento" required></select>
           </div>
@@ -53,15 +49,13 @@
         <div class="row mb-3">
           <div class="col-md-6">
             <label for="valorMovimiento" class="form-label">Valor del Movimiento</label>
-            <input type="number" step="0.01" class="form-control" id="valorMovimiento" required>
+            <input type="number" step="0.01" min="0" class="form-control" id="valorMovimiento" required />
           </div>
           <div class="col-md-6">
             <label for="descripcion" class="form-label">Descripción</label>
-            <input type="text" class="form-control" id="descripcion">
+            <input type="text" class="form-control" id="descripcion" />
           </div>
         </div>
-
-        <input type="hidden" id="usuarioCreacion" value="admin" />
 
         <div class="d-flex justify-content-end">
           <button type="submit" class="btn btn-success">Registrar Movimiento</button>
@@ -81,21 +75,33 @@
     const formCard = document.getElementById("formularioCard");
 
     try {
-      const res = await fetch(`http://localhost:8080/api/cuentas/${id}`);
+      const res = await fetch(`http://localhost:8080/saldo_cuenta/${id}`);
       if (!res.ok) throw new Error("Cuenta no encontrada");
 
       const cuenta = await res.json();
-      if (cuenta.statusCuenta !== 'ACTIVA') {
-        infoDiv.innerHTML = `<div class="alert alert-danger">La cuenta no está activa.</div>`;
+      const nombreStatusCuenta = cuenta.statusCuenta.nombre;
+
+      if (nombreStatusCuenta === 'Cuenta Cancelada') {
+        infoDiv.innerHTML = `<div class="alert alert-danger">La cuenta está cancelada.</div>`;
+        formCard.style.display = 'none';
+        return;
+      } else if (nombreStatusCuenta === 'Cuenta en Cobro Juridico') {
+        infoDiv.innerHTML = `<div class="alert alert-danger">La cuenta está en cobro jurídico.</div>`;
+        formCard.style.display = 'none';
+        return;
+      } else if (nombreStatusCuenta === 'Cuenta Bloqueda') {
+        infoDiv.innerHTML = `<div class="alert alert-danger">La cuenta está bloqueada.</div>`;
         formCard.style.display = 'none';
         return;
       }
 
+      const saldoActual = cuenta.saldoAnterior + cuenta.creditos - cuenta.debitos;
+
       infoDiv.innerHTML = `
         <div class="alert alert-success">
           Cuenta activa: <strong>${cuenta.idSaldoCuenta}</strong><br/>
-          Titular: ${cuenta.persona}<br/>
-          Saldo actual: $${cuenta.saldoActual.toFixed(2)}
+          Titular: ${cuenta.persona.nombre} ${cuenta.persona.apellido}<br/>
+          Saldo actual: $${saldoActual.toFixed(2)}
         </div>
       `;
 
@@ -109,27 +115,38 @@
 
   async function cargarTiposMovimiento() {
     const select = document.getElementById("idTipoMovimiento");
-    const res = await fetch("http://localhost:8080/api/tipos-movimiento");
+    const res = await fetch("http://localhost:8080/tipoMovimiento/getTipoMovimientos");
     if (!res.ok) return alert("Error cargando tipos de movimiento");
 
     const tipos = await res.json();
-    select.innerHTML = tipos.map(t => `<option value="${t.idTipoMovimientoCXC}">${t.nombre}</option>`).join('');
+    select.innerHTML = tipos
+      .map(t => `<option value="${t.idTipoMovimientoCXC}">${t.nombre}</option>`)
+      .join('');
   }
 
   async function registrarMovimiento(event) {
     event.preventDefault();
 
     const movimiento = {
-      idSaldoCuenta: parseInt(document.getElementById("idSaldoCuenta").value),
-      idTipoMovimientoCXC: parseInt(document.getElementById("idTipoMovimiento").value),
-      fechaMovimiento: document.getElementById("fechaMovimiento").value,
+      saldoCuenta: {
+        idSaldoCuenta: parseInt(document.getElementById("idSaldoCuenta").value)
+      },
+      tipoMovimientoCXC: {
+        idTipoMovimientoCXC: parseInt(document.getElementById("idTipoMovimiento").value)
+      },
+      fechaMovimiento: new Date().toISOString(),
       valorMovimiento: parseFloat(document.getElementById("valorMovimiento").value),
+      valorMovimientoPagado: null,
+      generadoAutomaticamente: null,
       descripcion: document.getElementById("descripcion").value,
-      usuarioCreacion: usuario
+      fechaCreacion: null,
+      usuarioCreacion: usuario,
+      fechaModificacion: null,
+      usuarioModificacion: null
     };
 
     try {
-      const res = await fetch("http://localhost:8080/api/movimientos", {
+      const res = await fetch("http://localhost:8080/movimientoCuenta/agregar", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
