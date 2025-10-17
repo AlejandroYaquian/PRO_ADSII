@@ -54,4 +54,11 @@ public class SaldoCuentaService {
     public List<SaldoCuenta> buscarPorNombreApellido(String nombre, String apellido) {
         return repository.findByPersona_NombreContainingIgnoreCaseAndPersona_ApellidoContainingIgnoreCase(nombre, apellido);
     }
+
+
+    public SaldoCuenta buscarCuentaPorId(Integer id) {
+        Optional<SaldoCuenta> saldo = repository.findById(id);
+        return saldo.orElse(null);
+    }
+
 }

@@ -25,20 +25,37 @@ public class MovimientoCuentaService {
      @Autowired
      private TipoMovimientoCXCRepository tipoMovimientoCXCRepository;
 
-     public MovimientoCuenta guardarMovimientoCuenta(MovimientoCuenta movimientoNuevo) {
-         Date fecha = new Date();
-         //Obtengo el objeto TipoMovimiento por medio del ID
-         Optional<TipoMovimientoCXC> tipoMov = tipoMovimientoCXCRepository.findById(movimientoNuevo.getTipoMovimientoCXC().getIdTipoMovimientoCXC());
-         TipoMovimientoCXC tipoMovimiento = tipoMov.get();
-         movimientoNuevo.setTipoMovimientoCXC(tipoMovimiento);
+  public MovimientoCuenta guardarMovimientoCuenta(MovimientoCuenta movimientoNuevo) {
+    Date fecha = new Date();
 
-         //Obtengo el objeto Saldo cuenta por medio del ID
-         Optional<SaldoCuenta> saldo = saldoCuentaRepository.findById(movimientoNuevo.getSaldoCuenta().getIdSaldoCuenta());
-         SaldoCuenta saldoCuenta = saldo.get();
-         movimientoNuevo.setSaldoCuenta(saldoCuenta);
-         movimientoNuevo.setFechaCreacion(fecha);
-         movimientoNuevo.setGeneradoAutomaticamente(false);
-         return movimientoCuentaRepository.save(movimientoNuevo);
-     }
+    Optional<SaldoCuenta> saldo = saldoCuentaRepository.findById(movimientoNuevo.getSaldoCuenta().getIdSaldoCuenta());
+    SaldoCuenta saldoCuenta = saldo.orElseThrow(() -> new RuntimeException("Cuenta no encontrada"));
+
+    Optional<TipoMovimientoCXC> tipoMov = tipoMovimientoCXCRepository.findById(movimientoNuevo.getTipoMovimientoCXC().getIdTipoMovimientoCXC());
+    TipoMovimientoCXC tipoMovimiento = tipoMov.orElseThrow(() -> new RuntimeException("Tipo de movimiento no encontrado"));
+
+    if(tipoMovimiento.getOperacionCuentaCorriente() == 1){ // cargo
+        double saldoActual = (saldoCuenta.getSaldoAnterior().doubleValue()+saldoCuenta.getCreditos().doubleValue()-saldoCuenta.getDebitos().doubleValue());
+        if(saldoActual < movimientoNuevo.getValorMovimiento()){
+            // Lanzar excepción para indicar saldo insuficiente
+            throw new RuntimeException("Saldo insuficiente para realizar el movimiento");
+        } else {
+            movimientoNuevo.setValorMovimientoPagado(movimientoNuevo.getValorMovimiento()); 
+            movimientoNuevo.setValorMovimiento(0.0);
+        }
+    } else {
+        movimientoNuevo.setValorMovimientoPagado(0.0); 
+        movimientoNuevo.setValorMovimiento(movimientoNuevo.getValorMovimiento());
+    }  
+
+    movimientoNuevo.setTipoMovimientoCXC(tipoMovimiento);
+    movimientoNuevo.setSaldoCuenta(saldoCuenta);
+    movimientoNuevo.setFechaCreacion(fecha);
+    movimientoNuevo.setGeneradoAutomaticamente(false);
+
+    return movimientoCuentaRepository.save(movimientoNuevo);
+}
+
 
 }
+

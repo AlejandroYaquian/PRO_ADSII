@@ -69,49 +69,60 @@
   const usuario = sessionStorage.getItem('usuarioActual') || 'admin';
   document.getElementById('navUsuario').textContent = usuario;
 
-  async function buscarCuenta() {
-    const id = document.getElementById("idSaldoCuenta").value;
-    const infoDiv = document.getElementById("infoCuenta");
-    const formCard = document.getElementById("formularioCard");
+ async function buscarCuenta() {
+  const id = document.getElementById("idSaldoCuenta").value;
+  const infoDiv = document.getElementById("infoCuenta");
+  const formCard = document.getElementById("formularioCard");
 
-    try {
-      const res = await fetch(`http://localhost:8080/saldo_cuenta/${id}`);
-      if (!res.ok) throw new Error("Cuenta no encontrada");
+  try {
+    // Cambiar la URL al nuevo endpoint personalizado
+    const res = await fetch(`http://localhost:8080/saldo_cuenta/buscar-cuenta/${id}`);
 
-      const cuenta = await res.json();
-      const nombreStatusCuenta = cuenta.statusCuenta.nombre;
-
-      if (nombreStatusCuenta === 'Cuenta Cancelada') {
-        infoDiv.innerHTML = `<div class="alert alert-danger">La cuenta está cancelada.</div>`;
-        formCard.style.display = 'none';
-        return;
-      } else if (nombreStatusCuenta === 'Cuenta en Cobro Juridico') {
-        infoDiv.innerHTML = `<div class="alert alert-danger">La cuenta está en cobro jurídico.</div>`;
-        formCard.style.display = 'none';
-        return;
-      } else if (nombreStatusCuenta === 'Cuenta Bloqueda') {
-        infoDiv.innerHTML = `<div class="alert alert-danger">La cuenta está bloqueada.</div>`;
-        formCard.style.display = 'none';
-        return;
-      }
-
-      const saldoActual = cuenta.saldoAnterior + cuenta.creditos - cuenta.debitos;
-
-      infoDiv.innerHTML = `
-        <div class="alert alert-success">
-          Cuenta activa: <strong>${cuenta.idSaldoCuenta}</strong><br/>
-          Titular: ${cuenta.persona.nombre} ${cuenta.persona.apellido}<br/>
-          Saldo actual: $${saldoActual.toFixed(2)}
-        </div>
-      `;
-
-      await cargarTiposMovimiento();
-      formCard.style.display = 'block';
-    } catch (err) {
-      infoDiv.innerHTML = `<div class="alert alert-danger">Error: ${err.message}</div>`;
+    if (!res.ok) {
+      // Si la cuenta no existe, mostramos el error personalizado
+      const error = await res.json(); // Esperamos que el backend nos mande { error: "Cuenta no encontrada" }
+      infoDiv.innerHTML = `<div class="alert alert-danger">${error.error || "Cuenta no encontrada"}</div>`;
       formCard.style.display = 'none';
+      return;
     }
+
+    const cuenta = await res.json();
+    const nombreStatusCuenta = cuenta.statusCuenta.nombre;
+
+    if (nombreStatusCuenta === 'Cuenta Cancelada') {
+      infoDiv.innerHTML = `<div class="alert alert-danger">La cuenta está cancelada.</div>`;
+      formCard.style.display = 'none';
+      return;
+    } else if (nombreStatusCuenta === 'Cuenta en Cobro Juridico') {
+      infoDiv.innerHTML = `<div class="alert alert-danger">La cuenta está en cobro jurídico.</div>`;
+      formCard.style.display = 'none';
+      return;
+    } else if (nombreStatusCuenta === 'Cuenta Bloqueda') {
+      infoDiv.innerHTML = `<div class="alert alert-danger">La cuenta está bloqueada.</div>`;
+      formCard.style.display = 'none';
+      return;
+    }
+
+    const saldoActual = cuenta.saldoAnterior + cuenta.creditos - cuenta.debitos;
+
+    infoDiv.innerHTML = `
+      <div class="alert alert-success">
+        Cuenta activa: <strong>${cuenta.idSaldoCuenta}</strong><br/>
+        Titular: ${cuenta.persona.nombre} ${cuenta.persona.apellido}<br/>
+        Saldo actual: $${saldoActual.toFixed(2)}
+      </div>
+    `;
+
+    await cargarTiposMovimiento();
+    formCard.style.display = 'block';
+
+  } catch (err) {
+    infoDiv.innerHTML = `<div class="alert alert-danger">Error inesperado: ${err.message}</div>`;
+    formCard.style.display = 'none';
   }
+}
+
+
 
   async function cargarTiposMovimiento() {
     const select = document.getElementById("idTipoMovimiento");
@@ -125,43 +136,49 @@
   }
 
   async function registrarMovimiento(event) {
-    event.preventDefault();
+  event.preventDefault();
 
-    const movimiento = {
-      saldoCuenta: {
-        idSaldoCuenta: parseInt(document.getElementById("idSaldoCuenta").value)
+  const movimiento = {
+    saldoCuenta: {
+      idSaldoCuenta: parseInt(document.getElementById("idSaldoCuenta").value)
+    },
+    tipoMovimientoCXC: {
+      idTipoMovimientoCXC: parseInt(document.getElementById("idTipoMovimiento").value)
+    },
+    fechaMovimiento: new Date().toISOString(),
+    valorMovimiento: parseFloat(document.getElementById("valorMovimiento").value),
+    valorMovimientoPagado: null,
+    generadoAutomaticamente: null,
+    descripcion: document.getElementById("descripcion").value,
+    fechaCreacion: null,
+    usuarioCreacion: usuario,
+    fechaModificacion: null,
+    usuarioModificacion: null
+  };
+
+  try {
+    const res = await fetch("http://localhost:8080/movimientoCuenta/agregar", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
       },
-      tipoMovimientoCXC: {
-        idTipoMovimientoCXC: parseInt(document.getElementById("idTipoMovimiento").value)
-      },
-      fechaMovimiento: new Date().toISOString(),
-      valorMovimiento: parseFloat(document.getElementById("valorMovimiento").value),
-      valorMovimientoPagado: null,
-      generadoAutomaticamente: null,
-      descripcion: document.getElementById("descripcion").value,
-      fechaCreacion: null,
-      usuarioCreacion: usuario,
-      fechaModificacion: null,
-      usuarioModificacion: null
-    };
+      body: JSON.stringify(movimiento)
+    });
 
-    try {
-      const res = await fetch("http://localhost:8080/movimientoCuenta/agregar", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(movimiento)
-      });
-
-      if (!res.ok) throw new Error("No se pudo registrar el movimiento");
-
-      alert("Movimiento registrado correctamente");
-      document.querySelector("form").reset();
-    } catch (err) {
-      alert("Error al registrar el movimiento: " + err.message);
+    if (!res.ok) {
+      // Leer el mensaje de error del cuerpo de la respuesta
+      const errorData = await res.json();
+      throw new Error(errorData.error || "No se pudo registrar el movimiento");
     }
+
+    alert("Movimiento registrado correctamente");
+    document.querySelector("form").reset();
+
+  } catch (err) {
+    alert("Error al registrar el movimiento: " + err.message);
   }
+}
+
 </script>
 
 </body>
