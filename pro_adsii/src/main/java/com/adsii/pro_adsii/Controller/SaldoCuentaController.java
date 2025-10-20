@@ -3,9 +3,13 @@ package com.adsii.pro_adsii.Controller;
 import com.adsii.pro_adsii.Entity.SaldoCuenta;
 import com.adsii.pro_adsii.Service.SaldoCuentaService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/saldo_cuenta")
@@ -50,4 +54,19 @@ public class SaldoCuentaController {
     public List<SaldoCuenta> buscarPorNombreApellido(@RequestParam String nombre, @RequestParam String apellido) {
         return service.buscarPorNombreApellido(nombre, apellido);
     }
+
+
+    @GetMapping("/buscar-cuenta/{id}")
+    public ResponseEntity<?> buscarCuentaPorId(@PathVariable Integer id) {
+        SaldoCuenta cuenta = service.buscarCuentaPorId(id);
+
+        if (cuenta == null) {
+            Map<String, String> error = new HashMap<>();
+            error.put("error", "Cuenta no encontrada");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+        }
+
+        return ResponseEntity.ok(cuenta);
+    }
+
 }
