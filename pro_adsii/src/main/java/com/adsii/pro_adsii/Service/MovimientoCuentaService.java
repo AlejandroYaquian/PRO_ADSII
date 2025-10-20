@@ -1,5 +1,6 @@
 package com.adsii.pro_adsii.Service;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.Optional;
 
@@ -41,11 +42,18 @@ public class MovimientoCuentaService {
             throw new RuntimeException("Saldo insuficiente para realizar el movimiento");
         } else {
             movimientoNuevo.setValorMovimientoPagado(movimientoNuevo.getValorMovimiento()); 
+            BigDecimal valor = new BigDecimal(String.valueOf(movimientoNuevo.getValorMovimiento()));
+            saldoCuenta.setDebitos(
+            saldoCuenta.getDebitos().add(valor));
             movimientoNuevo.setValorMovimiento(0.0);
-        }
+
+        }    
     } else {
         movimientoNuevo.setValorMovimientoPagado(0.0); 
         movimientoNuevo.setValorMovimiento(movimientoNuevo.getValorMovimiento());
+        BigDecimal valor = new BigDecimal(String.valueOf(movimientoNuevo.getValorMovimiento()));
+        saldoCuenta.setCreditos(
+        saldoCuenta.getCreditos().add(valor));
     }  
 
     movimientoNuevo.setTipoMovimientoCXC(tipoMovimiento);
