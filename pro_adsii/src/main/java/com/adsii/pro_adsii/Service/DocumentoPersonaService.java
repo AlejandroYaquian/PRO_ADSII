@@ -2,49 +2,83 @@ package com.adsii.pro_adsii.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.adsii.pro_adsii.Entity.DocumentoPersona;
 import com.adsii.pro_adsii.Entity.DocumentoPersonaId;
+import com.adsii.pro_adsii.Entity.Persona;
+import com.adsii.pro_adsii.Entity.TipoDocumento;
 import com.adsii.pro_adsii.Repository.DocumentoPersonaRepository;
+import com.adsii.pro_adsii.Repository.PersonaRepository;
+import com.adsii.pro_adsii.Repository.TipoDocumentoRepository;
 
 @Service
 public class DocumentoPersonaService {
 
     @Autowired
-    private DocumentoPersonaRepository documentoPersonaRepository;
+    private DocumentoPersonaRepository repo;
 
-    public List<DocumentoPersona> obtenerTodos() {
-        return documentoPersonaRepository.findAll();
+    @Autowired
+    private PersonaRepository personaRepo;
+
+    @Autowired
+    private TipoDocumentoRepository tipoRepo;
+
+    public List<DocumentoPersona> listarPorPersona(int idPersona) {
+        return repo.findByPersona_IdPersona(idPersona);
     }
 
-    public DocumentoPersona obtenerPorId(int idTipoDocumento, int idPersona) {
-        DocumentoPersonaId pk = new DocumentoPersonaId(idTipoDocumento, idPersona);
-        return documentoPersonaRepository.findById(pk).orElse(null);
-    }
+    public DocumentoPersona guardarDocumento(int idPersona, int idTipoDocumento, String noDocumento, String usuario) {
+        Persona persona = personaRepo.findById(idPersona)
+                .orElseThrow(() -> new RuntimeException("Persona no encontrada"));
+        TipoDocumento tipo = tipoRepo.findById(idTipoDocumento)
+                .orElseThrow(() -> new RuntimeException("Tipo de documento no encontrado"));
 
-    public DocumentoPersona guardarDocumento(DocumentoPersona documento, String usuario) {
-        DocumentoPersonaId pk = documento.getId();
-        boolean existe = documentoPersonaRepository.existsById(pk);
+        DocumentoPersonaId id = new DocumentoPersonaId();
+        id.setIdPersona(idPersona);
+        id.setIdTipoDocumento(idTipoDocumento);
 
-        if (!existe) {
-            documento.setFechaCreacion(LocalDateTime.now());
-            documento.setUsuarioCreacion(usuario);
+        Optional<DocumentoPersona> existente = repo.findById(id);
+
+        DocumentoPersona doc;
+        if (existente.isPresent()) {
+            doc = existente.get();
+            doc.setNoDocumento(noDocumento);
+            doc.setFechaModificacion(LocalDateTime.now());
+            doc.setUsuarioModificacion(usuario);
         } else {
-            DocumentoPersona existente = documentoPersonaRepository.findById(pk).orElseThrow();
-            documento.setFechaCreacion(existente.getFechaCreacion());
-            documento.setUsuarioCreacion(existente.getUsuarioCreacion());
-            documento.setFechaModificacion(LocalDateTime.now());
-            documento.setUsuarioModificacion(usuario);
+            boolean yaExisteTipo = repo.findByPersona_IdPersona(idPersona).stream()
+                .anyMatch(d -> d.getTipoDocumento().getIdTipoDocumento() == idTipoDocumento);
+            if (yaExisteTipo) {
+                throw new RuntimeException("Ya existe un documento de este tipo para esta persona.");
+            }
+
+            doc = new DocumentoPersona();
+            doc.setId(id);
+            doc.setPersona(persona);
+            doc.setTipoDocumento(tipo);
+            doc.setNoDocumento(noDocumento);
+            doc.setFechaCreacion(LocalDateTime.now());
+            doc.setUsuarioCreacion(usuario);
         }
 
-        return documentoPersonaRepository.save(documento);
+        return repo.save(doc);
     }
 
-    public void eliminarDocumento(int idTipoDocumento, int idPersona) {
-        DocumentoPersonaId pk = new DocumentoPersonaId(idTipoDocumento, idPersona);
-        documentoPersonaRepository.deleteById(pk);
+    public void eliminarDocumento(int idPersona, int idTipoDocumento) {
+        DocumentoPersonaId id = new DocumentoPersonaId();
+        id.setIdPersona(idPersona);
+        id.setIdTipoDocumento(idTipoDocumento);
+        repo.deleteById(id);
+    }
+
+    public DocumentoPersona obtenerDocumento(int idPersona, int idTipoDocumento) {
+        DocumentoPersonaId id = new DocumentoPersonaId();
+        id.setIdPersona(idPersona);
+        id.setIdTipoDocumento(idTipoDocumento);
+        return repo.findById(id).orElseThrow(() -> new RuntimeException("Documento no encontrado"));
     }
 }

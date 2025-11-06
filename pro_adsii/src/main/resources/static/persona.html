@@ -1,274 +1,425 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 
 <head>
-    <meta charset="UTF-8">
-    <title>CRUD Persona</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+  <meta charset="UTF-8">
+  <title>CRUD Persona</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
 </head>
 
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="index.html">Inicio</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMenu">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarMenu">
-                <ul class="navbar-nav me-auto mb-2 mb-lg-0"></ul>
-                <span class="navbar-text me-3 fw-semibold" id="navUsuario"></span>
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="index.html">Inicio</a>
+      <div class="collapse navbar-collapse">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0"></ul>
+        <span class="navbar-text me-3 fw-semibold" id="navUsuario"></span>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container mt-4">
+    <h2 class="mb-4">Gestión de Personas</h2>
+
+    <div class="card mb-4">
+      <div class="card-header">
+        <h5 id="form-title">Nueva Persona</h5>
+      </div>
+      <div class="card-body">
+        <form id="persona-form">
+          <input type="hidden" id="idPersona">
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label>Nombre</label>
+              <input type="text" id="nombre" class="form-control" required>
             </div>
-        </div>
-    </nav>
-
-    <div class="container mt-4">
-        <h2 class="mb-4">Gestión de Personas</h2>
-
-        <div class="card mb-4">
-            <div class="card-header">
-                <h5 id="form-title">Nueva Persona</h5>
+            <div class="col-md-6 mb-3">
+              <label>Apellido</label>
+              <input type="text" id="apellido" class="form-control" required>
             </div>
-            <div class="card-body">
-                <form id="persona-form">
-                    <input type="hidden" id="idPersona">
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label>Nombre</label>
-                            <input type="text" id="nombre" class="form-control" required>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label>Apellido</label>
-                            <input type="text" id="apellido" class="form-control" required>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label>Fecha Nacimiento</label>
-                            <input type="date" id="fechaNacimiento" class="form-control" required>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label>Género</label>
-                            <select id="idGenero" class="form-control" required>
-                                <option value="">-- Seleccionar Género --</option>
-                            </select>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label>Dirección</label>
-                            <input type="text" id="direccion" class="form-control">
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label>Teléfono</label>
-                            <input type="text" id="telefono" class="form-control">
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label>Correo Electrónico</label>
-                            <input type="email" id="correoElectronico" class="form-control">
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label>Estado Civil</label>
-                            <select id="idEstadoCivil" class="form-control" required>
-                                <option value="">-- Seleccionar Estado Civil --</option>
-                            </select>
-                        </div>
-                    </div>
-                    <button type="submit" class="btn btn-success">Guardar</button>
-                    <button type="button" id="cancelar" class="btn btn-secondary">Cancelar</button>
-                </form>
+            <div class="col-md-6 mb-3">
+              <label>Fecha Nacimiento</label>
+              <input type="date" id="fechaNacimiento" class="form-control" required>
             </div>
-        </div>
+            <div class="col-md-6 mb-3">
+              <label>Género</label>
+              <select id="idGenero" class="form-select" required>
+                <option value="">-- Seleccionar Género --</option>
+              </select>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label>Dirección</label>
+              <input type="text" id="direccion" class="form-control">
+            </div>
+            <div class="col-md-6 mb-3">
+              <label>Teléfono</label>
+              <input type="text" id="telefono" class="form-control">
+            </div>
+            <div class="col-md-6 mb-3">
+              <label>Correo Electrónico</label>
+              <input type="email" id="correoElectronico" class="form-control">
+            </div>
+            <div class="col-md-6 mb-3">
+              <label>Estado Civil</label>
+              <select id="idEstadoCivil" class="form-select" required>
+                <option value="">-- Seleccionar Estado Civil --</option>
+              </select>
+            </div>
+          </div>
 
-        <div class="mb-3">
-            <label>Buscar por Persona:</label>
-            <input type="text" id="buscarPersona" class="form-control" placeholder="Escribe nombre o apellido">
-        </div>
-
-        <table class="table table-bordered table-striped">
-            <thead class="table-dark">
-                <tr>
-                    <th>ID</th>
-                    <th>Nombre</th>
-                    <th>Apellido</th>
-                    <th>Fecha Nac.</th>
-                    <th>Género</th>
-                    <th>Dirección</th>
-                    <th>Teléfono</th>
-                    <th>Correo</th>
-                    <th>Estado Civil</th>
-                    <th>Fecha Creación</th>
-                    <th>Usuario Creación</th>
-                    <th>Fecha Modificación</th>
-                    <th>Usuario Modificación</th>
-                    <th>Acciones</th>
-                </tr>
-            </thead>
-            <tbody id="personas-table"></tbody>
-        </table>
+          <button type="submit" class="btn btn-success">Guardar</button>
+          <button type="button" id="cancelar" class="btn btn-secondary">Cancelar</button>
+        </form>
+      </div>
     </div>
 
-    <div id="alert-container" class="position-fixed top-0 end-0 p-3" style="z-index: 9999;"></div>
+    <div class="mb-3">
+      <label>Buscar por Persona:</label>
+      <input type="text" id="buscarPersona" class="form-control" placeholder="Escribe nombre o apellido">
+    </div>
 
-    <script>
-        const usuario = sessionStorage.getItem('usuarioActual') || 'admin';
-        const apiBase = '/persona';
-        let personas = [];
-        let generosMap = {};
-        let estadoCivilMap = {};
+    <div class="d-flex justify-content-center mt-3">
+      <table id="tablaPersonas" class="table table-striped table-bordered w-auto">
+        <thead class="table-dark">
+          <tr>
+            <th>ID</th>
+            <th>Nombre</th>
+            <th>Apellido</th>
+            <th>Fecha Nacimiento</th>
+            <th>Género</th>
+            <th>Dirección</th>
+            <th>Teléfono</th>
+            <th>Correo</th>
+            <th>Estado Civil</th>
+            <th>Fecha Creación</th>
+            <th>Usuario Creación</th>
+            <th>Fecha Modificación</th>
+            <th>Usuario Modificación</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody id="personas-table"></tbody>
+      </table>
+    </div>
+  </div>
 
-        if (!usuario) {
-            window.location.href = 'login.html';
+  <div class="modal fade" id="modalDocumentos" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Documentos de la persona</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <table class="table table-bordered">
+            <thead>
+              <tr>
+                <th>Tipo Documento</th>
+                <th>Número</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="tablaDocumentos"></tbody>
+          </table>
+
+          <hr>
+          <h6>Agregar nuevo documento</h6>
+          <div class="row">
+            <div class="col-md-6">
+              <label>Tipo de documento:</label>
+              <select id="tipoDocumento" class="form-select"></select>
+            </div>
+            <div class="col-md-6">
+              <label>Número:</label>
+              <input id="noDocumento" type="text" class="form-control">
+            </div>
+          </div>
+          <div class="mt-3">
+            <button type="button" class="btn btn-success" onclick="agregarDocumento()">Guardar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="alert-container" class="position-fixed top-0 end-0 p-3" style="z-index: 9999;"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    const usuario = sessionStorage.getItem('usuarioActual') || 'admin';
+    const apiBase = '/persona';
+    const apiTipoDocumento = '/api/tipodocumento';
+    let personas = [];
+    let generosMap = {};
+    let estadoCivilMap = {};
+    let tiposDocumento = [];
+    let personaActual = null;
+
+    document.getElementById('buscarPersona').addEventListener('input', e => {
+      const texto = e.target.value.toLowerCase().trim();
+      const filtradas = personas.filter(p =>
+        p.nombre.toLowerCase().includes(texto) ||
+        p.apellido.toLowerCase().includes(texto)
+      );
+      mostrarPersonas(filtradas);
+    });
+
+
+    function mostrarMensaje(mensaje, tipo = 'success') {
+      const container = document.getElementById('alert-container');
+      const alert = document.createElement('div');
+      alert.className = `alert alert-${tipo} alert-dismissible fade show`;
+      alert.innerHTML = `${mensaje}<button type="button" class="btn-close" data-bs-dismiss="alert"></button>`;
+      container.appendChild(alert);
+      setTimeout(() => alert.remove(), 3000);
+    }
+
+    async function listarPersonas() {
+      const res = await fetch(apiBase);
+      personas = await res.json();
+      mostrarPersonas(personas);
+    }
+
+    function mostrarPersonas(lista) {
+      const tbody = document.getElementById('personas-table');
+      tbody.innerHTML = '';
+      lista.forEach(p => {
+        tbody.innerHTML += `
+          <tr>
+            <td>${p.idPersona}</td>
+            <td>${p.nombre}</td>
+            <td>${p.apellido}</td>
+            <td>${p.fechaNacimiento ?? ''}</td>
+            <td>${generosMap[p.idGenero] ?? ''}</td>
+            <td>${p.direccion ?? ''}</td>
+            <td>${p.telefono ?? ''}</td>
+            <td>${p.correoElectronico ?? ''}</td>
+            <td>${estadoCivilMap[p.idEstadoCivil] ?? ''}</td>
+            <td>${p.fechaCreacion ?? ''}</td>
+            <td>${p.usuarioCreacion ?? ''}</td>
+            <td>${p.fechaModificacion ?? ''}</td>
+            <td>${p.usuarioModificacion ?? ''}</td>
+            <td>
+              <button class="btn btn-info btn-sm" onclick="abrirModalDocumentos(${p.idPersona})">Documentos</button>
+              <button class="btn btn-warning btn-sm" onclick="editarPersona(${p.idPersona})">Editar</button>
+              <button class="btn btn-danger btn-sm" onclick="eliminarPersona(${p.idPersona})">Eliminar</button>
+            </td>
+          </tr>`;
+      });
+    }
+
+    document.getElementById('persona-form').addEventListener('submit', async e => {
+      e.preventDefault();
+      const idPersona = document.getElementById('idPersona').value;
+      const persona = {
+        nombre: nombre.value,
+        apellido: apellido.value,
+        fechaNacimiento: fechaNacimiento.value,
+        idGenero: idGenero.value,
+        direccion: direccion.value,
+        telefono: telefono.value,
+        correoElectronico: correoElectronico.value,
+        idEstadoCivil: idEstadoCivil.value
+      };
+
+      const method = idPersona ? 'PUT' : 'POST';
+      const url = idPersona ? `${apiBase}/${idPersona}` : apiBase;
+      const res = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json', 'usuario': usuario },
+        body: JSON.stringify(persona)
+      });
+
+      if (res.ok) {
+        mostrarMensaje(`Persona ${idPersona ? 'actualizada' : 'creada'} con éxito`);
+        document.getElementById('persona-form').reset();
+        document.getElementById('form-title').innerText = 'Nueva Persona';
+        document.getElementById('idPersona').value = '';
+        await listarPersonas();
+      } else {
+        mostrarMensaje('Error al guardar', 'danger');
+      }
+    });
+
+    async function editarPersona(id) {
+      const res = await fetch(`${apiBase}/${id}`);
+      const p = await res.json();
+      idPersona.value = p.idPersona;
+      nombre.value = p.nombre;
+      apellido.value = p.apellido;
+      fechaNacimiento.value = p.fechaNacimiento;
+      idGenero.value = p.idGenero;
+      direccion.value = p.direccion;
+      telefono.value = p.telefono;
+      correoElectronico.value = p.correoElectronico;
+      idEstadoCivil.value = p.idEstadoCivil;
+      document.getElementById('form-title').innerText = 'Editar Persona';
+    }
+
+    async function eliminarPersona(id) {
+      if (confirm('¿Eliminar esta persona?')) {
+        const res = await fetch(`${apiBase}/${id}`, { method: 'DELETE' });
+        if (res.ok) {
+          mostrarMensaje('Persona eliminada');
+          listarPersonas();
+        }
+      }
+    }
+
+    document.getElementById('cancelar').addEventListener('click', () => {
+      document.getElementById('persona-form').reset();
+      document.getElementById('idPersona').value = '';
+      document.getElementById('form-title').innerText = 'Nueva Persona';
+    });
+
+    async function abrirModalDocumentos(idPersona) {
+      personaActual = idPersona;
+      const res = await fetch(`/documento-persona/persona/${idPersona}`);
+      const docs = await res.json();
+      const tbody = document.getElementById('tablaDocumentos');
+      tbody.innerHTML = '';
+
+      docs.forEach(d => {
+        tbody.innerHTML += `
+      <tr>
+        <td>${d.tipoDocumento.nombre}</td>
+        <td>${d.noDocumento}</td>
+        <td>
+                  <button class="btn btn-warning btn-sm" onclick="editarDocumento(${d.id.idTipoDocumento}, ${personaActual})">
+          Editar
+        </button>
+          <button class="btn btn-danger btn-sm" onclick="eliminarDocumento(${d.id.idTipoDocumento}, ${personaActual})">
+            Eliminar
+          </button>
+        </td>
+      </tr>`;
+      });
+
+      const modal = bootstrap.Modal.getOrCreateInstance(document.getElementById('modalDocumentos'));
+      modal.show();
+    }
+
+    async function agregarDocumento() {
+      const tipo = document.getElementById('tipoDocumento').value;
+      const numero = document.getElementById('noDocumento').value;
+      if (!numero) {
+        mostrarMensaje("Ingresa un número de documento", "warning");
+        return;
+      }
+
+      const res = await fetch(`/documento-persona`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'usuario': usuario },
+        body: JSON.stringify({ idPersona: personaActual, idTipoDocumento: tipo, noDocumento: numero })
+      });
+
+      if (res.ok) {
+        mostrarMensaje('Documento agregado correctamente');
+        document.getElementById('noDocumento').value = '';
+        abrirModalDocumentos(personaActual);
+      } else {
+        mostrarMensaje('Error al agregar documento', 'danger');
+      }
+    }
+
+    async function editarDocumento(idTipoDocumento, idPersona) {
+      const res = await fetch(`/documento-persona/${idTipoDocumento}/${idPersona}`);
+      if (!res.ok) {
+        mostrarMensaje('Error al cargar documento', 'danger');
+        return;
+      }
+      const d = await res.json();
+
+      const tipoDocumento = document.getElementById('tipoDocumento');
+      const noDocumento = document.getElementById('noDocumento');
+      const btnGuardar = document.getElementById('btnGuardarDocumento');
+
+      tipoDocumento.value = d.tipoDocumento.idTipoDocumento;
+      noDocumento.value = d.noDocumento;
+      tipoDocumento.disabled = true;
+      btnGuardar.innerText = 'Actualizar Documento';
+
+      const nuevoBoton = btnGuardar.cloneNode(true);
+      btnGuardar.parentNode.replaceChild(nuevoBoton, btnGuardar);
+
+      nuevoBoton.addEventListener('click', async () => {
+        const numero = noDocumento.value.trim();
+        if (!numero) {
+          mostrarMensaje('Ingresa el número del documento', 'warning');
+          return;
+        }
+
+        const res = await fetch(`/documento-persona`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'usuario': usuario },
+          body: JSON.stringify({
+            idPersona,
+            idTipoDocumento,
+            noDocumento: numero
+          })
+        });
+
+        if (res.ok) {
+          mostrarMensaje('Documento actualizado correctamente');
+          tipoDocumento.disabled = false;
+          nuevoBoton.innerText = 'Agregar Documento';
+          noDocumento.value = '';
+
+          nuevoBoton.replaceWith(nuevoBoton.cloneNode(true));
+          const btnOriginal = document.getElementById('btnGuardarDocumento');
+          btnOriginal.addEventListener('click', () => agregarDocumento(idPersona));
+
+          abrirModalDocumentos(personaActual);
         } else {
-            document.getElementById('navUsuario').textContent = usuario;
+          const msg = await res.text();
+          mostrarMensaje(msg.includes('Ya existe') ? msg : 'Error al actualizar', 'danger');
         }
+      });
+    }
 
-        function mostrarMensaje(mensaje, tipo = 'success') {
-            const container = document.getElementById('alert-container');
-            const alert = document.createElement('div');
-            alert.className = `alert alert-${tipo} alert-dismissible fade show`;
-            alert.role = 'alert';
-            alert.innerHTML = `
-                ${mensaje}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            `;
-            container.appendChild(alert);
-            setTimeout(() => alert.remove(), 3000);
-        }
-
-        async function listarPersonas() {
-            const res = await fetch(apiBase);
-            personas = await res.json();
-            mostrarPersonas(personas);
-        }
-
-        function mostrarPersonas(lista) {
-            const tbody = document.getElementById('personas-table');
-            tbody.innerHTML = '';
-            lista.forEach(p => {
-                tbody.innerHTML += `
-                    <tr>
-                        <td>${p.idPersona}</td>
-                        <td>${p.nombre}</td>
-                        <td>${p.apellido}</td>
-                        <td>${p.fechaNacimiento}</td>
-                        <td>${generosMap[p.idGenero] ?? ''}</td>
-                        <td>${p.direccion ?? ''}</td>
-                        <td>${p.telefono ?? ''}</td>
-                        <td>${p.correoElectronico ?? ''}</td>
-                        <td>${estadoCivilMap[p.idEstadoCivil] ?? ''}</td>
-                        <td>${p.fechaCreacion ?? ''}</td>
-                        <td>${p.usuarioCreacion ?? ''}</td>
-                        <td>${p.fechaModificacion ?? ''}</td>
-                        <td>${p.usuarioModificacion ?? ''}</td>
-                        <td>
-                            <button class="btn btn-warning btn-sm" onclick="editarPersona(${p.idPersona})">Editar</button>
-                            <button class="btn btn-danger btn-sm" onclick="eliminarPersona(${p.idPersona})">Eliminar</button>
-                        </td>
-                    </tr>
-                `;
-            });
-        }
-
-        document.getElementById('buscarPersona').addEventListener('input', e => {
-            const valor = e.target.value.toLowerCase();
-            const filtrados = personas.filter(p => {
-                const nombreCompleto = `${p.nombre} ${p.apellido}`.toLowerCase();
-                return nombreCompleto.includes(valor);
-            });
-            mostrarPersonas(filtrados);
+    async function eliminarDocumento(idTipoDocumento, idPersona) {
+      if (confirm('¿Seguro que deseas eliminar este documento?')) {
+        const res = await fetch(`/documento-persona/${idTipoDocumento}/${idPersona}`, {
+          method: 'DELETE'
         });
 
-        async function cargarGeneros() {
-            const res = await fetch('/persona/listarGeneros');
-            const generos = await res.json();
-            const select = document.getElementById('idGenero');
-            select.innerHTML = '<option value="">-- Seleccionar Género --</option>';
-            generos.forEach(g => {
-                select.innerHTML += `<option value="${g.idGenero}">${g.nombre}</option>`;
-                generosMap[g.idGenero] = g.nombre;
-            });
+        if (res.ok) {
+          mostrarMensaje('Documento eliminado con éxito', 'success');
+          abrirModalDocumentos(personaActual);
+        } else {
+          const msg = await res.text();
+          mostrarMensaje(`Error: ${msg}`, 'danger');
         }
+      }
+    }
 
-        async function cargarEstadoCivil() {
-            const res = await fetch('/persona/listarEstadoCivil');
-            const estados = await res.json();
-            const select = document.getElementById('idEstadoCivil');
-            select.innerHTML = '<option value="">-- Seleccionar Estado Civil --</option>';
-            estados.forEach(e => {
-                select.innerHTML += `<option value="${e.idEstadoCivil}">${e.nombre}</option>`;
-                estadoCivilMap[e.idEstadoCivil] = e.nombre;
-            });
-        }
+    async function cargarGeneros() {
+      const res = await fetch('/persona/listarGeneros');
+      const generos = await res.json();
+      generos.forEach(g => generosMap[g.idGenero] = g.nombre);
+      idGenero.innerHTML = '<option value="">-- Seleccionar Género --</option>' +
+        generos.map(g => `<option value="${g.idGenero}">${g.nombre}</option>`).join('');
+    }
 
-        document.getElementById('persona-form').addEventListener('submit', async e => {
-            e.preventDefault();
-            const idPersona = document.getElementById('idPersona').value;
-            const persona = {
-                nombre: document.getElementById('nombre').value,
-                apellido: document.getElementById('apellido').value,
-                fechaNacimiento: document.getElementById('fechaNacimiento').value,
-                idGenero: document.getElementById('idGenero').value,
-                direccion: document.getElementById('direccion').value,
-                telefono: document.getElementById('telefono').value,
-                correoElectronico: document.getElementById('correoElectronico').value,
-                idEstadoCivil: document.getElementById('idEstadoCivil').value
-            };
+    async function cargarEstadoCivil() {
+      const res = await fetch('/persona/listarEstadoCivil');
+      const estados = await res.json();
+      estados.forEach(e => estadoCivilMap[e.idEstadoCivil] = e.nombre);
+      idEstadoCivil.innerHTML = '<option value="">-- Seleccionar Estado Civil --</option>' +
+        estados.map(e => `<option value="${e.idEstadoCivil}">${e.nombre}</option>`).join('');
+    }
 
-            const method = idPersona ? 'PUT' : 'POST';
-            const url = idPersona ? `${apiBase}/${idPersona}` : apiBase;
+    async function cargarTiposDocumento() {
+      const res = await fetch(apiTipoDocumento);
+      tiposDocumento = await res.json();
+      tipoDocumento.innerHTML = tiposDocumento.map(t => `<option value="${t.idTipoDocumento}">${t.nombre}</option>`).join('');
+    }
 
-            const res = await fetch(url, {
-                method,
-                headers: { 'Content-Type': 'application/json', 'usuario': usuario },
-                body: JSON.stringify(persona)
-            });
-
-            if (res.ok) {
-                mostrarMensaje(`Persona ${idPersona ? 'modificada' : 'creada'} con éxito`, 'success');
-                document.getElementById('persona-form').reset();
-                document.getElementById('idPersona').value = '';
-                document.getElementById('form-title').innerText = 'Nueva Persona';
-                listarPersonas();
-            } else {
-                const msg = await res.text();
-                mostrarMensaje(`Error: ${msg}`, 'danger');
-            }
-        });
-
-        async function editarPersona(id) {
-            const res = await fetch(`${apiBase}/${id}`);
-            const p = await res.json();
-            document.getElementById('idPersona').value = p.idPersona;
-            document.getElementById('nombre').value = p.nombre;
-            document.getElementById('apellido').value = p.apellido;
-            document.getElementById('fechaNacimiento').value = p.fechaNacimiento;
-            document.getElementById('idGenero').value = p.idGenero;
-            document.getElementById('direccion').value = p.direccion;
-            document.getElementById('telefono').value = p.telefono;
-            document.getElementById('correoElectronico').value = p.correoElectronico;
-            document.getElementById('idEstadoCivil').value = p.idEstadoCivil;
-            document.getElementById('form-title').innerText = 'Editar Persona';
-        }
-
-        async function eliminarPersona(id) {
-            if (confirm('¿Seguro que deseas eliminar esta persona?')) {
-                const res = await fetch(`${apiBase}/${id}`, { method: 'DELETE' });
-                if (res.ok) {
-                    mostrarMensaje('Persona eliminada con éxito', 'success');
-                    listarPersonas();
-                } else {
-                    const msg = await res.text();
-                    mostrarMensaje(`Error: ${msg}`, 'danger');
-                }
-            }
-        }
-
-        document.getElementById('cancelar').addEventListener('click', () => {
-            document.getElementById('persona-form').reset();
-            document.getElementById('idPersona').value = '';
-            document.getElementById('form-title').innerText = 'Nueva Persona';
-        });
-
-        cargarGeneros();
-        cargarEstadoCivil();
-        listarPersonas();
-    </script>
+    cargarGeneros();
+    cargarEstadoCivil();
+    cargarTiposDocumento();
+    listarPersonas();
+  </script>
 </body>
 
 </html>

@@ -2,6 +2,7 @@ package com.adsii.pro_adsii.Entity;
 
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -14,6 +15,7 @@ import lombok.Data;
 @Entity
 @Table(name = "TIPO_DOCUMENTO")
 @Data
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class TipoDocumento {
 
     @Id
