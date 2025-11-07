@@ -5,6 +5,29 @@
     <meta charset="UTF-8">
     <title>Gestión de Cuentas Corrientes</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        /* Centrado horizontal y límite de ancho */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Centrado de la tabla si hay mucho contenido */
+        .table-responsive {
+            display: flex;
+            justify-content: center;
+        }
+
+        table {
+            width: 95%;
+        }
+
+        th, td {
+            text-align: center;
+            vertical-align: middle;
+        }
+    </style>
 </head>
 
 <body class="bg-light">
@@ -19,88 +42,87 @@
     </nav>
 
     <div class="container mt-4">
-        <div class="container py-5">
-            <h2 class="mb-4 text-center">Gestión de Cuentas Corrientes</h2>
+        <h2 class="mb-4 text-center">💼 Gestión de Cuentas Corrientes</h2>
 
-            <div class="card mb-4">
-                <div class="card-header" id="form-title">➕ Crear Nueva Cuenta</div>
-                <div class="card-body">
-                    <form id="cuenta-form">
-                        <input type="hidden" id="idCuentaCorriente">
-                        <input type="hidden" id="usuario" value="admin_web_user"> 
+        <div class="card mb-4 shadow-sm">
+            <div class="card-header bg-primary text-white" id="form-title">➕ Crear Nueva Cuenta</div>
+            <div class="card-body">
+                <form id="cuenta-form">
+                    <input type="hidden" id="idCuentaCorriente">
+                    <input type="hidden" id="usuario" value="admin_web_user"> 
 
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <label for="numeroCuenta" class="form-label">Número de Cuenta:</label>
-                                <input type="text" id="numeroCuenta" class="form-control" placeholder="Número de Cuenta" required>
-                            </div>
-                            
-                            <div class="col-md-6">
-                                <label for="idPersona" class="form-label">Cliente:</label>
-                                <select id="idPersona" class="form-select" required>
-                                    <option value="">-- Seleccione Cliente --</option>
-                                </select>
-                            </div>
-
-                            <div class="col-md-4">
-                                <label for="idTipoSaldoCuenta" class="form-label">Tipo de Saldo:</label>
-                                <select id="idTipoSaldoCuenta" class="form-select" required>
-                                    <option value="">-- Seleccione Tipo --</option>
-                                </select>
-                            </div>
-
-                            <div class="col-md-4">
-                                <label for="idStatusCuenta" class="form-label">Estado de Cuenta:</label>
-                                <select id="idStatusCuenta" class="form-select" required>
-                                    <option value="">-- Seleccione Estado --</option>
-                                </select>
-                            </div>
-
-                            <div class="col-md-4">
-                                <label for="fechaApertura" class="form-label">Fecha de Apertura:</label>
-                                <input type="datetime-local" id="fechaApertura" class="form-control" />
-                            </div>
-                            
-                            <div class="col-12 mt-4 d-flex gap-2 justify-content-end">
-                                <button type="submit" class="btn btn-primary" id="btnGuardar">💾 Guardar Cuenta</button>
-                                <button type="button" id="btnCancelar" class="btn btn-secondary">❌ Cancelar</button>
-                            </div>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="numeroCuenta" class="form-label">Número de Cuenta:</label>
+                            <input type="text" id="numeroCuenta" class="form-control" placeholder="Ej. 001-CC-2025" required>
                         </div>
-                    </form>
-                </div>
-            </div>
 
-            <div class="card">
-                <div class="card-header">📋 Listado de Cuentas Corrientes</div>
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-striped table-hover">
-                            <thead class="table-dark">
-                                <tr>
-                                    <th>ID</th>
-                                    <th>N° Cuenta</th>
-                                    <th>Cliente</th>
-                                    <th>Tipo Saldo</th>
-                                    <th>Estado</th>
-                                    <th>Fecha Apertura</th>
-                                    <th>Acciones</th>
-                                </tr>
-                            </thead>
-                            <tbody id="cuentas-table">
-                                <tr>
-                                    <td colspan="7" class="text-center">Cargando...</td>
-                                </tr>
-                            </tbody>
-                        </table>
+                        <div class="col-md-6">
+                            <label for="idPersona" class="form-label">Cliente:</label>
+                            <select id="idPersona" class="form-select" required>
+                                <option value="">-- Seleccione Cliente --</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label for="idTipoSaldoCuenta" class="form-label">Tipo de Saldo:</label>
+                            <select id="idTipoSaldoCuenta" class="form-select" required>
+                                <option value="">-- Seleccione Tipo --</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label for="idStatusCuenta" class="form-label">Estado de Cuenta:</label>
+                            <select id="idStatusCuenta" class="form-select" required>
+                                <option value="">-- Seleccione Estado --</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label for="fechaApertura" class="form-label">Fecha de Apertura:</label>
+                            <input type="datetime-local" id="fechaApertura" class="form-control" required>
+                        </div>
+
+                        <div class="col-12 mt-4 d-flex gap-2 justify-content-end">
+                            <button type="submit" class="btn btn-success" id="btnGuardar">💾 Guardar Cuenta</button>
+                            <button type="button" id="btnCancelar" class="btn btn-secondary">❌ Cancelar</button>
+                        </div>
                     </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="card shadow-sm">
+            <div class="card-header bg-dark text-white">📋 Listado de Cuentas Corrientes</div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover align-middle">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>ID</th>
+                                <th>N° Cuenta</th>
+                                <th>Cliente</th>
+                                <th>Tipo Saldo</th>
+                                <th>Estado</th>
+                                <th>Fecha Apertura</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="cuentas-table">
+                            <tr>
+                                <td colspan="7" class="text-center">Cargando...</td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
     </div>
 
+    <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
     <script>
-        // ⭐⭐ ENDPOINTS CORREGIDOS PARA COINCIDIR CON LOS CONTROLLERS EN JAVA ⭐⭐
         const API_BASE = '/cuentas'; 
         const API_PERSONA = '/persona'; 
         const API_TIPO_SALDO = '/tipo-saldo/listar'; 
@@ -109,197 +131,163 @@
         const usuario = document.getElementById('usuario').value;
         document.getElementById('navUsuario').textContent = 'Usuario: ' + usuario;
 
-        // Función auxiliar para formatear la fecha
         const formatDateTime = (dateString) => {
             if (!dateString) return '';
             const date = new Date(dateString);
-            return date.toLocaleDateString('es-ES', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }).replace(',', '');
+            return date.toLocaleString('es-ES');
         };
-        
-        // Función para cargar los dropdowns (selects)
+
         async function cargarDropdown(url, selectId, idField, nameField) {
             const select = document.getElementById(selectId);
             try {
                 const res = await fetch(url);
                 const data = await res.json();
                 data.forEach(item => {
-                    // Si tiene nombre y apellido (como Persona), úsalos. De lo contrario, usa el campo de nombre simple.
                     const text = (item.nombre && item.apellido) ? `${item.nombre} ${item.apellido}` : item[nameField];
                     select.innerHTML += `<option value="${item[idField]}">${text}</option>`;
                 });
             } catch (error) {
-                console.error(`Error al cargar ${selectId} desde ${url}:`, error);
+                console.error(`Error al cargar ${selectId}:`, error);
                 select.innerHTML += `<option value="" disabled>Error al cargar datos</option>`;
             }
         }
-        
-        // Inicializar todos los dropdowns
+
         async function inicializarDropdowns() {
-             await cargarDropdown(API_PERSONA, 'idPersona', 'idPersona', 'nombre'); 
-             await cargarDropdown(API_TIPO_SALDO, 'idTipoSaldoCuenta', 'idTipoSaldoCuenta', 'nombre');
-             await cargarDropdown(API_STATUS_CUENTA, 'idStatusCuenta', 'idStatusCuenta', 'nombre');
+            await cargarDropdown(API_PERSONA, 'idPersona', 'idPersona', 'nombre');
+            await cargarDropdown(API_TIPO_SALDO, 'idTipoSaldoCuenta', 'idTipoSaldoCuenta', 'nombre');
+            await cargarDropdown(API_STATUS_CUENTA, 'idStatusCuenta', 'idStatusCuenta', 'nombre');
         }
 
-        // Función para listar las cuentas (CRUD - Read)
         async function listarCuentas() {
             const tbody = document.getElementById('cuentas-table');
             tbody.innerHTML = `<tr><td colspan="7" class="text-center">Cargando...</td></tr>`;
-
             try {
                 const res = await fetch(API_BASE);
                 const cuentas = await res.json();
 
-                tbody.innerHTML = '';
                 if (cuentas.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="7" class="text-center">No hay cuentas corrientes registradas.</td></tr>`;
+                    tbody.innerHTML = `<tr><td colspan="7" class="text-center">No hay cuentas registradas.</td></tr>`;
                     return;
                 }
 
+                tbody.innerHTML = '';
                 cuentas.forEach(c => {
-                    // NOTA: Se asume que Persona y StatusCuenta tienen un campo 'nombre' para mostrar.
-                    const clienteNombre = (c.persona && c.persona.nombre && c.persona.apellido) ? `${c.persona.nombre} ${c.persona.apellido}` : 'N/A';
-                    const tipoSaldoNombre = (c.tipoSaldoCuenta && c.tipoSaldoCuenta.nombre) ? c.tipoSaldoCuenta.nombre : 'N/A';
-                    const statusNombre = (c.statusCuenta && c.statusCuenta.nombre) ? c.statusCuenta.nombre : 'N/A';
+                    const cliente = c.persona ? `${c.persona.nombre} ${c.persona.apellido}` : 'N/A';
+                    const tipo = c.tipoSaldoCuenta ? c.tipoSaldoCuenta.nombre : 'N/A';
+                    const estado = c.statusCuenta ? c.statusCuenta.nombre : 'N/A';
 
-                    const row = `
+                    tbody.innerHTML += `
                         <tr>
-                            <td>${c.idCuentaCorriente}</td>
+                            <td>${c.idSaldoCuenta}</td>
                             <td>${c.numeroCuenta}</td>
-                            <td>${clienteNombre}</td>
-                            <td>${tipoSaldoNombre}</td>
-                            <td>${statusNombre}</td>
+                            <td>${cliente}</td>
+                            <td>${tipo}</td>
+                            <td>${estado}</td>
                             <td>${formatDateTime(c.fechaApertura)}</td>
                             <td>
-                                <button class="btn btn-warning btn-sm" onclick="editarCuenta(${c.idCuentaCorriente})">✍️ Editar</button>
-                                <button class="btn btn-danger btn-sm" onclick="eliminarCuenta(${c.idCuentaCorriente})">🗑️ Eliminar</button>
+                                <button class="btn btn-warning btn-sm" onclick="editarCuenta(${c.idSaldoCuenta})">✏️</button>
+                                <button class="btn btn-danger btn-sm" onclick="eliminarCuenta(${c.idSaldoCuenta})">🗑️</button>
                             </td>
                         </tr>
                     `;
-                    tbody.innerHTML += row;
                 });
-            } catch (error) {
-                console.error("Error al cargar cuentas:", error);
-                tbody.innerHTML = `<tr><td colspan="7" class="text-center">Error al cargar los datos.</td></tr>`;
+            } catch (err) {
+                console.error(err);
+                tbody.innerHTML = `<tr><td colspan="7" class="text-center">Error al cargar las cuentas.</td></tr>`;
             }
         }
 
-        // Manejador del Formulario (CRUD - Create/Update)
         document.getElementById('cuenta-form').addEventListener('submit', async e => {
             e.preventDefault();
 
             const id = document.getElementById('idCuentaCorriente').value;
-            const isUpdate = !!id;
-            const method = isUpdate ? 'PUT' : 'POST';
-            const url = isUpdate ? `${API_BASE}/${id}` : API_BASE;
-            
-            // Recolección de datos
-            const cuenta = {
-                idCuentaCorriente: isUpdate ? parseInt(id) : null,
-                numeroCuenta: document.getElementById('numeroCuenta').value,
-                fechaApertura: document.getElementById('fechaApertura').value,
-                
-                // Objetos anidados solo con el ID
-                persona: { idPersona: parseInt(document.getElementById('idPersona').value) },
-                tipoSaldoCuenta: { idTipoSaldoCuenta: parseInt(document.getElementById('idTipoSaldoCuenta').value) },
-                statusCuenta: { idStatusCuenta: parseInt(document.getElementById('idStatusCuenta').value) }
-            };
+            const method = id ? 'PUT' : 'POST';
+            const url = id ? `${API_BASE}/${id}` : API_BASE;
+
+const cuenta = {
+    idSaldoCuenta: id ? parseInt(id) : null,
+    numeroCuenta: document.getElementById('numeroCuenta').value,
+    fechaApertura: document.getElementById('fechaApertura').value,
+    persona: { idPersona: parseInt(document.getElementById('idPersona').value) },
+    tipoSaldoCuenta: { idTipoSaldoCuenta: parseInt(document.getElementById('idTipoSaldoCuenta').value) },
+    statusCuenta: { idStatusCuenta: parseInt(document.getElementById('idStatusCuenta').value) },
+    fechaCreacion: new Date().toISOString(),           // 🕒 Fecha actual
+    usuarioCreacion: usuario,                           // 👤 Usuario que lo crea
+    fechaModificacion: null,                            // Vacío en creación
+    usuarioModificacion: null,                          // Vacío en creación
+    saldoAnterior: 0,                                   // Valor inicial
+    debitos: 0,
+    creditos: 0
+};
+
+
 
             try {
                 const res = await fetch(url, {
                     method: method,
-                    headers: { 
+                    headers: {
                         'Content-Type': 'application/json',
-                        'usuario': usuario // Pasamos el usuario en el header
+                        'usuario': usuario
                     },
                     body: JSON.stringify(cuenta)
                 });
-                
+
                 if (!res.ok) {
-                    const errorText = await res.text();
-                    
-                    // ⭐⭐ GESTIÓN DE ERRORES DE VALIDACIÓN (400 Bad Request) ⭐⭐
-                    if (res.status === 400) {
-                        alert(`¡ERROR DE GESTIÓN! ${errorText}`);
-                    } else {
-                        alert(`Error al guardar/actualizar la cuenta. Detalles: ${errorText}`);
-                    }
-                    // ⭐⭐ FIN GESTIÓN DE ERRORES ⭐⭐
-                    
+                    const text = await res.text();
+                    alert(`Error: ${text}`);
                     return;
                 }
 
                 cancelarEdicion();
                 listarCuentas();
-            } catch (error) {
-                console.error("Error en la solicitud:", error);
-                alert("Ocurrió un error de conexión al intentar guardar la cuenta.");
+            } catch (err) {
+                console.error(err);
+                alert("Error al guardar la cuenta.");
             }
         });
 
-        // Cargar datos para edición (CRUD - Read Single for Edit)
         async function editarCuenta(id) {
             try {
                 const res = await fetch(`${API_BASE}/${id}`);
                 const c = await res.json();
-                
-                // Rellenar formulario
-                document.getElementById('idCuentaCorriente').value = c.idCuentaCorriente;
+
+                document.getElementById('idCuentaCorriente').value = c.idSaldoCuenta;
                 document.getElementById('numeroCuenta').value = c.numeroCuenta;
-                
-                // Rellenar selects con el ID de la entidad relacionada
                 document.getElementById('idPersona').value = c.persona.idPersona;
                 document.getElementById('idTipoSaldoCuenta').value = c.tipoSaldoCuenta.idTipoSaldoCuenta;
                 document.getElementById('idStatusCuenta').value = c.statusCuenta.idStatusCuenta;
-                
-                // Rellenar Fecha de Apertura (formato YYYY-MM-DDTHH:mm)
-                if (c.fechaApertura) {
-                    const date = new Date(c.fechaApertura);
-                    const formattedDate = date.toISOString().substring(0, 16);
-                    document.getElementById('fechaApertura').value = formattedDate;
-                } else {
-                    document.getElementById('fechaApertura').value = '';
-                }
 
-                document.getElementById('form-title').innerText = '✍️ Editar Cuenta Corriente';
-                document.getElementById('btnGuardar').innerText = 'Actualizar';
-            } catch (error) {
-                console.error("Error al obtener cuenta para edición:", error);
-                alert("Error al cargar los datos de la cuenta para edición.");
+                const date = new Date(c.fechaApertura);
+                document.getElementById('fechaApertura').value = date.toISOString().slice(0, 16);
+
+                document.getElementById('form-title').textContent = "✍️ Editar Cuenta";
+                document.getElementById('btnGuardar').textContent = "Actualizar";
+            } catch (err) {
+                alert("Error al editar cuenta.");
             }
         }
 
-        // Función para eliminar (CRUD - Delete)
         async function eliminarCuenta(id) {
-            if (confirm('¿Seguro que deseas eliminar esta cuenta? Esta acción es irreversible.')) {
-                try {
-                    const res = await fetch(`${API_BASE}/${id}`, { method: 'DELETE' });
-                    // NOTA: La validación de estado para DELETE debe estar en el Service/Controller
-                    if (!res.ok) {
-                        const errorText = await res.text();
-                        alert(`Error al eliminar la cuenta. Detalles: ${errorText}`);
-                    }
-                    listarCuentas();
-                } catch (error) {
-                    console.error("Error al eliminar:", error);
-                    alert("Ocurrió un error de conexión al intentar eliminar la cuenta.");
-                }
+            if (!confirm('¿Eliminar esta cuenta?')) return;
+            try {
+                await fetch(`${API_BASE}/${id}`, { method: 'DELETE' });
+                listarCuentas();
+            } catch (err) {
+                alert("Error al eliminar cuenta.");
             }
         }
 
-        // Función para limpiar y resetear el formulario
         function cancelarEdicion() {
             document.getElementById('cuenta-form').reset();
             document.getElementById('idCuentaCorriente').value = '';
-            document.getElementById('form-title').innerText = '➕ Crear Nueva Cuenta';
-            document.getElementById('btnGuardar').innerText = '💾 Guardar Cuenta';
+            document.getElementById('form-title').textContent = "➕ Crear Nueva Cuenta";
+            document.getElementById('btnGuardar').textContent = "💾 Guardar Cuenta";
         }
 
         document.getElementById('btnCancelar').addEventListener('click', cancelarEdicion);
 
-        // Inicialización: Cargar selects y tabla
         inicializarDropdowns();
         listarCuentas();
     </script>
 </body>
-
 </html>

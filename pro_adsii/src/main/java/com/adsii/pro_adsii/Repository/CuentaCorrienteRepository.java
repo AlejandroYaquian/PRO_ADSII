@@ -7,10 +7,6 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface CuentaCorrienteRepository extends JpaRepository<CuentaCorriente, Integer> {
-    
-    // Buscar cuentas por ID de Persona (cliente)
-    List<CuentaCorriente> findByPersona_IdPersona(int idPersona);
-    
-    // Buscar cuenta por número de cuenta
-    CuentaCorriente findByNumeroCuenta(String numeroCuenta);
+    List<CuentaCorriente> findByPersona_IdPersona(Integer idPersona);
+    boolean existsByNumeroCuenta(String numeroCuenta);
 }

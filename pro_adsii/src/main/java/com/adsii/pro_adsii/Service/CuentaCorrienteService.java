@@ -5,6 +5,10 @@ import com.adsii.pro_adsii.Entity.Persona;
 import com.adsii.pro_adsii.Entity.TipoSaldoCuenta;
 import com.adsii.pro_adsii.Entity.StatusCuenta;
 import com.adsii.pro_adsii.Repository.CuentaCorrienteRepository;
+import com.adsii.pro_adsii.Repository.PersonaRepository;
+import com.adsii.pro_adsii.Repository.StatusCuentaRepository;
+import com.adsii.pro_adsii.Repository.TipoSaldoCuentaRepository;
+
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -16,95 +20,73 @@ import java.util.Optional;
 public class CuentaCorrienteService {
 
     @Autowired
-    private CuentaCorrienteRepository repository;
-    
-    // Servicios auxiliares
-    @Autowired
-    private PersonaService personaService; 
-    @Autowired
-    private TipoSaldoCuentaService tipoSaldoService;
-    @Autowired
-    private StatusCuentaService statusCuentaService;
+    private CuentaCorrienteRepository repo;
 
-    public List<CuentaCorriente> listarTodas() {
-        return repository.findAll();
+    @Autowired
+    private PersonaRepository personaRepo;
+
+    @Autowired
+    private TipoSaldoCuentaRepository tipoRepo;
+
+    @Autowired
+    private StatusCuentaRepository statusRepo;
+
+    // Listar todas las cuentas
+    public List<CuentaCorriente> listar() {
+        return repo.findAll();
     }
 
+    // Buscar por persona
+    public List<CuentaCorriente> listarPorPersona(Integer idPersona) {
+        return repo.findByPersona_IdPersona(idPersona);
+    }
+
+    // Buscar una cuenta específica
     public CuentaCorriente obtenerPorId(Integer id) {
-        return repository.findById(id).orElseThrow(() -> new EntityNotFoundException("Cuenta con ID " + id + " no encontrada."));
-    }
-    
-    public List<CuentaCorriente> buscarPorIdPersona(int idPersona) {
-        return repository.findByPersona_IdPersona(idPersona);
-    }
-    
-    public CuentaCorriente buscarPorNumeroCuenta(String numeroCuenta) {
-        return repository.findByNumeroCuenta(numeroCuenta);
+        return repo.findById(id).orElseThrow(() -> new RuntimeException("Cuenta no encontrada"));
     }
 
-    public CuentaCorriente guardar(CuentaCorriente cuenta, String usuarioActual) {
-        
-        // *****************************************************************
-        // 1. Lógica para CARGAR las entidades relacionadas antes de guardar
-        // *****************************************************************
-        
-        // Cargar Persona (Cliente) - Servicio espera 'int'
-        Integer idPersona = Optional.ofNullable(cuenta.getPersona())
-                            .map(Persona::getIdPersona)
-                            .orElseThrow(() -> new IllegalArgumentException("ID de Persona (Cliente) es obligatorio."));
-        Persona persona = personaService.obtenerPorId(idPersona); 
-        cuenta.setPersona(persona);
-
-        // Cargar TipoSaldoCuenta - Servicio espera 'Long' (REQUIERE CONVERSIÓN)
-        Long idTipoSaldoInt = Optional.ofNullable(cuenta.getTipoSaldoCuenta())
-                                 .map(TipoSaldoCuenta::getIdTipoSaldoCuenta)
-                                 .orElseThrow(() -> new IllegalArgumentException("ID de Tipo de Saldo es obligatorio."));
-        
-        // CORRECCIÓN para TipoSaldoCuentaService: Convertir a Long
-        Long idTipoSaldoLong = idTipoSaldoInt.longValue(); 
-        TipoSaldoCuenta tipoSaldo = tipoSaldoService.obtenerPorId(idTipoSaldoLong);
-        cuenta.setTipoSaldoCuenta(tipoSaldo);
-        
-        // Cargar StatusCuenta - Servicio espera 'Integer' (NO REQUIERE CONVERSIÓN)
-        Integer idStatusInt = Optional.ofNullable(cuenta.getStatusCuenta())
-                              .map(StatusCuenta::getIdStatusCuenta)
-                              .orElseThrow(() -> new IllegalArgumentException("ID de Estado de Cuenta es obligatorio."));
-        
-        // CORRECCIÓN para StatusCuentaService: Usar Integer directamente
-        StatusCuenta status = statusCuentaService.obtenerPorId(idStatusInt);
-        cuenta.setStatusCuenta(status);
-        
-        // *****************************************************************
-        // 2. Lógica de auditoría (Creación/Modificación)
-        // *****************************************************************
-        if (cuenta.getIdSaldoCuenta() == null || cuenta.getIdSaldoCuenta() == 0) {
-            // CREAR
-            cuenta.setFechaCreacion(LocalDateTime.now());
-            cuenta.setUsuarioCreacion(usuarioActual);
-            
-            if (cuenta.getFechaApertura() == null) {
-                cuenta.setFechaApertura(LocalDateTime.now()); 
-            }
-            cuenta.setFechaModificacion(null);
-            cuenta.setUsuarioModificacion(null);
-        } else {
-            // ACTUALIZAR
-            CuentaCorriente existente = repository.findById(cuenta.getIdSaldoCuenta())
-                .orElseThrow(() -> new EntityNotFoundException("Cuenta con ID " + cuenta.getIdSaldoCuenta() + " no encontrada"));
-            
-            // Preservar la información de creación original
-            cuenta.setFechaCreacion(existente.getFechaCreacion());
-            cuenta.setUsuarioCreacion(existente.getUsuarioCreacion());
-            
-            // Establecer la información de modificación
-            cuenta.setFechaModificacion(LocalDateTime.now());
-            cuenta.setUsuarioModificacion(usuarioActual);
+    // Crear cuenta
+    public CuentaCorriente crear(CuentaCorriente cuenta, String usuario) {
+        if (repo.existsByNumeroCuenta(cuenta.getNumeroCuenta())) {
+            throw new RuntimeException("Ya existe una cuenta con ese número");
         }
-        
-        return repository.save(cuenta);
+
+        cuenta.setPersona(personaRepo.findById(cuenta.getPersona().getIdPersona())
+                .orElseThrow(() -> new RuntimeException("Persona no encontrada")));
+
+        cuenta.setTipoSaldoCuenta(tipoRepo.findById(cuenta.getTipoSaldoCuenta().getIdTipoSaldoCuenta())
+                .orElseThrow(() -> new RuntimeException("Tipo de saldo no encontrado")));
+
+        cuenta.setStatusCuenta(statusRepo.findById(cuenta.getStatusCuenta().getIdStatusCuenta())
+                .orElseThrow(() -> new RuntimeException("Status de cuenta no encontrado")));
+
+        cuenta.setFechaApertura(LocalDateTime.now());
+        cuenta.setFechaCreacion(LocalDateTime.now());
+        cuenta.setUsuarioCreacion(usuario);
+        return repo.save(cuenta);
     }
 
+    // Actualizar cuenta
+    public CuentaCorriente actualizar(Integer id, CuentaCorriente cuentaNueva, String usuario) {
+        CuentaCorriente cuenta = obtenerPorId(id);
+
+        cuenta.setSaldoAnterior(cuentaNueva.getSaldoAnterior());
+        cuenta.setDebitos(cuentaNueva.getDebitos());
+        cuenta.setCreditos(cuentaNueva.getCreditos());
+        cuenta.setStatusCuenta(cuentaNueva.getStatusCuenta());
+        cuenta.setTipoSaldoCuenta(cuentaNueva.getTipoSaldoCuenta());
+        cuenta.setFechaModificacion(LocalDateTime.now());
+        cuenta.setUsuarioModificacion(usuario);
+
+        return repo.save(cuenta);
+    }
+
+    // Eliminar cuenta
     public void eliminar(Integer id) {
-        repository.deleteById(id);
+        if (!repo.existsById(id)) {
+            throw new RuntimeException("Cuenta no encontrada");
+        }
+        repo.deleteById(id);
     }
 }
