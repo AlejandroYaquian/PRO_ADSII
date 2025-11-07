@@ -1,20 +1,16 @@
 package com.adsii.pro_adsii.Service;
 
 import com.adsii.pro_adsii.Entity.CuentaCorriente;
-import com.adsii.pro_adsii.Entity.Persona; 
-import com.adsii.pro_adsii.Entity.TipoSaldoCuenta;
-import com.adsii.pro_adsii.Entity.StatusCuenta;
 import com.adsii.pro_adsii.Repository.CuentaCorrienteRepository;
 import com.adsii.pro_adsii.Repository.PersonaRepository;
 import com.adsii.pro_adsii.Repository.StatusCuentaRepository;
 import com.adsii.pro_adsii.Repository.TipoSaldoCuentaRepository;
 
-import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
+
 
 @Service
 public class CuentaCorrienteService {
