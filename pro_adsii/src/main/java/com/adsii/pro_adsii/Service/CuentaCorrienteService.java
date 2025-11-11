@@ -42,36 +42,60 @@ public class CuentaCorrienteService {
         return repo.findById(id).orElseThrow(() -> new RuntimeException("Cuenta no encontrada"));
     }
 
-    // Crear cuenta
+    // Crear cuenta - CORREGIDO PARA CONVERSIÓN DE IDs A ENTIDADES
     public CuentaCorriente crear(CuentaCorriente cuenta, String usuario) {
         if (repo.existsByNumeroCuenta(cuenta.getNumeroCuenta())) {
             throw new RuntimeException("Ya existe una cuenta con ese número");
         }
+        
+        // Asignación de Persona
+        Integer idPersona = cuenta.getPersona() != null ? cuenta.getPersona().getIdPersona() : null;
+        if (idPersona == null) {
+            throw new RuntimeException("ID de Persona (Cliente) es requerido");
+        }
+        cuenta.setPersona(personaRepo.getReferenceById(idPersona));
 
-        cuenta.setPersona(personaRepo.findById(cuenta.getPersona().getIdPersona())
-                .orElseThrow(() -> new RuntimeException("Persona no encontrada")));
+        // Asignación de TipoSaldoCuenta
+        Long idTipo = cuenta.getTipoSaldoCuenta() != null ? cuenta.getTipoSaldoCuenta().getIdTipoSaldoCuenta() : null;
+        if (idTipo == null) {
+             throw new RuntimeException("ID de Tipo de Saldo es requerido");
+        }
+        cuenta.setTipoSaldoCuenta(tipoRepo.getReferenceById(idTipo));
 
-        cuenta.setTipoSaldoCuenta(tipoRepo.findById(cuenta.getTipoSaldoCuenta().getIdTipoSaldoCuenta())
-                .orElseThrow(() -> new RuntimeException("Tipo de saldo no encontrado")));
-
-        cuenta.setStatusCuenta(statusRepo.findById(cuenta.getStatusCuenta().getIdStatusCuenta())
-                .orElseThrow(() -> new RuntimeException("Status de cuenta no encontrado")));
+        // Asignación de StatusCuenta
+        Integer idStatus = cuenta.getStatusCuenta() != null ? cuenta.getStatusCuenta().getIdStatusCuenta() : null;
+        if (idStatus == null) {
+            throw new RuntimeException("ID de Status de Cuenta es requerido");
+        }
+        cuenta.setStatusCuenta(statusRepo.getReferenceById(idStatus));
 
         cuenta.setFechaApertura(LocalDateTime.now());
         cuenta.setFechaCreacion(LocalDateTime.now());
         cuenta.setUsuarioCreacion(usuario);
+        
         return repo.save(cuenta);
     }
 
-    // Actualizar cuenta
+    // Actualizar cuenta - CORREGIDO PARA PERSISTIR CAMBIOS EN RELACIONES
     public CuentaCorriente actualizar(Integer id, CuentaCorriente cuentaNueva, String usuario) {
         CuentaCorriente cuenta = obtenerPorId(id);
 
+        // Actualizar solo campos modificables, manteniendo las relaciones
         cuenta.setSaldoAnterior(cuentaNueva.getSaldoAnterior());
         cuenta.setDebitos(cuentaNueva.getDebitos());
         cuenta.setCreditos(cuentaNueva.getCreditos());
-        cuenta.setStatusCuenta(cuentaNueva.getStatusCuenta());
-        cuenta.setTipoSaldoCuenta(cuentaNueva.getTipoSaldoCuenta());
+
+        // Aseguramos que los objetos de relación se actualicen usando getReferenceById si el ID cambia
+        Integer idStatus = cuentaNueva.getStatusCuenta() != null ? cuentaNueva.getStatusCuenta().getIdStatusCuenta() : null;
+        if (idStatus != null) {
+             cuenta.setStatusCuenta(statusRepo.getReferenceById(idStatus));
+        }
+
+        Long idTipo = cuentaNueva.getTipoSaldoCuenta() != null ? cuentaNueva.getTipoSaldoCuenta().getIdTipoSaldoCuenta() : null;
+        if (idTipo != null) {
+            cuenta.setTipoSaldoCuenta(tipoRepo.getReferenceById(idTipo));
+        }
+        
         cuenta.setFechaModificacion(LocalDateTime.now());
         cuenta.setUsuarioModificacion(usuario);
 

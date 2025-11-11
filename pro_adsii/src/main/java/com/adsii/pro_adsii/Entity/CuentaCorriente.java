@@ -11,6 +11,9 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 @Entity
 @Data
 @Table(name = "Saldo_Cuenta")
+// Se recomienda mantener esta anotación para manejar proxies de Hibernate, 
+// pero verificar si su presencia causa el problema de 'null' en numeroCuenta.
+// Si el problema persiste, intente comentarla o eliminarla.
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class CuentaCorriente {
 
@@ -19,7 +22,7 @@ public class CuentaCorriente {
     @Column(name = "IdSaldoCuenta")
     private Integer idSaldoCuenta;
 
-    // Relación Muchos a Uno con Persona
+    // Relación Muchos a Uno con Persona (FetchType.LAZY es correcto)
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "IdPersona", nullable = false)
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
@@ -38,7 +41,7 @@ public class CuentaCorriente {
     private StatusCuenta statusCuenta;
 
     @Column(name = "numero_cuenta", nullable = false, length = 20, unique = true)
-    private String numeroCuenta;
+    private String numeroCuenta; // <--- Debe coincidir con el nombre de la columna en BD
 
     @Column(name = "fecha_apertura", nullable = false)
     private LocalDateTime fechaApertura;
