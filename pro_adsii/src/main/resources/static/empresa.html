@@ -42,40 +42,57 @@
                     <form id="empresa-form">
                         <input type="hidden" id="idEmpresa">
                         <div class="row g-2">
+                            <h5 class="mt-3 mb-3">Información General</h5>
+
                             <div class="col-md-4 mb-2">
-                                <input type="text" id="nombre" class="form-control" placeholder="Nombre" required>
+                                <label for="nombre" class="form-label">Nombre</label>
+                                <input type="text" id="nombre" class="form-control" required>
                             </div>
                             <div class="col-md-4 mb-2">
-                                <input type="text" id="direccion" class="form-control" placeholder="Dirección" required>
+                                <label for="direccion" class="form-label">Dirección</label>
+                                <input type="text" id="direccion" class="form-control" required>
                             </div>
                             <div class="col-md-4 mb-2">
-                                <input type="text" id="nit" class="form-control" placeholder="NIT" required>
+                                <label for="nit" class="form-label">NIT</label>
+                                <input type="text" id="nit" class="form-control" required>
+                            </div>
+
+                            <h5 class="mt-3 mb-3">Política de Contraseña</h5>
+
+                            <div class="col-md-3 mb-2">
+                                <label for="passwordLargo" class="form-label">Largo Mínimo</label>
+                                <input type="number" id="passwordLargo" class="form-control" required>
                             </div>
                             <div class="col-md-3 mb-2">
-                                <input type="number" id="passwordLargo" class="form-control" placeholder="Largo mínimo" required>
+                                <label for="passwordCantidadMayusculas" class="form-label">Cantidad Mayúsculas</label>
+                                <input type="number" id="passwordCantidadMayusculas" class="form-control" required>
                             </div>
                             <div class="col-md-3 mb-2">
-                                <input type="number" id="passwordCantidadMayusculas" class="form-control" placeholder="Mayúsculas" required>
+                                <label for="passwordCantidadMinusculas" class="form-label">Cantidad Minúsculas</label>
+                                <input type="number" id="passwordCantidadMinusculas" class="form-control" required>
                             </div>
                             <div class="col-md-3 mb-2">
-                                <input type="number" id="passwordCantidadMinusculas" class="form-control" placeholder="Minúsculas" required>
-                            </div>
-                            <div class="col-md-3 mb-2">
-                                <input type="number" id="passwordCantidadNumeros" class="form-control" placeholder="Números" required>
+                                <label for="passwordCantidadNumeros" class="form-label">Cantidad Números</label>
+                                <input type="number" id="passwordCantidadNumeros" class="form-control" required>
                             </div>
                             <div class="col-md-4 mb-2">
-                                <input type="number" id="passwordCantidadCaracteresEspeciales" class="form-control" placeholder="Especiales" required>
+                                <label for="passwordCantidadCaracteresEspeciales" class="form-label">Caracteres Especiales</label>
+                                <input type="number" id="passwordCantidadCaracteresEspeciales" class="form-control" required>
                             </div>
                             <div class="col-md-4 mb-2">
-                                <input type="number" id="passwordCantidadCaducidadDias" class="form-control" placeholder="Caducidad (días)" required>
+                                <label for="passwordCantidadCaducidadDias" class="form-label">Caducidad (Días)</label>
+                                <input type="number" id="passwordCantidadCaducidadDias" class="form-control" required>
                             </div>
                             <div class="col-md-4 mb-2">
-                                <input type="number" id="passwordIntentosAntesDeBloquear" class="form-control" placeholder="Intentos antes de bloquear" required>
+                                <label for="passwordIntentosAntesDeBloquear" class="form-label">Intentos antes de Bloquear</label>
+                                <input type="number" id="passwordIntentosAntesDeBloquear" class="form-control" required>
                             </div>
                             <div class="col-md-4 mb-2">
-                                <input type="number" id="passwordCantidadPreguntasValidar" class="form-control" placeholder="Preguntas de seguridad" required>
+                                <label for="passwordCantidadPreguntasValidar" class="form-label">Preguntas de Seguridad</label>
+                                <input type="number" id="passwordCantidadPreguntasValidar" class="form-control" required>
                             </div>
-                            <div class="col-12 d-flex gap-2 justify-content-end">
+
+                            <div class="col-12 d-flex gap-2 justify-content-end mt-4">
                                 <button type="submit" class="btn btn-primary" id="btnGuardar">Guardar</button>
                                 <button type="button" id="btnCancelar" class="btn btn-secondary">Cancelar</button>
                             </div>
