@@ -36,18 +36,18 @@ public class MovimientoCuentaService {
     TipoMovimientoCXC tipoMovimiento = tipoMov.orElseThrow(() -> new RuntimeException("Tipo de movimiento no encontrado"));
 
     if(tipoMovimiento.getOperacionCuentaCorriente() == 1){ // cargo
-        double saldoActual = (saldoCuenta.getSaldoAnterior().doubleValue()+saldoCuenta.getCreditos().doubleValue()-saldoCuenta.getDebitos().doubleValue());
-        if(saldoActual < movimientoNuevo.getValorMovimiento()){
+    //    double saldoActual = (saldoCuenta.getSaldoAnterior().doubleValue()+saldoCuenta.getCreditos().doubleValue()-saldoCuenta.getDebitos().doubleValue());
+    //    if(saldoActual < movimientoNuevo.getValorMovimiento()){
             // Lanzar excepción para indicar saldo insuficiente
-            throw new RuntimeException("Saldo insuficiente para realizar el movimiento");
-        } else {
+    //        throw new RuntimeException("Saldo insuficiente para realizar el movimiento");
+    //    } else {
             movimientoNuevo.setValorMovimientoPagado(movimientoNuevo.getValorMovimiento()); 
             BigDecimal valor = new BigDecimal(String.valueOf(movimientoNuevo.getValorMovimiento()));
             saldoCuenta.setDebitos(
             saldoCuenta.getDebitos().add(valor));
             movimientoNuevo.setValorMovimiento(0.0);
 
-        }    
+    //    }    
     } else {
         movimientoNuevo.setValorMovimientoPagado(0.0); 
         movimientoNuevo.setValorMovimiento(movimientoNuevo.getValorMovimiento());
