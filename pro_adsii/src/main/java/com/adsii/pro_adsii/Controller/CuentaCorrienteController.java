@@ -8,6 +8,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/cuentas")
+@CrossOrigin(origins = "*") 
 public class CuentaCorrienteController {
 
     @Autowired
@@ -28,14 +29,16 @@ public class CuentaCorrienteController {
         return service.obtenerPorId(id);
     }
 
-    @PostMapping
-    public CuentaCorriente crear(@RequestBody CuentaCorriente cuenta, @RequestHeader("usuario") String usuario) {
-        return service.crear(cuenta, usuario);
+    @PostMapping 
+    public CuentaCorriente crear(@RequestBody CuentaCorriente cuenta) {
+        String usuarioActual = cuenta.getUsuarioCreacion(); 
+        return service.crear(cuenta, usuarioActual);
     }
 
-    @PutMapping("/{id}")
-    public CuentaCorriente actualizar(@PathVariable Integer id, @RequestBody CuentaCorriente cuenta, @RequestHeader("usuario") String usuario) {
-        return service.actualizar(id, cuenta, usuario);
+    @PutMapping("/{id}") 
+    public CuentaCorriente actualizar(@PathVariable Integer id, @RequestBody CuentaCorriente cuenta) {
+        String usuarioActual = cuenta.getUsuarioModificacion();
+        return service.actualizar(id, cuenta, usuarioActual);
     }
 
     @DeleteMapping("/{id}")

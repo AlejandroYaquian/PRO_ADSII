@@ -11,9 +11,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 @Entity
 @Data
 @Table(name = "Saldo_Cuenta")
-// Se recomienda mantener esta anotación para manejar proxies de Hibernate, 
-// pero verificar si su presencia causa el problema de 'null' en numeroCuenta.
-// Si el problema persiste, intente comentarla o eliminarla.
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class CuentaCorriente {
 
@@ -21,49 +18,51 @@ public class CuentaCorriente {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "IdSaldoCuenta")
     private Integer idSaldoCuenta;
+    
+    // EL NUMERO DE CUENTA SERÁ EL MISMO ID. En la BD debe estar como NOT NULL.
+    @Column(name = "numero_cuenta", length = 20) 
+    private String numeroCuenta; 
 
-    // Relación Muchos a Uno con Persona (FetchType.LAZY es correcto)
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "IdPersona", nullable = false)
+    @JoinColumn(name = "IdPersona", nullable = false) // Un Persona (Cliente) tiene varias Cuentas
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private Persona persona;
 
-    // Relación con TipoSaldoCuenta
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "IdTipoSaldoCuenta", nullable = false)
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private TipoSaldoCuenta tipoSaldoCuenta;
 
-    // Relación con StatusCuenta
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "IdStatusCuenta", nullable = false)
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private StatusCuenta statusCuenta;
 
-    @Column(name = "numero_cuenta", nullable = false, length = 20, unique = true)
-    private String numeroCuenta; // <--- Debe coincidir con el nombre de la columna en BD
-
     @Column(name = "fecha_apertura", nullable = false)
     private LocalDateTime fechaApertura;
 
+    // --- CAMPOS DE SALDO ---
+    @Column(name = "SaldoAnterior", precision = 10, scale = 2)
+    private BigDecimal saldoAnterior;
+
+    @Column(name = "Debitos", precision = 10, scale = 2)
+    private BigDecimal debitos;
+
+    @Column(name = "Creditos", precision = 10, scale = 2)
+    private BigDecimal creditos;
+    // ----------------------
+
+    // --- CAMPOS DE AUDITORÍA ---
     @Column(name = "fecha_creacion", nullable = false)
     private LocalDateTime fechaCreacion;
 
-    @Column(name = "usuario_creacion", nullable = false, length = 100)
+    @Column(name = "usuario_creacion", nullable = false, length = 50)
     private String usuarioCreacion;
 
     @Column(name = "fecha_modificacion")
     private LocalDateTime fechaModificacion;
 
-    @Column(name = "usuario_modificacion", length = 100)
+    @Column(name = "usuario_modificacion", length = 50)
     private String usuarioModificacion;
-
-    @Column(name = "SaldoAnterior")
-    private BigDecimal saldoAnterior;
-
-    @Column(name = "Debitos")
-    private BigDecimal debitos;
-
-    @Column(name = "Creditos")
-    private BigDecimal creditos;
+    // --------------------------------------------------------------------
 }

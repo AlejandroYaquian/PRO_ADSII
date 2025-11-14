@@ -7,25 +7,24 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
     <style>
-        /* Centrado horizontal y límite de ancho */
         .container {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
         }
 
-        /* Centrado de la tabla si hay mucho contenido */
         .table-responsive {
-            display: flex;
-            justify-content: center;
+            overflow-x: auto;
         }
 
         table {
-            width: 95%;
+            width: 100%;
         }
 
-        th, td {
+        th,
+        td {
             text-align: center;
             vertical-align: middle;
+            font-size: 0.85em; 
         }
     </style>
 </head>
@@ -49,15 +48,11 @@
             <div class="card-body">
                 <form id="cuenta-form">
                     <input type="hidden" id="idCuentaCorriente">
-                    <input type="hidden" id="usuario" value="admin_web_user"> 
+                    <input type="hidden" id="usuario" value="usuario_logeado_ejemplo"> 
 
                     <div class="row g-3">
-                        <div class="col-md-6">
-                            <label for="idSaldoCuenta" class="form-label">Número de Cuenta:</label>
-                            <input type="text" id="idSaldoCuenta" class="form-control" placeholder="Ej. 001-CC-2025" required>
-                        </div>
-
-                        <div class="col-md-6">
+                        
+                        <div class="col-md-4">
                             <label for="idPersona" class="form-label">Cliente:</label>
                             <select id="idPersona" class="form-select" required>
                                 <option value="">-- Seleccione Cliente --</option>
@@ -79,10 +74,22 @@
                         </div>
 
                         <div class="col-md-4">
-                            <label for="fechaApertura" class="form-label">Fecha de Apertura:</label>
-                            <input type="datetime-local" id="fechaApertura" class="form-control" required>
+                            <label for="fechaApertura" class="form-label">Fecha de Apertura (Opcional):</label>
+                            <input type="datetime-local" id="fechaApertura" class="form-control">
                         </div>
 
+                        <div class="col-md-4">
+                            <label for="saldoAnterior" class="form-label">Saldo Anterior:</label>
+                            <input type="number" step="0.01" id="saldoAnterior" class="form-control" value="0.00" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="debitos" class="form-label">Débitos:</label>
+                            <input type="number" step="0.01" id="debitos" class="form-control" value="0.00" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="creditos" class="form-label">Créditos:</label>
+                            <input type="number" step="0.01" id="creditos" class="form-control" value="0.00" required>
+                        </div>
                         <div class="col-12 mt-4 d-flex gap-2 justify-content-end">
                             <button type="submit" class="btn btn-success" id="btnGuardar">💾 Guardar Cuenta</button>
                             <button type="button" id="btnCancelar" class="btn btn-secondary">❌ Cancelar</button>
@@ -99,18 +106,25 @@
                     <table class="table table-bordered table-hover align-middle">
                         <thead class="table-dark">
                             <tr>
-                                <th>ID</th>
+                                <th>ID Saldo</th>
                                 <th>N° Cuenta</th>
                                 <th>Cliente</th>
                                 <th>Tipo Saldo</th>
                                 <th>Estado</th>
-                                <th>Fecha Apertura</th>
+                                <th>Fec. Apertura</th>
+                                <th>Saldo Ant.</th>
+                                <th>Débitos</th>
+                                <th>Créditos</th>
+                                <th>Fec. Creación</th>
+                                <th>Usuario Creación</th>
+                                <th>Fec. Modificación</th>
+                                <th>Usuario Modificación</th>
                                 <th>Acciones</th>
                             </tr>
                         </thead>
                         <tbody id="cuentas-table">
                             <tr>
-                                <td colspan="7" class="text-center">Cargando...</td>
+                                <td colspan="14" class="text-center">Cargando...</td>
                             </tr>
                         </tbody>
                     </table>
@@ -122,11 +136,11 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
     <script>
-        const API_BASE = '/cuentas'; 
+        const API_BASE = '/cuentas';
         const API_PERSONA = '/persona'; 
-        const API_TIPO_SALDO = '/tipo-saldo/listar'; 
-        const API_STATUS_CUENTA = '/statuscuenta'; 
-        
+        const API_TIPO_SALDO = '/tipo-saldo/listar';
+        const API_STATUS_CUENTA = '/statuscuenta';
+
         const usuario = document.getElementById('usuario').value;
         document.getElementById('navUsuario').textContent = 'Usuario: ' + usuario;
 
@@ -136,36 +150,38 @@
             return date.toLocaleString('es-ES');
         };
 
-        async function cargarDropdown(url, selectId, idField, nameField) {
+        async function cargarDropdown(url, selectId, idField, nameField, customTextFunc) {
             const select = document.getElementById(selectId);
+            select.innerHTML = `<option value="">-- Seleccione ${selectId.replace('id', '')} --</option>`;
             try {
                 const res = await fetch(url);
+                if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
                 const data = await res.json();
                 data.forEach(item => {
-                    const text = (item.nombre && item.apellido) ? `${item.nombre} ${item.apellido}` : item[nameField];
+                    const text = customTextFunc ? customTextFunc(item) : item[nameField];
                     select.innerHTML += `<option value="${item[idField]}">${text}</option>`;
                 });
             } catch (error) {
-                console.error(`Error al cargar ${selectId}:`, error);
+                console.error(`Error al cargar ${selectId} desde ${url}:`, error);
                 select.innerHTML += `<option value="" disabled>Error al cargar datos</option>`;
             }
         }
 
         async function inicializarDropdowns() {
-            await cargarDropdown(API_PERSONA, 'idPersona', 'idPersona', 'nombre');
+            await cargarDropdown(API_PERSONA, 'idPersona', 'idPersona', 'nombre', (item) => `${item.nombre} ${item.apellido || ''}`);
             await cargarDropdown(API_TIPO_SALDO, 'idTipoSaldoCuenta', 'idTipoSaldoCuenta', 'nombre');
             await cargarDropdown(API_STATUS_CUENTA, 'idStatusCuenta', 'idStatusCuenta', 'nombre');
         }
 
         async function listarCuentas() {
             const tbody = document.getElementById('cuentas-table');
-            tbody.innerHTML = `<tr><td colspan="7" class="text-center">Cargando...</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="14" class="text-center">Cargando...</td></tr>`;
             try {
                 const res = await fetch(API_BASE);
                 const cuentas = await res.json();
 
                 if (cuentas.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="7" class="text-center">No hay cuentas registradas.</td></tr>`;
+                    tbody.innerHTML = `<tr><td colspan="14" class="text-center">No hay cuentas registradas.</td></tr>`;
                     return;
                 }
 
@@ -175,15 +191,21 @@
                     const tipo = c.tipoSaldoCuenta ? c.tipoSaldoCuenta.nombre : 'N/A';
                     const estado = c.statusCuenta ? c.statusCuenta.nombre : 'N/A';
 
-                    // c.numeroCuenta ya no debería ser null si la entidad está bien mapeada y poblada
                     tbody.innerHTML += `
                         <tr>
                             <td>${c.idSaldoCuenta}</td>
-                            <td>${c.idSaldoCuenta}</td>
+                            <td>${c.numeroCuenta || c.idSaldoCuenta || 'N/A'}</td>
                             <td>${cliente}</td>
                             <td>${tipo}</td>
                             <td>${estado}</td>
                             <td>${formatDateTime(c.fechaApertura)}</td>
+                            <td class="text-end">${c.saldoAnterior ? c.saldoAnterior.toFixed(2) : '0.00'}</td>
+                            <td class="text-end">${c.debitos ? c.debitos.toFixed(2) : '0.00'}</td>
+                            <td class="text-end">${c.creditos ? c.creditos.toFixed(2) : '0.00'}</td>
+                            <td>${formatDateTime(c.fechaCreacion)}</td>
+                            <td>${c.usuarioCreacion || 'N/A'}</td>
+                            <td>${c.fechaModificacion ? formatDateTime(c.fechaModificacion) : 'N/A'}</td>
+                            <td>${c.usuarioModificacion || 'N/A'}</td>
                             <td>
                                 <button class="btn btn-warning btn-sm" onclick="editarCuenta(${c.idSaldoCuenta})">✏️</button>
                                 <button class="btn btn-danger btn-sm" onclick="eliminarCuenta(${c.idSaldoCuenta})">🗑️</button>
@@ -193,7 +215,7 @@
                 });
             } catch (err) {
                 console.error(err);
-                tbody.innerHTML = `<tr><td colspan="7" class="text-center">Error al cargar las cuentas.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="14" class="text-center">Error al cargar las cuentas.</td></tr>`;
             }
         }
 
@@ -203,37 +225,41 @@
             const id = document.getElementById('idCuentaCorriente').value;
             const method = id ? 'PUT' : 'POST';
             const url = id ? `${API_BASE}/${id}` : API_BASE;
+            const isUpdate = !!id;
 
-            // La estructura del objeto JSON enviado es **correcta** para el servicio modificado
-            const cuenta = {
-                idSaldoCuenta: id ? parseInt(id) : null,
-                numeroCuenta: document.getElementById('idSaldoCuenta').value,
-                fechaApertura: document.getElementById('fechaApertura').value,
-                persona: { idPersona: parseInt(document.getElementById('idPersona').value) },
-                tipoSaldoCuenta: { idTipoSaldoCuenta: parseInt(document.getElementById('idTipoSaldoCuenta').value) },
-                statusCuenta: { idStatusCuenta: parseInt(document.getElementById('idStatusCuenta').value) },
-                fechaCreacion: new Date().toISOString(), 
-                usuarioCreacion: usuario, 
-                fechaModificacion: null, 
-                usuarioModificacion: null, 
-                saldoAnterior: 0, 
-                debitos: 0,
-                creditos: 0
-            };
+            let cuentaPayload = {};
+            const getDecimalValue = (id) => parseFloat(document.getElementById(id).value) || 0;
 
-            // Para la edición, solo se envían los campos que se permiten actualizar en el Service
-            if(id) {
-                // En actualización, solo se envían los campos que se actualizan en el Service
-                const cuentaUpdate = {
-                    saldoAnterior: 0, // Si no hay formulario, enviar 0 o el valor actual
-                    debitos: 0,
-                    creditos: 0,
-                    // Enviamos las relaciones actualizadas (aunque el resto del formulario no las pida)
+            if (isUpdate) {
+                // PAYLOAD de actualización
+                cuentaPayload = {
+                    saldoAnterior: getDecimalValue('saldoAnterior'),
+                    debitos: getDecimalValue('debitos'),
+                    creditos: getDecimalValue('creditos'),
                     tipoSaldoCuenta: { idTipoSaldoCuenta: parseInt(document.getElementById('idTipoSaldoCuenta').value) },
-                    statusCuenta: { idStatusCuenta: parseInt(document.getElementById('idStatusCuenta').value) }
+                    statusCuenta: { idStatusCuenta: parseInt(document.getElementById('idStatusCuenta').value) },
+                    usuarioModificacion: usuario 
                 };
-                Object.assign(cuenta, cuentaUpdate); // Mezcla las propiedades
+            } else {
+                // Aseguramos que fechaApertura tenga un valor para evitar el error "not-null"
+                let fechaAperturaValue = document.getElementById('fechaApertura').value;
+                if (!fechaAperturaValue) {
+                    fechaAperturaValue = new Date().toISOString().slice(0, 16); 
+                }
 
+                // PAYLOAD de creación
+                cuentaPayload = {
+                    fechaApertura: fechaAperturaValue, 
+                    persona: { idPersona: parseInt(document.getElementById('idPersona').value) },
+                    tipoSaldoCuenta: { idTipoSaldoCuenta: parseInt(document.getElementById('idTipoSaldoCuenta').value) },
+                    statusCuenta: { idStatusCuenta: parseInt(document.getElementById('idStatusCuenta').value) },
+                    saldoAnterior: getDecimalValue('saldoAnterior'),
+                    debitos: getDecimalValue('debitos'),
+                    creditos: getDecimalValue('creditos'),
+                    usuarioCreacion: usuario,
+                    // No enviamos numeroCuenta, se genera en el backend con el ID.
+                    numeroCuenta: "0" // Valor temporal para evitar errores de deserialización si la BD lo pide NOT NULL
+                };
             }
 
             try {
@@ -241,9 +267,8 @@
                     method: method,
                     headers: {
                         'Content-Type': 'application/json',
-                        'usuario': usuario
                     },
-                    body: JSON.stringify(cuenta)
+                    body: JSON.stringify(cuentaPayload)
                 });
 
                 if (!res.ok) {
@@ -266,21 +291,30 @@
                 const c = await res.json();
 
                 document.getElementById('idCuentaCorriente').value = c.idSaldoCuenta;
-                document.getElementById('idSaldoCuenta').value = c.idSaldoCuenta;
-                // Asignar IDs a los selectores
+                
+                document.getElementById('saldoAnterior').value = c.saldoAnterior || '0.00';
+                document.getElementById('debitos').value = c.debitos || '0.00';
+                document.getElementById('creditos').value = c.creditos || '0.00';
+                
+                document.getElementById('idPersona').disabled = true;
+                document.getElementById('fechaApertura').disabled = true; 
+
                 document.getElementById('idPersona').value = c.persona.idPersona;
                 document.getElementById('idTipoSaldoCuenta').value = c.tipoSaldoCuenta.idTipoSaldoCuenta;
                 document.getElementById('idStatusCuenta').value = c.statusCuenta.idStatusCuenta;
 
-                // Formatear fecha para el input datetime-local
-                const date = new Date(c.fechaApertura);
-                const localDateTime = new Date(date.getTime() - (date.getTimezoneOffset() * 60000)).toISOString().slice(0, 16);
-                document.getElementById('fechaApertura').value = localDateTime;
+                if (c.fechaApertura) {
+                    const date = new Date(c.fechaApertura);
+                    const localDateTime = new Date(date.getTime() - (date.getTimezoneOffset() * 60000)).toISOString().slice(0, 16);
+                    document.getElementById('fechaApertura').value = localDateTime;
+                } else {
+                    document.getElementById('fechaApertura').value = '';
+                }
 
-                document.getElementById('form-title').textContent = "✍️ Editar Cuenta";
+                document.getElementById('form-title').textContent = `✍️ Editar Cuenta (ID: ${c.idSaldoCuenta} / N° Cuenta: ${c.numeroCuenta || c.idSaldoCuenta})`;
                 document.getElementById('btnGuardar').textContent = "Actualizar";
             } catch (err) {
-                alert("Error al editar cuenta.");
+                alert("Error al editar cuenta: " + err.message);
             }
         }
 
@@ -302,6 +336,14 @@
         function cancelarEdicion() {
             document.getElementById('cuenta-form').reset();
             document.getElementById('idCuentaCorriente').value = '';
+            
+            document.getElementById('saldoAnterior').value = '0.00';
+            document.getElementById('debitos').value = '0.00';
+            document.getElementById('creditos').value = '0.00';
+
+            document.getElementById('idPersona').disabled = false;
+            document.getElementById('fechaApertura').disabled = false;
+
             document.getElementById('form-title').textContent = "➕ Crear Nueva Cuenta";
             document.getElementById('btnGuardar').textContent = "💾 Guardar Cuenta";
         }
@@ -312,4 +354,5 @@
         listarCuentas();
     </script>
 </body>
+
 </html>
